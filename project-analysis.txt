@@ -1,0 +1,658 @@
+================================================================================
+                 PROJECT STRUCTURE & COLOR USAGE ANALYSIS
+================================================================================
+
+================================================================================
+[1] FILE TREE (excluding node_modules, .git, dist)
+================================================================================
+./.env
+./.env.example
+./.gitignore
+./ATTRIBUTIONS.md
+./README.md
+./SETTLE_ARCHITECTURE.md
+./guidelines/Guidelines.md
+./index.html
+./package-lock.json
+./package.json
+./pnpm-lock.yaml
+./postcss.config.mjs
+./src/app/App.tsx
+./src/app/components/AuthGuardLayout.tsx
+./src/app/components/app-preview.tsx
+./src/app/components/brand-colors.tsx
+./src/app/components/figma/ImageWithFallback.tsx
+./src/app/components/layout.tsx
+./src/app/components/logo.tsx
+./src/app/components/typography-showcase.tsx
+./src/app/components/ui/accordion.tsx
+./src/app/components/ui/alert-dialog.tsx
+./src/app/components/ui/alert.tsx
+./src/app/components/ui/aspect-ratio.tsx
+./src/app/components/ui/avatar.tsx
+./src/app/components/ui/badge.tsx
+./src/app/components/ui/breadcrumb.tsx
+./src/app/components/ui/button.tsx
+./src/app/components/ui/calendar.tsx
+./src/app/components/ui/card.tsx
+./src/app/components/ui/carousel.tsx
+./src/app/components/ui/chart.tsx
+./src/app/components/ui/checkbox.tsx
+./src/app/components/ui/collapsible.tsx
+./src/app/components/ui/command.tsx
+./src/app/components/ui/context-menu.tsx
+./src/app/components/ui/dialog.tsx
+./src/app/components/ui/drawer.tsx
+./src/app/components/ui/dropdown-menu.tsx
+./src/app/components/ui/form.tsx
+./src/app/components/ui/hover-card.tsx
+./src/app/components/ui/input-otp.tsx
+./src/app/components/ui/input.tsx
+./src/app/components/ui/label.tsx
+./src/app/components/ui/menubar.tsx
+./src/app/components/ui/navigation-menu.tsx
+./src/app/components/ui/pagination.tsx
+./src/app/components/ui/popover.tsx
+./src/app/components/ui/progress.tsx
+./src/app/components/ui/radio-group.tsx
+./src/app/components/ui/resizable.tsx
+./src/app/components/ui/scroll-area.tsx
+./src/app/components/ui/select.tsx
+./src/app/components/ui/separator.tsx
+./src/app/components/ui/sheet.tsx
+./src/app/components/ui/sidebar.tsx
+./src/app/components/ui/skeleton.tsx
+./src/app/components/ui/slider.tsx
+./src/app/components/ui/sonner.tsx
+./src/app/components/ui/switch.tsx
+./src/app/components/ui/table.tsx
+./src/app/components/ui/tabs.tsx
+./src/app/components/ui/textarea.tsx
+./src/app/components/ui/toggle-group.tsx
+./src/app/components/ui/toggle.tsx
+./src/app/components/ui/tooltip.tsx
+./src/app/components/ui/use-mobile.ts
+./src/app/components/ui/utils.ts
+./src/app/components/visa/DocumentGuide.tsx
+./src/app/components/visa/DocumentSubmitCTA.tsx
+./src/app/components/visa/KiipProgress.tsx
+./src/app/components/visa/KpointSimulator.tsx
+./src/app/components/visa/LawyerMatchCTA.tsx
+./src/app/components/visa/LiabilitySheet.tsx
+./src/app/components/visa/RequirementsChecklist.tsx
+./src/app/components/visa/ScoreRing.tsx
+./src/app/components/visa/WageCalculator.tsx
+./src/app/pages/PaywallSuccess.tsx
+./src/app/pages/education.tsx
+./src/app/pages/home.tsx
+./src/app/pages/housing.tsx
+./src/app/pages/landing.tsx
+./src/app/pages/onboarding.tsx
+./src/app/pages/paywall.tsx
+./src/app/pages/profile.tsx
+./src/app/pages/remit.tsx
+./src/app/pages/visa.tsx
+./src/app/routes.tsx
+./src/hooks/useRequireAuth.ts
+./src/i18n/index.ts
+./src/i18n/locales/en.json
+./src/i18n/locales/ko.json
+./src/i18n/locales/vi.json
+./src/i18n/locales/zh.json
+./src/lib/supabase.ts
+./src/main.tsx
+./src/stores/useAuthStore.ts
+./src/stores/useDashboardStore.ts
+./src/stores/usePaymentStore.ts
+./src/stores/useSubmitStore.ts
+./src/styles/fonts.css
+./src/styles/index.css
+./src/styles/tailwind.css
+./src/styles/theme.css
+./src/types/index.ts
+./src/vite-env.d.ts
+./tsconfig.json
+./vercel.json
+./vite.config.ts
+
+================================================================================
+[2] HARDCODED COLOR USAGE
+================================================================================
+src/styles/theme.css:6: * 하드코딩 색상(#007AFF 등) 직접 사용 절대 금지 — Dennis 규칙 #32
+src/styles/theme.css:11:  --color-action-primary: #007AFF;
+src/styles/theme.css:13:  --color-action-success: #34C759;
+src/styles/theme.css:14:  --color-action-warning: #FF9500;
+src/styles/theme.css:15:  --color-action-error: #FF3B30;
+src/styles/theme.css:18:  --color-text-primary: #1D1D1F;
+src/styles/theme.css:19:  --color-text-secondary: #86868B;
+src/styles/theme.css:21:  --color-text-on-color: #FFFFFF;
+src/styles/theme.css:24:  --color-surface-primary: #FFFFFF;
+src/styles/theme.css:25:  --color-surface-secondary: #F5F5F7;
+src/styles/theme.css:27:  --color-surface-elevated: #FFFFFF;
+src/styles/theme.css:45:  --color-text-primary: #F5F5F7;
+src/styles/theme.css:48:  --color-text-on-color: #FFFFFF;
+src/app/components/logo.tsx:31:          fill="#007AFF"
+src/app/components/logo.tsx:39:          fill="#34C759"
+src/app/components/typography-showcase.tsx:38:            <span className="text-xs text-[#86868B] uppercase tracking-wide" style={{ fontWeight: 500 }}>
+src/app/components/typography-showcase.tsx:43:            <p className="text-[#1D1D1F]">{example.english}</p>
+src/app/components/typography-showcase.tsx:44:            <p className="text-[#1D1D1F]">{example.korean}</p>
+src/app/components/typography-showcase.tsx:46:          <div className="flex gap-4 text-xs text-[#86868B] pt-2">
+src/app/components/typography-showcase.tsx:57:      <div className="bg-[#007AFF] text-white rounded-3xl p-8">
+src/app/components/brand-colors.tsx:5:      hex: "#007AFF",
+src/app/components/brand-colors.tsx:11:      hex: "#34C759",
+src/app/components/brand-colors.tsx:17:      hex: "#F5F5F7",
+src/app/components/brand-colors.tsx:34:              <span className="text-sm text-[#86868B] font-mono">{color.hex}</span>
+src/app/components/brand-colors.tsx:36:            <p className="text-sm text-[#86868B]">{color.description}</p>
+src/app/components/brand-colors.tsx:37:            <p className="text-xs text-[#86868B]/70 italic">{color.role}</p>
+src/app/components/app-preview.tsx:9:          <div className="bg-[#F5F5F7] rounded-[2.5rem] overflow-hidden">
+src/app/components/app-preview.tsx:35:                <p className="text-[#86868B]">
+src/app/components/app-preview.tsx:57:                      <p className="text-xs text-[#86868B]">{action.subtitle}</p>
+src/app/components/app-preview.tsx:66:                  <span className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>
+src/app/components/app-preview.tsx:69:                  <span className="text-xs text-[#007AFF]">View all</span>
+src/app/components/app-preview.tsx:72:                  <div className="w-10 h-10 bg-[#007AFF] rounded-xl flex items-center justify-center text-white">
+src/app/components/app-preview.tsx:79:                    <p className="text-xs text-[#86868B]">비자 연장이 승인되었습니다</p>
+src/app/components/app-preview.tsx:80:                    <p className="text-xs text-[#86868B] mt-1">2 hours ago</p>
+src/app/components/app-preview.tsx:86:              <button className="w-full bg-[#007AFF] text-white rounded-2xl py-4 hover:opacity-90 active:scale-[0.98] transition-all" style={{ fontWeight: 600 }}>
+src/app/components/app-preview.tsx:98:          <p className="text-[#86868B]">
+src/app/components/app-preview.tsx:104:          <p className="text-[#86868B]">
+src/app/components/AuthGuardLayout.tsx:49:      <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
+src/app/components/AuthGuardLayout.tsx:50:        <div className="w-8 h-8 border-3 border-[#007AFF] border-t-transparent rounded-full animate-spin" />
+src/app/components/AuthGuardLayout.tsx:61:      <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
+src/app/components/AuthGuardLayout.tsx:62:        <div className="w-8 h-8 border-3 border-[#007AFF] border-t-transparent rounded-full animate-spin" />
+src/app/pages/housing.tsx:117:              <ChevronLeft size={24} className="text-[#007AFF]" strokeWidth={2.5} />
+src/app/pages/housing.tsx:128:        <div className="bg-gradient-to-br from-[#007AFF] to-[#0051D5] rounded-3xl p-8 text-white shadow-lg">
+src/app/pages/housing.tsx:155:            className="w-full bg-white text-[#007AFF] rounded-2xl py-4 active:scale-98 transition-transform"
+src/app/pages/housing.tsx:174:            <div className="text-center py-8 text-[#86868B] text-sm">{tc('loading')}</div>
+src/app/pages/housing.tsx:188:                          <span className="text-[10px] bg-[#34C759] text-white px-2 py-0.5 rounded-full" style={{ fontWeight: 600 }}>
+src/app/pages/housing.tsx:193:                      <p className="text-xs text-[#86868B]">{provider.name_kr}</p>
+src/app/pages/housing.tsx:199:                      <p className="text-xs text-[#86868B]">{t('insurance_month')}</p>
+src/app/pages/housing.tsx:205:                      <span key={feature} className="text-xs bg-[#F5F5F7] text-[#1D1D1F] px-3 py-1 rounded-full">
+src/app/pages/housing.tsx:213:                      <p className="text-xs text-[#86868B]">{t('insurance_coverage')}</p>
+src/app/pages/housing.tsx:217:                      <p className="text-xs text-[#86868B]">{t('insurance_rating')}</p>
+src/app/pages/housing.tsx:234:              <div className="text-center py-8 text-[#86868B] text-sm">{tc('loading')}</div>
+src/app/pages/housing.tsx:239:                  className="w-full flex items-start gap-4 p-5 text-left active:bg-[#F5F5F7] transition-colors"
+src/app/pages/housing.tsx:242:                  <div className="w-14 h-14 bg-[#007AFF]/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+src/app/pages/housing.tsx:243:                    <Scale size={24} className="text-[#007AFF]" strokeWidth={2} />
+src/app/pages/housing.tsx:248:                      {service.is_verified && <CheckCircle size={16} className="text-[#007AFF]" />}
+src/app/pages/housing.tsx:250:                    <p className="text-xs text-[#86868B] mb-2">{service.name_kr}</p>
+src/app/pages/housing.tsx:253:                      <span className="text-xs text-[#86868B]">• ★ {service.rating}</span>
+src/app/pages/housing.tsx:257:                        <span key={s} className="text-[10px] bg-[#F5F5F7] text-[#86868B] px-2 py-0.5 rounded-full">{s}</span>
+src/app/pages/housing.tsx:261:                  <ChevronRight size={20} className="text-[#86868B] flex-shrink-0 mt-2" />
+src/app/pages/housing.tsx:269:        <button className="w-full bg-gradient-to-br from-[#FF3B30] to-[#D70015] rounded-3xl p-6 text-white shadow-lg active:scale-98 transition-transform">
+src/app/pages/profile.tsx:206:    { icon: FileText, label: "Visa status", labelKr: "비자 상태", value: visaStatusText, color: visaDDay !== null && visaDDay <= 30 ? "#FF9500" : "#007AFF" },
+src/app/pages/profile.tsx:207:    { icon: Award, label: "KIIP Level", labelKr: "KIIP 단계", value: kiipText, color: "#34C759" },
+src/app/pages/profile.tsx:208:    { icon: Briefcase, label: "Nationality", labelKr: "국적", value: userProfile?.nationality || 'Not set', color: "#007AFF" },
+src/app/pages/profile.tsx:395:              <ChevronLeft size={24} className="text-[#007AFF]" strokeWidth={2.5} />
+src/app/pages/profile.tsx:406:            <div className="w-24 h-24 bg-gradient-to-br from-[#007AFF] to-[#0051D5] rounded-full flex items-center justify-center text-white text-4xl">
+src/app/pages/profile.tsx:413:              <p className="text-sm text-[#86868B]">{displayEmail}</p>
+src/app/pages/profile.tsx:416:              <div className="flex items-center gap-2 bg-[#F5F5F7] px-4 py-2 rounded-full">
+src/app/pages/profile.tsx:417:                <span className="text-xs text-[#86868B]">Member since</span>
+src/app/pages/profile.tsx:431:                <button key={index} className="w-full flex items-start gap-4 p-5 text-left active:bg-[#F5F5F7] transition-colors">
+src/app/pages/profile.tsx:437:                    <p className="text-xs text-[#86868B] mb-1">{spec.labelKr}</p>
+src/app/pages/profile.tsx:440:                  <ChevronRight size={20} className="text-[#86868B] flex-shrink-0 mt-2" />
+src/app/pages/profile.tsx:453:            <span className="text-xs text-[#86868B]">
+src/app/pages/profile.tsx:459:          <div className="w-full bg-[#F5F5F7] rounded-full h-2 mb-6 overflow-hidden">
+src/app/pages/profile.tsx:461:              className="h-full bg-gradient-to-r from-[#007AFF] to-[#34C759] rounded-full transition-all duration-500"
+src/app/pages/profile.tsx:469:            className="w-full bg-white rounded-3xl p-5 text-left active:bg-[#F5F5F7] transition-colors mb-3"
+src/app/pages/profile.tsx:472:              <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-[#007AFF]/10">
+src/app/pages/profile.tsx:473:                <CreditCard size={20} className="text-[#007AFF]" strokeWidth={2} />
+src/app/pages/profile.tsx:477:                <p className="text-xs text-[#86868B] mb-2">신분증 · 여권 · 주소 · 연락처</p>
+src/app/pages/profile.tsx:480:                    <span className="text-[#86868B]">ARC</span>
+src/app/pages/profile.tsx:484:                    <span className="text-[#86868B]">Passport</span>
+src/app/pages/profile.tsx:488:                    <span className="text-[#86868B]">Address (KR)</span>
+src/app/pages/profile.tsx:493:              <ChevronRight size={20} className="text-[#86868B] flex-shrink-0 mt-2" />
+src/app/pages/profile.tsx:500:            className="w-full bg-white rounded-3xl p-5 text-left active:bg-[#F5F5F7] transition-colors"
+src/app/pages/profile.tsx:503:              <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-[#34C759]/10">
+src/app/pages/profile.tsx:504:                <Building2 size={20} className="text-[#34C759]" strokeWidth={2} />
+src/app/pages/profile.tsx:508:                <p className="text-xs text-[#86868B] mb-2">근무처 · 직업 · 소득 (신청 유형별)</p>
+src/app/pages/profile.tsx:511:                    <span className="text-[#86868B]">Workplace</span>
+src/app/pages/profile.tsx:515:                    <span className="text-[#86868B]">Occupation</span>
+src/app/pages/profile.tsx:519:                    <span className="text-[#86868B]">Income</span>
+src/app/pages/profile.tsx:526:              <ChevronRight size={20} className="text-[#86868B] flex-shrink-0 mt-2" />
+src/app/pages/profile.tsx:541:                  <Component key={index} {...(props as any)} className="w-full flex items-center gap-4 p-5 text-left active:bg-[#F5F5F7] transition-colors">
+src/app/pages/profile.tsx:542:                    <Icon size={20} className="text-[#007AFF] flex-shrink-0" strokeWidth={2} />
+src/app/pages/profile.tsx:545:                      <p className="text-xs text-[#86868B] mt-0.5">{item.labelKr}</p>
+src/app/pages/profile.tsx:547:                    {item.value && <span className="text-sm text-[#86868B]">{item.value}</span>}
+src/app/pages/profile.tsx:548:                    <ChevronRight size={20} className="text-[#86868B] flex-shrink-0" />
+src/app/pages/profile.tsx:557:        <Link to="/paywall" className="block bg-gradient-to-br from-[#007AFF] to-[#0051D5] rounded-3xl p-6 text-white shadow-lg active:scale-98 transition-transform">
+src/app/pages/profile.tsx:571:        <button onClick={handleSignOut} className="w-full bg-white rounded-3xl p-5 text-[#FF3B30] active:bg-[#F5F5F7] transition-colors" style={{ fontWeight: 600 }}>
+src/app/pages/profile.tsx:575:        <p className="text-center text-xs text-[#86868B]">Settle v1.0.0</p>
+src/app/pages/profile.tsx:595:                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F5F5F7]"
+src/app/pages/profile.tsx:597:                <X size={16} className="text-[#86868B]" />
+src/app/pages/profile.tsx:605:                  <label className="text-xs text-[#86868B] mb-1 block">
+src/app/pages/profile.tsx:606:                    {field.label} <span className="text-[#86868B]/60">{field.labelKr}</span>
+src/app/pages/profile.tsx:618:                            backgroundColor: incomeCurrency === cur ? '#007AFF' : '#F5F5F7',
+src/app/pages/profile.tsx:619:                            color: incomeCurrency === cur ? '#fff' : '#86868B',
+src/app/pages/profile.tsx:635:                      className="w-full p-3 bg-[#F5F5F7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#007AFF]/30"
+src/app/pages/profile.tsx:655:                        className="w-full p-3 bg-[#F5F5F7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#007AFF]/30 placeholder:text-[#86868B]/50"
+src/app/pages/profile.tsx:659:                          <Loader2 size={16} className="animate-spin text-[#007AFF]" />
+src/app/pages/profile.tsx:667:                    <p className="text-[10px] text-[#86868B]/60 mt-1">{field.hint}</p>
+src/app/pages/profile.tsx:672:                    <p className="text-[10px] text-[#86868B] mt-1">
+src/app/pages/profile.tsx:684:              className="w-full mt-6 py-4 bg-[#007AFF] text-white rounded-2xl active:scale-98 transition-transform disabled:opacity-50"
+src/app/pages/profile.tsx:718:                  className="w-full flex items-center justify-between p-4 rounded-2xl active:bg-[#F5F5F7] transition-colors"
+src/app/pages/profile.tsx:722:                    <Check size={18} className="text-[#007AFF]" />
+src/app/pages/remit.tsx:521:    <div className="min-h-screen bg-[#F5F5F7]">
+src/app/pages/remit.tsx:530:              <ChevronLeft size={24} className="text-[#007AFF]" strokeWidth={2.5} />
+src/app/pages/remit.tsx:537:              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#F5F5F7] active:scale-95 transition-all"
+src/app/pages/remit.tsx:539:              <RefreshCw size={18} className={`text-[#86868B] ${loading ? "animate-spin" : ""}`} />
+src/app/pages/remit.tsx:548:          <div className="bg-white rounded-2xl p-4 border border-[#007AFF]/10">
+src/app/pages/remit.tsx:550:              <Plane size={16} className="text-[#007AFF]" />
+src/app/pages/remit.tsx:551:              <span className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>
+src/app/pages/remit.tsx:557:              <div className="flex-1 relative h-2 bg-[#F5F5F7] rounded-full overflow-hidden">
+src/app/pages/remit.tsx:559:                  className="absolute inset-y-0 left-0 bg-[#007AFF] rounded-full transition-all duration-1000"
+src/app/pages/remit.tsx:572:              <span className="text-xs text-[#86868B]">
+src/app/pages/remit.tsx:575:              <span className="text-xs text-[#007AFF]" style={{ fontWeight: 600 }}>
+src/app/pages/remit.tsx:582:          <div className="bg-[#34C759]/5 rounded-2xl p-4 border border-[#34C759]/20">
+src/app/pages/remit.tsx:589:                <p className="text-xs text-[#86868B] mt-0.5">
+src/app/pages/remit.tsx:600:            visaAlert.level === "expired" ? "bg-[#FF3B30]/5 border border-[#FF3B30]/15" :
+src/app/pages/remit.tsx:601:            visaAlert.level === "urgent" ? "bg-[#FF9500]/5 border border-[#FF9500]/15" :
+src/app/pages/remit.tsx:602:            "bg-[#007AFF]/5 border border-[#007AFF]/10"
+src/app/pages/remit.tsx:609:                visaAlert.level === "expired" ? "text-[#FF3B30]" :
+src/app/pages/remit.tsx:610:                visaAlert.level === "urgent" ? "text-[#FF9500]" :
+src/app/pages/remit.tsx:611:                "text-[#007AFF]"
+src/app/pages/remit.tsx:614:                <p className="text-sm text-[#1D1D1F]" style={{ fontWeight: 500 }}>
+src/app/pages/remit.tsx:617:                <p className="text-xs text-[#86868B] mt-0.5">
+src/app/pages/remit.tsx:621:              <ChevronDown size={16} className={`text-[#86868B] transition-transform ${showVisaActions ? "rotate-180" : ""}`} />
+src/app/pages/remit.tsx:630:                  className="flex items-center gap-3 p-3 bg-white rounded-xl active:bg-[#F5F5F7] transition-colors"
+src/app/pages/remit.tsx:632:                  <Globe size={16} className="text-[#007AFF]" />
+src/app/pages/remit.tsx:652:                    className="flex items-center gap-3 p-3 bg-white rounded-xl active:bg-[#F5F5F7] transition-colors w-full text-left"
+src/app/pages/remit.tsx:654:                    <Building2 size={16} className="text-[#34C759]" />
+src/app/pages/remit.tsx:663:                  className="w-full p-2 text-xs text-[#86868B] text-center"
+src/app/pages/remit.tsx:681:            <p className="text-xs text-[#86868B] mt-0.5">
+src/app/pages/remit.tsx:685:          <ChevronDown size={20} className="text-[#86868B]" />
+src/app/pages/remit.tsx:690:          <label className="text-sm text-[#86868B] mb-2 block" style={{ fontWeight: 500 }}>
+src/app/pages/remit.tsx:693:          <div className="flex items-center bg-white rounded-2xl border-2 border-[#007AFF] px-4 py-3">
+src/app/pages/remit.tsx:694:            <span className="text-xl text-[#007AFF] mr-2" style={{ fontWeight: 700 }}>
+src/app/pages/remit.tsx:706:              className="flex-1 text-2xl bg-transparent outline-none text-[#1D1D1F] placeholder:text-[#C7C7CC]"
+src/app/pages/remit.tsx:719:                    ? "bg-[#007AFF] text-white"
+src/app/pages/remit.tsx:720:                    : "bg-white text-[#86868B] hover:bg-[#E8E8ED]"
+src/app/pages/remit.tsx:733:            <span className="text-xs text-[#86868B]">
+src/app/pages/remit.tsx:743:            <p className="text-sm text-[#1D1D1F]">
+src/app/pages/remit.tsx:745:              <span style={{ fontWeight: 700, color: "#FF9500" }}>
+src/app/pages/remit.tsx:756:            <RefreshCw size={32} className="text-[#007AFF] animate-spin" />
+src/app/pages/remit.tsx:757:            <p className="text-sm text-[#86868B] mt-4">환율 정보 가져오는 중...</p>
+src/app/pages/remit.tsx:761:            <p className="text-base text-[#86868B]">
+src/app/pages/remit.tsx:776:                      ? "border-2 border-[#007AFF] shadow-[0_4px_24px_rgba(0,122,255,0.12)]"
+src/app/pages/remit.tsx:782:                    <div className="inline-flex items-center gap-1.5 bg-[#007AFF]/10 text-[#007AFF] text-xs px-3 py-1 rounded-full mb-3" style={{ fontWeight: 600 }}>
+src/app/pages/remit.tsx:795:                      <p className="text-xs text-[#86868B]">{quote.name}</p>
+src/app/pages/remit.tsx:797:                    <div className="flex items-center gap-1 text-[#FF9500]">
+src/app/pages/remit.tsx:798:                      <Star size={14} fill="#FF9500" />
+src/app/pages/remit.tsx:807:                    <p className="text-xs text-[#86868B] mb-1">받는 금액</p>
+src/app/pages/remit.tsx:810:                        isFirst ? "text-[#007AFF]" : "text-[#1D1D1F]"
+src/app/pages/remit.tsx:815:                      <span className="text-base text-[#86868B]" style={{ fontWeight: 600 }}>
+src/app/pages/remit.tsx:822:                  <div className="flex items-center bg-[#F5F5F7] rounded-2xl p-3 mb-3">
+src/app/pages/remit.tsx:824:                      <p className="text-[10px] text-[#86868B]">수수료</p>
+src/app/pages/remit.tsx:831:                      <p className="text-[10px] text-[#86868B]">속도</p>
+src/app/pages/remit.tsx:838:                      <p className="text-[10px] text-[#86868B]">적용 환율</p>
+src/app/pages/remit.tsx:848:                    className="w-full flex items-center justify-center gap-1 py-1 text-xs text-[#86868B] hover:text-[#1D1D1F] transition-colors"
+src/app/pages/remit.tsx:858:                    <div className="bg-[#F5F5F7] rounded-2xl p-4 mt-2 mb-3 space-y-2.5 text-sm">
+src/app/pages/remit.tsx:860:                        <span className="text-[#86868B]">보내는 금액</span>
+src/app/pages/remit.tsx:864:                        <span className="text-[#86868B]">수수료</span>
+src/app/pages/remit.tsx:865:                        <span className="text-[#FF3B30]" style={{ fontWeight: 600 }}>
+src/app/pages/remit.tsx:870:                        <span className="text-[#86868B]">환전 금액</span>
+src/app/pages/remit.tsx:874:                        <span className="text-[#86868B]">기준 환율 (mid-market)</span>
+src/app/pages/remit.tsx:878:                        <span className="text-[#86868B]">업체 환율 (스프레드 포함)</span>
+src/app/pages/remit.tsx:882:                        <span className="text-[#86868B]">환율 차이 비용</span>
+src/app/pages/remit.tsx:883:                        <span className="text-[#FF3B30]" style={{ fontWeight: 600 }}>
+src/app/pages/remit.tsx:891:                        <span className="text-[#007AFF]" style={{ fontWeight: 800 }}>
+src/app/pages/remit.tsx:904:                        ? "bg-[#007AFF] text-white"
+src/app/pages/remit.tsx:905:                        : "bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E8E8ED]"
+src/app/pages/remit.tsx:921:            <Shield size={14} className="text-[#86868B] mt-0.5 flex-shrink-0" />
+src/app/pages/remit.tsx:922:            <p className="text-xs text-[#86868B] leading-relaxed">
+src/app/pages/remit.tsx:949:                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#F5F5F7]"
+src/app/pages/remit.tsx:951:                <X size={18} className="text-[#86868B]" />
+src/app/pages/remit.tsx:957:              <div className="flex items-center gap-2 bg-[#F5F5F7] rounded-xl px-3 py-2.5">
+src/app/pages/remit.tsx:958:                <Search size={16} className="text-[#86868B]" />
+src/app/pages/remit.tsx:979:                  className={`w-full flex items-center gap-4 px-5 py-4 border-b border-black/[0.03] text-left active:bg-[#F5F5F7] transition-colors ${
+src/app/pages/remit.tsx:980:                    selectedCountry.code === country.code ? "bg-[#007AFF]/5" : ""
+src/app/pages/remit.tsx:988:                    <p className="text-xs text-[#86868B] mt-0.5">{country.nameEn}</p>
+src/app/pages/remit.tsx:990:                  <span className="text-sm text-[#86868B]" style={{ fontWeight: 500 }}>
+src/app/pages/remit.tsx:994:                    <span className="text-[#007AFF] text-lg" style={{ fontWeight: 700 }}>
+src/app/pages/paywall.tsx:84:    <div className="min-h-screen bg-gradient-to-b from-white to-[#F5F5F7]">
+src/app/pages/paywall.tsx:93:              <ChevronLeft size={24} className="text-[#007AFF]" strokeWidth={2.5} />
+src/app/pages/paywall.tsx:105:          <div className="bg-[#FF3B30]/10 border border-[#FF3B30]/20 rounded-2xl px-4 py-3">
+src/app/pages/paywall.tsx:106:            <p className="text-sm text-[#FF3B30]">{error}</p>
+src/app/pages/paywall.tsx:116:          <p className="text-[#86868B]">
+src/app/pages/paywall.tsx:122:        <div className="bg-white rounded-3xl p-8 border-2 border-[#F5F5F7]">
+src/app/pages/paywall.tsx:128:              <p className="text-sm text-[#86868B]">Essential tools for your life in Korea</p>
+src/app/pages/paywall.tsx:140:                <Check size={20} className="text-[#34C759] flex-shrink-0" strokeWidth={2.5} />
+src/app/pages/paywall.tsx:146:          <button className="w-full bg-[#F5F5F7] text-[#1D1D1F] rounded-2xl py-4 active:scale-98 transition-transform" style={{ fontWeight: 600 }}>
+src/app/pages/paywall.tsx:152:        <div className="bg-gradient-to-br from-[#007AFF] to-[#0051D5] rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden">
+src/app/pages/paywall.tsx:195:              className="w-full bg-white text-[#007AFF] rounded-2xl py-4 mb-3 active:scale-98 transition-transform disabled:opacity-60 flex items-center justify-center gap-2"
+src/app/pages/paywall.tsx:217:          className="w-full text-left bg-white rounded-3xl p-6 border-2 border-[#34C759] active:scale-98 transition-transform disabled:opacity-60"
+src/app/pages/paywall.tsx:225:                <span className="text-xs bg-[#34C759] text-white px-2 py-0.5 rounded-full" style={{ fontWeight: 600 }}>
+src/app/pages/paywall.tsx:229:              <p className="text-sm text-[#86868B]">연간 구독 • ₩95,040/year</p>
+src/app/pages/paywall.tsx:235:              <p className="text-sm text-[#86868B]">/month</p>
+src/app/pages/paywall.tsx:250:              <p className="text-sm text-[#86868B]">
+src/app/pages/paywall.tsx:258:              <p className="text-sm text-[#86868B]">
+src/app/pages/paywall.tsx:266:              <p className="text-sm text-[#86868B]">
+src/app/pages/paywall.tsx:275:          <p className="text-xs text-[#86868B]">
+src/app/pages/paywall.tsx:278:          <p className="text-xs text-[#86868B]">
+src/app/pages/PaywallSuccess.tsx:81:    <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center px-6">
+src/app/pages/PaywallSuccess.tsx:86:            <Loader2 size={48} className="text-[#007AFF] animate-spin mx-auto" />
+src/app/pages/PaywallSuccess.tsx:90:            <p className="text-sm text-[#86868B]">
+src/app/pages/PaywallSuccess.tsx:99:            <CheckCircle2 size={48} className="text-[#34C759] mx-auto" />
+src/app/pages/PaywallSuccess.tsx:103:            <p className="text-sm text-[#86868B]">
+src/app/pages/PaywallSuccess.tsx:108:              className="w-full bg-[#007AFF] text-white rounded-2xl py-4 active:scale-96 transition-transform"
+src/app/pages/PaywallSuccess.tsx:119:            <XCircle size={48} className="text-[#FF3B30] mx-auto" />
+src/app/pages/PaywallSuccess.tsx:123:            <p className="text-sm text-[#FF3B30]">
+src/app/pages/PaywallSuccess.tsx:129:                className="w-full bg-[#007AFF] text-white rounded-2xl py-4 active:scale-96 transition-transform"
+src/app/pages/PaywallSuccess.tsx:136:                className="w-full bg-[#F5F5F7] text-[#1D1D1F] rounded-2xl py-4 active:scale-96 transition-transform"
+src/app/pages/education.tsx:233:                className="text-[#007AFF]"
+src/app/pages/education.tsx:256:                    className="text-[#86868B] animate-spin"
+src/app/pages/education.tsx:259:                  <Bell size={20} className="text-[#007AFF]" />
+src/app/pages/education.tsx:261:                  <BellOff size={20} className="text-[#86868B]" />
+src/app/pages/education.tsx:282:                className="text-[#007AFF] animate-spin"
+src/app/pages/education.tsx:289:                className="text-[#86868B] mx-auto mb-3"
+src/app/pages/education.tsx:292:                className="text-sm text-[#86868B]"
+src/app/pages/education.tsx:296:              <p className="text-xs text-[#86868B] mt-1">
+src/app/pages/education.tsx:310:                    className="w-full flex items-start gap-4 p-5 text-left active:bg-[#F5F5F7] transition-colors"
+src/app/pages/education.tsx:315:                          ? 'bg-[#007AFF]/10'
+src/app/pages/education.tsx:316:                          : 'bg-[#F5F5F7]'
+src/app/pages/education.tsx:325:                              ? '#007AFF'
+src/app/pages/education.tsx:326:                              : '#86868B',
+src/app/pages/education.tsx:336:                              ? '#007AFF'
+src/app/pages/education.tsx:337:                              : '#86868B',
+src/app/pages/education.tsx:345:                        <Calendar size={14} className="text-[#86868B]" />
+src/app/pages/education.tsx:346:                        <span className="text-xs text-[#86868B]">
+src/app/pages/education.tsx:356:                      <p className="text-xs text-[#86868B] mb-2">
+src/app/pages/education.tsx:361:                        <span className="text-xs bg-[#F5F5F7] text-[#86868B] px-2 py-0.5 rounded-full">
+src/app/pages/education.tsx:365:                          <span className="text-xs bg-[#F5F5F7] text-[#86868B] px-2 py-0.5 rounded-full">
+src/app/pages/education.tsx:373:                      className="text-[#86868B] flex-shrink-0 mt-2"
+src/app/pages/education.tsx:403:                    <p className="text-xs text-[#86868B]">{exam.titleKr}</p>
+src/app/pages/education.tsx:409:                        style={{ fontWeight: 600, color: '#34C759' }}
+src/app/pages/education.tsx:413:                      <p className="text-xs text-[#86868B]">Last score</p>
+src/app/pages/education.tsx:420:                    <p className="text-xs text-[#86868B]">Questions</p>
+src/app/pages/education.tsx:429:                    <p className="text-xs text-[#86868B]">Duration</p>
+src/app/pages/education.tsx:438:                    <p className="text-xs text-[#86868B]">Attempts</p>
+src/app/pages/education.tsx:449:                  <div className="flex items-center justify-center gap-2 text-[#007AFF]">
+src/app/pages/education.tsx:481:                <span className="text-xl text-[#86868B]">
+src/app/pages/education.tsx:485:              <p className="text-sm text-[#86868B] mt-2">
+src/app/pages/education.tsx:489:                <p className="text-xs text-[#86868B] mt-1">
+src/app/pages/education.tsx:493:              <div className="mt-4 w-full bg-[#F5F5F7] rounded-full h-3 overflow-hidden">
+src/app/pages/education.tsx:495:                  className="h-full bg-gradient-to-r from-[#007AFF] to-[#34C759] rounded-full transition-all"
+src/app/pages/education.tsx:515:                      <p className="text-xs text-[#86868B]">
+src/app/pages/education.tsx:526:                      <span className="text-sm text-[#86868B]">
+src/app/pages/education.tsx:532:                  <div className="w-full bg-[#F5F5F7] rounded-full h-2 overflow-hidden">
+src/app/pages/education.tsx:534:                      className="h-full bg-[#007AFF] rounded-full"
+src/app/pages/education.tsx:540:                  <p className="text-xs text-[#86868B]">
+src/app/pages/education.tsx:550:        <button className="w-full bg-gradient-to-br from-[#34C759] to-[#30A14E] rounded-3xl p-6 text-white shadow-lg active:scale-98 transition-transform">
+src/app/pages/onboarding.tsx:182:    <div className="min-h-screen bg-[#F5F5F7]">
+src/app/pages/onboarding.tsx:186:          <div className="w-16 h-16 bg-gradient-to-br from-[#007AFF] to-[#0051D5] rounded-[20px] mx-auto mb-6 flex items-center justify-center">
+src/app/pages/onboarding.tsx:189:          <h1 className="text-2xl text-[#1D1D1F] mb-2" style={{ fontWeight: 700 }}>
+src/app/pages/onboarding.tsx:192:          <p className="text-sm text-[#86868B]">
+src/app/pages/onboarding.tsx:203:              step >= 1 ? "bg-[#007AFF]" : "bg-[#E5E5EA]"
+src/app/pages/onboarding.tsx:206:              step >= 2 ? "bg-[#007AFF]" : "bg-[#E5E5EA]"
+src/app/pages/onboarding.tsx:220:                ? "border-[#34C759] bg-[#34C759]/5"
+src/app/pages/onboarding.tsx:221:                : "border-[#007AFF]/30 bg-white"
+src/app/pages/onboarding.tsx:225:              arcScanned ? "bg-[#34C759]/10" : "bg-[#007AFF]/10"
+src/app/pages/onboarding.tsx:228:                <Check size={22} className="text-[#34C759]" strokeWidth={2.5} />
+src/app/pages/onboarding.tsx:230:                <Camera size={22} className="text-[#007AFF]" strokeWidth={2} />
+src/app/pages/onboarding.tsx:237:              <p className="text-xs text-[#86868B] mt-0.5">
+src/app/pages/onboarding.tsx:241:            {!arcScanned && <ChevronRight size={18} className="text-[#86868B]" />}
+src/app/pages/onboarding.tsx:262:              <User size={16} className="text-[#007AFF]" />
+src/app/pages/onboarding.tsx:263:              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>이름 (영문)</label>
+src/app/pages/onboarding.tsx:270:              className="w-full text-base bg-transparent outline-none text-[#1D1D1F] placeholder:text-[#C7C7CC]"
+src/app/pages/onboarding.tsx:278:              <Flag size={16} className="text-[#007AFF]" />
+src/app/pages/onboarding.tsx:279:              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>국적</label>
+src/app/pages/onboarding.tsx:288:                      ? "bg-[#007AFF] text-white"
+src/app/pages/onboarding.tsx:289:                      : "bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E8E8ED]"
+src/app/pages/onboarding.tsx:302:              <FileText size={16} className="text-[#007AFF]" />
+src/app/pages/onboarding.tsx:303:              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>비자 유형</label>
+src/app/pages/onboarding.tsx:312:                      ? "bg-[#007AFF] text-white"
+src/app/pages/onboarding.tsx:313:                      : "bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E8E8ED]"
+src/app/pages/onboarding.tsx:326:              <Calendar size={16} className="text-[#007AFF]" />
+src/app/pages/onboarding.tsx:327:              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>비자 만료일</label>
+src/app/pages/onboarding.tsx:333:              className="w-full text-base bg-transparent outline-none text-[#1D1D1F]"
+src/app/pages/onboarding.tsx:344:                ? "bg-[#007AFF] text-white active:scale-[0.98]"
+src/app/pages/onboarding.tsx:360:              <Phone size={16} className="text-[#007AFF]" />
+src/app/pages/onboarding.tsx:361:              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>전화번호</label>
+src/app/pages/onboarding.tsx:368:              className="w-full text-base bg-transparent outline-none text-[#1D1D1F] placeholder:text-[#C7C7CC]"
+src/app/pages/onboarding.tsx:376:              <Globe size={16} className="text-[#007AFF]" />
+src/app/pages/onboarding.tsx:377:              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>선호 언어</label>
+src/app/pages/onboarding.tsx:386:                      ? "bg-[#007AFF] text-white"
+src/app/pages/onboarding.tsx:387:                      : "bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E8E8ED]"
+src/app/pages/onboarding.tsx:400:              <Building2 size={16} className="text-[#007AFF]" />
+src/app/pages/onboarding.tsx:401:              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>주거래 은행 (선택)</label>
+src/app/pages/onboarding.tsx:410:                      ? "bg-[#007AFF] text-white"
+src/app/pages/onboarding.tsx:411:                      : "bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E8E8ED]"
+src/app/pages/onboarding.tsx:424:              <Send size={16} className="text-[#007AFF]" />
+src/app/pages/onboarding.tsx:425:              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>자주 보내는 국가 (선택)</label>
+src/app/pages/onboarding.tsx:434:                      ? "bg-[#007AFF] text-white"
+src/app/pages/onboarding.tsx:435:                      : "bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E8E8ED]"
+src/app/pages/onboarding.tsx:450:              className="px-6 py-4 rounded-2xl bg-white text-[#1D1D1F] text-base active:scale-[0.98] transition-all"
+src/app/pages/onboarding.tsx:460:                  ? "bg-[#007AFF] text-white active:scale-[0.98]"
+src/app/pages/landing.tsx:73:      color: "#007AFF",
+src/app/pages/landing.tsx:79:      color: "#34C759",
+src/app/pages/landing.tsx:85:      color: "#007AFF",
+src/app/pages/landing.tsx:91:      color: "#34C759",
+src/app/pages/landing.tsx:98:    <div className="min-h-screen bg-gradient-to-b from-white to-[#F5F5F7] flex flex-col items-center justify-center px-6 overflow-hidden">
+src/app/pages/landing.tsx:162:            <p className="text-lg text-[#86868B] max-w-xs">
+src/app/pages/landing.tsx:181:                <div className="bg-[#FF3B30]/10 text-[#FF3B30] text-sm px-4 py-3 rounded-2xl">
+src/app/pages/landing.tsx:188:                <div className="bg-[#34C759]/10 text-[#34C759] text-sm px-4 py-3 rounded-2xl">
+src/app/pages/landing.tsx:207:                    className="w-full bg-[#F5F5F7] rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#007AFF] transition-all"
+src/app/pages/landing.tsx:225:                  className="w-full bg-[#F5F5F7] rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#007AFF] transition-all"
+src/app/pages/landing.tsx:244:                    className="w-full bg-[#F5F5F7] rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#007AFF] transition-all"
+src/app/pages/landing.tsx:256:              className="w-full bg-gradient-to-br from-[#007AFF] to-[#0051D5] text-white rounded-3xl py-4 shadow-lg active:scale-98 transition-transform disabled:opacity-50"
+src/app/pages/landing.tsx:274:                className="w-full bg-white border border-black/10 text-[#1D1D1F] rounded-3xl py-4 shadow-sm active:scale-98 transition-transform disabled:opacity-50 flex items-center justify-center gap-3"
+src/app/pages/landing.tsx:305:                    className="text-[#007AFF]"
+src/app/pages/landing.tsx:313:                    className="text-[#007AFF]"
+src/app/pages/landing.tsx:324:                  className="text-[#007AFF] mx-auto"
+src/app/pages/landing.tsx:334:                  className="text-[#007AFF] mx-auto"
+src/app/pages/landing.tsx:344:              <p className="text-xs text-[#86868B]">
+
+================================================================================
+[3] CSS VARIABLE USAGE
+================================================================================
+src/styles/theme.css:63:  background: var(--color-surface-glass);
+src/styles/theme.css:66:  border-top: 1px solid var(--color-border-strong);
+src/styles/theme.css:72:    background: var(--color-surface-elevated);
+src/app/components/visa/ScoreRing.tsx:35:      style={{ backgroundColor: "var(--color-surface-primary)" }}
+src/app/components/visa/ScoreRing.tsx:46:              stroke="var(--color-surface-secondary)"
+src/app/components/visa/ScoreRing.tsx:54:              stroke="var(--color-action-primary)"
+src/app/components/visa/ScoreRing.tsx:66:                color: "var(--color-text-primary)",
+src/app/components/visa/ScoreRing.tsx:73:              style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/ScoreRing.tsx:86:              color: "var(--color-text-primary)",
+src/app/components/visa/ScoreRing.tsx:93:            style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/ScoreRing.tsx:104:          style={{ borderTop: "1px solid var(--color-border-default)" }}
+src/app/components/visa/ScoreRing.tsx:111:                color: "var(--color-text-primary)",
+src/app/components/visa/ScoreRing.tsx:118:              style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/ScoreRing.tsx:128:                color: "var(--color-text-primary)",
+src/app/components/visa/ScoreRing.tsx:135:              style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/ScoreRing.tsx:145:                color: "var(--color-text-primary)",
+src/app/components/visa/ScoreRing.tsx:152:              style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/ScoreRing.tsx:162:          style={{ color: "var(--color-text-tertiary)" }}
+src/app/components/visa/KpointSimulator.tsx:41:        style={{ backgroundColor: "var(--color-surface-primary)" }}
+src/app/components/visa/KpointSimulator.tsx:45:          style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/KpointSimulator.tsx:54:            backgroundColor: "var(--color-action-primary)",
+src/app/components/visa/KpointSimulator.tsx:55:            color: "var(--color-text-on-color)",
+src/app/components/visa/KpointSimulator.tsx:80:      style={{ backgroundColor: "var(--color-surface-primary)" }}
+src/app/components/visa/KpointSimulator.tsx:88:            color: "var(--color-text-primary)",
+src/app/components/visa/KpointSimulator.tsx:95:          style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/KpointSimulator.tsx:108:              ? "var(--color-action-success)"
+src/app/components/visa/KpointSimulator.tsx:109:              : "var(--color-action-warning)",
+src/app/components/visa/KpointSimulator.tsx:116:          style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/KpointSimulator.tsx:125:              ? "color-mix(in srgb, var(--color-action-success) 12%, transparent)"
+src/app/components/visa/KpointSimulator.tsx:126:              : "color-mix(in srgb, var(--color-action-warning) 12%, transparent)",
+src/app/components/visa/KpointSimulator.tsx:128:              ? "var(--color-action-success)"
+src/app/components/visa/KpointSimulator.tsx:129:              : "var(--color-action-warning)",
+src/app/components/visa/KpointSimulator.tsx:148:                  style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/KpointSimulator.tsx:156:                    color: "var(--color-text-primary)",
+src/app/components/visa/KpointSimulator.tsx:160:                  <span style={{ color: "var(--color-text-tertiary)" }}>
+src/app/components/visa/KpointSimulator.tsx:169:                  backgroundColor: "var(--color-surface-secondary)",
+src/app/components/visa/KpointSimulator.tsx:176:                    backgroundColor: "var(--color-action-primary)",
+src/app/components/visa/KpointSimulator.tsx:188:        style={{ color: "var(--color-text-tertiary)" }}
+src/app/components/visa/DocumentGuide.tsx:80:      style={{ backgroundColor: "var(--color-surface-primary)" }}
+src/app/components/visa/DocumentGuide.tsx:87:            style={{ color: "var(--color-action-primary)" }}
+src/app/components/visa/DocumentGuide.tsx:93:              color: "var(--color-text-primary)",
+src/app/components/visa/DocumentGuide.tsx:101:          style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/DocumentGuide.tsx:118:                backgroundColor: "var(--color-surface-secondary)",
+src/app/components/visa/DocumentGuide.tsx:127:                    ? "var(--color-surface-primary)"
+src/app/components/visa/DocumentGuide.tsx:128:                    : "color-mix(in srgb, var(--color-action-primary) 12%, transparent)",
+src/app/components/visa/DocumentGuide.tsx:130:                    ? "var(--color-text-tertiary)"
+src/app/components/visa/DocumentGuide.tsx:131:                    : "var(--color-action-primary)",
+src/app/components/visa/DocumentGuide.tsx:145:                    color: "var(--color-text-primary)",
+src/app/components/visa/DocumentGuide.tsx:153:                    style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/DocumentGuide.tsx:161:                    style={{ color: "var(--color-text-tertiary)" }}
+src/app/components/visa/DocumentGuide.tsx:178:            backgroundColor: "color-mix(in srgb, var(--color-action-primary) 8%, transparent)",
+src/app/components/visa/DocumentGuide.tsx:184:              style={{ color: "var(--color-action-primary)" }}
+src/app/components/visa/DocumentGuide.tsx:190:                color: "var(--color-action-primary)",
+src/app/components/visa/DocumentGuide.tsx:198:            style={{ color: "var(--color-action-primary)" }}
+src/app/components/visa/DocumentGuide.tsx:206:        style={{ color: "var(--color-text-tertiary)" }}
+src/app/components/visa/RequirementsChecklist.tsx:27:          color: "var(--color-text-primary)",
+src/app/components/visa/RequirementsChecklist.tsx:35:          backgroundColor: "var(--color-surface-primary)",
+src/app/components/visa/RequirementsChecklist.tsx:36:          borderColor: "var(--color-border-default)",
+src/app/components/visa/RequirementsChecklist.tsx:50:                style={{ color: "var(--color-action-success)" }}
+src/app/components/visa/RequirementsChecklist.tsx:57:                style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/RequirementsChecklist.tsx:65:                  color: "var(--color-text-primary)",
+src/app/components/visa/RequirementsChecklist.tsx:72:                style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/RequirementsChecklist.tsx:80:              style={{ color: "var(--color-text-tertiary)" }}
+src/app/components/visa/LawyerMatchCTA.tsx:17:          "linear-gradient(135deg, var(--color-action-primary), var(--color-action-primary-hover))",
+src/app/components/visa/LawyerMatchCTA.tsx:18:        color: "var(--color-text-on-color)",
+src/app/components/visa/LiabilitySheet.tsx:44:        backgroundColor: "var(--color-overlay)",
+src/app/components/visa/LiabilitySheet.tsx:51:        style={{ backgroundColor: "var(--color-surface-primary)" }}
+src/app/components/visa/LiabilitySheet.tsx:59:              color: "var(--color-text-primary)",
+src/app/components/visa/LiabilitySheet.tsx:67:            style={{ backgroundColor: "var(--color-surface-secondary)" }}
+src/app/components/visa/LiabilitySheet.tsx:72:              style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/LiabilitySheet.tsx:82:          style={{ backgroundColor: "var(--color-surface-secondary)" }}
+src/app/components/visa/LiabilitySheet.tsx:94:              <span style={{ color: "var(--color-text-secondary)" }}>
+src/app/components/visa/LiabilitySheet.tsx:100:                  color: "var(--color-text-primary)",
+src/app/components/visa/LiabilitySheet.tsx:112:          style={{ backgroundColor: "var(--color-action-warning)", opacity: 0.15 }}
+src/app/components/visa/LiabilitySheet.tsx:118:          style={{ backgroundColor: "color-mix(in srgb, var(--color-action-warning) 15%, var(--color-surface-primary))" }}
+src/app/components/visa/LiabilitySheet.tsx:125:            style={{ accentColor: "var(--color-action-primary)" }}
+src/app/components/visa/LiabilitySheet.tsx:132:                color: "var(--color-action-warning)",
+src/app/components/visa/LiabilitySheet.tsx:139:              style={{ color: "var(--color-action-warning)" }}
+src/app/components/visa/LiabilitySheet.tsx:151:              backgroundColor: "color-mix(in srgb, var(--color-action-error) 10%, transparent)",
+src/app/components/visa/LiabilitySheet.tsx:157:              style={{ color: "var(--color-action-error)" }}
+src/app/components/visa/LiabilitySheet.tsx:161:              style={{ color: "var(--color-action-error)" }}
+src/app/components/visa/LiabilitySheet.tsx:175:            backgroundColor: "var(--color-action-success)",
+src/app/components/visa/LiabilitySheet.tsx:176:            color: "var(--color-text-on-color)",
+src/app/components/visa/KiipProgress.tsx:24:    return { labelKey: "visa:kiip_completed", color: "var(--color-action-success)" };
+src/app/components/visa/KiipProgress.tsx:26:    return { labelKey: "visa:kiip_in_progress", color: "var(--color-action-primary)" };
+src/app/components/visa/KiipProgress.tsx:27:  return { labelKey: "visa:kiip_locked", color: "var(--color-text-secondary)" };
+src/app/components/visa/KiipProgress.tsx:39:          color: "var(--color-text-primary)",
+src/app/components/visa/KiipProgress.tsx:46:        style={{ backgroundColor: "var(--color-surface-primary)" }}
+src/app/components/visa/KiipProgress.tsx:70:                    color: "var(--color-text-primary)",
+src/app/components/visa/KiipProgress.tsx:77:                  style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/DocumentSubmitCTA.tsx:31:          "linear-gradient(135deg, var(--color-action-success), #30A14E)",
+src/app/components/visa/DocumentSubmitCTA.tsx:32:        color: "var(--color-text-on-color)",
+src/app/components/visa/DocumentSubmitCTA.tsx:74:          backgroundColor: "var(--color-surface-primary)",
+src/app/components/visa/DocumentSubmitCTA.tsx:75:          color: "var(--color-action-success)",
+src/app/components/visa/WageCalculator.tsx:116:      style={{ backgroundColor: "var(--color-surface-primary)" }}
+src/app/components/visa/WageCalculator.tsx:122:          style={{ color: "var(--color-action-primary)" }}
+src/app/components/visa/WageCalculator.tsx:128:            color: "var(--color-text-primary)",
+src/app/components/visa/WageCalculator.tsx:141:            style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/WageCalculator.tsx:148:              style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/WageCalculator.tsx:163:                backgroundColor: "var(--color-surface-secondary)",
+src/app/components/visa/WageCalculator.tsx:164:                color: "var(--color-text-primary)",
+src/app/components/visa/WageCalculator.tsx:176:              style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/WageCalculator.tsx:190:                backgroundColor: "var(--color-surface-secondary)",
+src/app/components/visa/WageCalculator.tsx:191:                color: "var(--color-text-primary)",
+src/app/components/visa/WageCalculator.tsx:199:              style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/WageCalculator.tsx:213:                backgroundColor: "var(--color-surface-secondary)",
+src/app/components/visa/WageCalculator.tsx:214:                color: "var(--color-text-primary)",
+src/app/components/visa/WageCalculator.tsx:226:              style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/WageCalculator.tsx:240:                backgroundColor: "var(--color-surface-secondary)",
+src/app/components/visa/WageCalculator.tsx:241:                color: "var(--color-text-primary)",
+src/app/components/visa/WageCalculator.tsx:249:              style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/WageCalculator.tsx:263:                backgroundColor: "var(--color-surface-secondary)",
+src/app/components/visa/WageCalculator.tsx:264:                color: "var(--color-text-primary)",
+src/app/components/visa/WageCalculator.tsx:278:            backgroundColor: "var(--color-action-primary)",
+src/app/components/visa/WageCalculator.tsx:279:            color: "var(--color-text-on-color)",
+src/app/components/visa/WageCalculator.tsx:295:              color: "var(--color-text-secondary)",
+src/app/components/visa/WageCalculator.tsx:306:                backgroundColor: "var(--color-surface-secondary)",
+src/app/components/visa/WageCalculator.tsx:311:                style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/WageCalculator.tsx:319:                  color: "var(--color-text-primary)",
+src/app/components/visa/WageCalculator.tsx:328:                backgroundColor: "var(--color-surface-secondary)",
+src/app/components/visa/WageCalculator.tsx:333:                style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/WageCalculator.tsx:341:                  color: "var(--color-text-primary)",
+src/app/components/visa/WageCalculator.tsx:352:            style={{ backgroundColor: "var(--color-surface-secondary)" }}
+src/app/components/visa/WageCalculator.tsx:366:                  style={{ color: "var(--color-text-secondary)" }}
+src/app/components/visa/WageCalculator.tsx:374:                    color: "var(--color-text-primary)",
+src/app/components/visa/WageCalculator.tsx:386:            style={{ color: "var(--color-text-tertiary)" }}
+src/app/components/visa/WageCalculator.tsx:395:              backgroundColor: "var(--color-surface-secondary)",
+src/app/components/visa/WageCalculator.tsx:402:                color: "var(--color-text-secondary)",
+src/app/components/visa/WageCalculator.tsx:411:                backgroundColor: "var(--color-surface-primary)",
+src/app/components/visa/WageCalculator.tsx:417:                style={{ color: "var(--color-action-primary)" }}
+src/app/components/visa/WageCalculator.tsx:423:                  color: "var(--color-action-primary)",
+src/app/components/visa/WageCalculator.tsx:435:                backgroundColor: "var(--color-surface-primary)",
+src/app/components/visa/WageCalculator.tsx:441:                style={{ color: "var(--color-action-primary)" }}
+src/app/components/visa/WageCalculator.tsx:447:                  color: "var(--color-action-primary)",
+src/app/components/layout.tsx:51:        backgroundColor: "var(--color-surface-secondary)",
+src/app/components/layout.tsx:79:              background: "var(--color-surface-glass)",
+src/app/components/layout.tsx:82:              borderTop: "1px solid var(--color-border-strong)",
+src/app/components/layout.tsx:112:                        ? "var(--color-action-primary)"
+src/app/components/layout.tsx:113:                        : "var(--color-text-secondary)",
+src/app/components/layout.tsx:124:                        ? "var(--color-action-primary)"
+src/app/components/layout.tsx:125:                        : "var(--color-text-secondary)",
+src/app/pages/home.tsx:52:      return { icon: CheckCircle, color: "var(--color-action-success)" };
+src/app/pages/home.tsx:54:      return { icon: Send, color: "var(--color-action-primary)" };
+src/app/pages/home.tsx:57:      return { icon: GraduationCap, color: "var(--color-action-success)" };
+src/app/pages/home.tsx:59:      return { icon: CheckCircle, color: "var(--color-action-primary)" };
+src/app/pages/home.tsx:183:      ? "var(--color-text-secondary)"
+src/app/pages/home.tsx:185:        ? "var(--color-action-warning)"
+src/app/pages/home.tsx:187:          ? "var(--color-action-primary)"
+src/app/pages/home.tsx:188:          : "var(--color-action-success)";
+src/app/pages/home.tsx:196:      style={{ backgroundColor: "var(--color-surface-secondary)" }}
+src/app/pages/home.tsx:201:          backgroundColor: "var(--color-surface-primary)",
+src/app/pages/home.tsx:202:          borderBottom: "1px solid var(--color-border-default)",
+src/app/pages/home.tsx:211:              style={{ backgroundColor: "var(--color-surface-secondary)" }}
+src/app/pages/home.tsx:229:              color: "var(--color-text-primary)",
+src/app/pages/home.tsx:236:            style={{ color: "var(--color-text-secondary)" }}
+src/app/pages/home.tsx:248:                "linear-gradient(135deg, var(--color-action-warning), #FF6B00)",
+src/app/pages/home.tsx:249:              color: "var(--color-text-on-color)",
+src/app/pages/home.tsx:284:            backgroundColor: "var(--color-surface-primary)",
+src/app/pages/home.tsx:290:            style={{ color: "var(--color-text-secondary)" }}
+src/app/pages/home.tsx:304:                style={{ color: "var(--color-text-secondary)" }}
+src/app/pages/home.tsx:312:              style={{ color: "var(--color-text-tertiary)" }}
+src/app/pages/home.tsx:320:              style={{ backgroundColor: "var(--color-surface-secondary)" }}
+src/app/pages/home.tsx:339:              backgroundColor: "var(--color-surface-primary)",
+src/app/pages/home.tsx:346:                style={{ color: "var(--color-text-secondary)" }}
+src/app/pages/home.tsx:350:                style={{ color: "var(--color-text-secondary)" }}
+src/app/pages/home.tsx:357:                style={{ backgroundColor: "var(--color-surface-secondary)" }}
+src/app/pages/home.tsx:365:                    color: "var(--color-text-primary)",
+src/app/pages/home.tsx:372:                  style={{ color: "var(--color-action-success)" }}
+src/app/pages/home.tsx:380:                style={{ color: "var(--color-text-tertiary)" }}
+src/app/pages/home.tsx:391:              backgroundColor: "var(--color-surface-primary)",
+src/app/pages/home.tsx:397:              style={{ color: "var(--color-text-secondary)" }}
+src/app/pages/home.tsx:407:                    color: "var(--color-text-primary)",
+src/app/pages/home.tsx:415:                      color: "var(--color-text-secondary)",
+src/app/pages/home.tsx:424:                    backgroundColor: "var(--color-surface-secondary)",
+src/app/pages/home.tsx:431:                      backgroundColor: "var(--color-action-success)",
+src/app/pages/home.tsx:439:                style={{ color: "var(--color-text-tertiary)" }}
+src/app/pages/home.tsx:452:            backgroundColor: "var(--color-surface-primary)",
+src/app/pages/home.tsx:460:                style={{ color: "var(--color-text-secondary)" }}
+src/app/pages/home.tsx:466:                  style={{ backgroundColor: "var(--color-surface-secondary)" }}
+src/app/pages/home.tsx:473:                    color: "var(--color-text-primary)",
+src/app/pages/home.tsx:481:                  style={{ color: "var(--color-text-tertiary)" }}
+src/app/pages/home.tsx:489:              style={{ color: "var(--color-text-secondary)" }}
+src/app/pages/home.tsx:501:                color: "var(--color-text-primary)",
+src/app/pages/home.tsx:511:                  color: "var(--color-action-primary)",
+src/app/pages/home.tsx:524:                backgroundColor: "var(--color-surface-primary)",
+src/app/pages/home.tsx:525:                borderColor: "var(--color-border-default)",
+src/app/pages/home.tsx:533:                      backgroundColor: "var(--color-surface-secondary)",
+src/app/pages/home.tsx:540:                        backgroundColor: "var(--color-surface-secondary)",
+src/app/pages/home.tsx:546:                        backgroundColor: "var(--color-surface-secondary)",
+src/app/pages/home.tsx:557:                backgroundColor: "var(--color-surface-primary)",
+src/app/pages/home.tsx:558:                borderColor: "var(--color-border-default)",
+src/app/pages/home.tsx:585:                          color: "var(--color-text-primary)",
+src/app/pages/home.tsx:593:                          style={{ color: "var(--color-text-secondary)" }}
+src/app/pages/home.tsx:600:                        style={{ color: "var(--color-text-tertiary)" }}
+src/app/pages/home.tsx:608:                      style={{ color: "var(--color-text-tertiary)" }}
+src/app/pages/home.tsx:618:              style={{ backgroundColor: "var(--color-surface-primary)" }}
+src/app/pages/home.tsx:622:                style={{ color: "var(--color-text-secondary)" }}
+src/app/pages/home.tsx:631:                  backgroundColor: "var(--color-action-primary)",
+src/app/pages/home.tsx:632:                  color: "var(--color-text-on-color)",
+src/app/pages/home.tsx:649:                "linear-gradient(135deg, var(--color-action-primary), var(--color-action-primary-hover))",
+src/app/pages/home.tsx:650:              color: "var(--color-text-on-color)",
+src/app/pages/visa.tsx:125:      style={{ backgroundColor: "var(--color-surface-secondary)" }}
+src/app/pages/visa.tsx:131:          backgroundColor: "var(--color-surface-primary)",
+src/app/pages/visa.tsx:132:          borderBottom: "1px solid var(--color-border-default)",
+src/app/pages/visa.tsx:140:              color: "var(--color-text-primary)",
+
+================================================================================
+[SUMMARY STATISTICS]
+================================================================================
+Total Files: 109
+Hardcoded Color Lines: 322
+CSS Variable Lines: 205

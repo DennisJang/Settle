@@ -81,16 +81,31 @@ export function Paywall() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-[#F5F5F7]">
+    <div
+      className="min-h-screen"
+      style={{
+        background: "linear-gradient(to bottom, var(--color-surface-primary), var(--color-surface-secondary))",
+      }}
+    >
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-xl border-b border-black/5 sticky top-0 z-10">
+      <header
+        className="backdrop-blur-xl border-b sticky top-0 z-10"
+        style={{
+          backgroundColor: "color-mix(in srgb, var(--color-surface-primary) 80%, transparent)",
+          borderColor: "var(--color-border-default)",
+        }}
+      >
         <div className="px-6 py-4">
           <div className="flex items-center gap-4">
             <Link
               to="/home"
               className="w-10 h-10 -ml-2 flex items-center justify-center active:scale-95 transition-transform"
             >
-              <ChevronLeft size={24} className="text-[#007AFF]" strokeWidth={2.5} />
+              <ChevronLeft
+                size={24}
+                strokeWidth={2.5}
+                style={{ color: "var(--color-action-primary)" }}
+              />
             </Link>
             <h1 className="text-xl" style={{ fontWeight: 600 }}>
               Subscription
@@ -102,8 +117,16 @@ export function Paywall() {
       <div className="px-6 py-8 space-y-8">
         {/* Error banner */}
         {error && (
-          <div className="bg-[#FF3B30]/10 border border-[#FF3B30]/20 rounded-2xl px-4 py-3">
-            <p className="text-sm text-[#FF3B30]">{error}</p>
+          <div
+            className="border rounded-2xl px-4 py-3"
+            style={{
+              backgroundColor: "color-mix(in srgb, var(--color-action-error) 10%, transparent)",
+              borderColor: "color-mix(in srgb, var(--color-action-error) 20%, transparent)",
+            }}
+          >
+            <p className="text-sm" style={{ color: "var(--color-action-error)" }}>
+              {error}
+            </p>
           </div>
         )}
 
@@ -113,19 +136,27 @@ export function Paywall() {
           <h1 className="text-3xl" style={{ fontWeight: 600 }}>
             Choose your plan
           </h1>
-          <p className="text-[#86868B]">
+          <p style={{ color: "var(--color-text-secondary)" }}>
             플랜을 선택하세요 • Start with Basic, upgrade anytime
           </p>
         </div>
 
         {/* Basic Plan */}
-        <div className="bg-white rounded-3xl p-8 border-2 border-[#F5F5F7]">
+        <div
+          className="rounded-3xl p-8 border-2"
+          style={{
+            backgroundColor: "var(--color-surface-primary)",
+            borderColor: "var(--color-surface-secondary)",
+          }}
+        >
           <div className="flex items-start justify-between mb-6">
             <div>
               <h2 className="text-2xl mb-2" style={{ fontWeight: 600 }}>
                 Basic
               </h2>
-              <p className="text-sm text-[#86868B]">Essential tools for your life in Korea</p>
+              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                Essential tools for your life in Korea
+              </p>
             </div>
             <div className="text-right">
               <p className="text-4xl" style={{ fontWeight: 600 }}>
@@ -137,19 +168,37 @@ export function Paywall() {
           <div className="space-y-3 mb-6">
             {basicFeatures.map((feature, index) => (
               <div key={index} className="flex items-center gap-3">
-                <Check size={20} className="text-[#34C759] flex-shrink-0" strokeWidth={2.5} />
+                <Check
+                  size={20}
+                  className="flex-shrink-0"
+                  strokeWidth={2.5}
+                  style={{ color: "var(--color-action-success)" }}
+                />
                 <span className="text-sm">{feature}</span>
               </div>
             ))}
           </div>
 
-          <button className="w-full bg-[#F5F5F7] text-[#1D1D1F] rounded-2xl py-4 active:scale-98 transition-transform" style={{ fontWeight: 600 }}>
+          <button
+            className="w-full rounded-2xl py-4 active:scale-98 transition-transform"
+            style={{
+              fontWeight: 600,
+              backgroundColor: "var(--color-surface-secondary)",
+              color: "var(--color-text-primary)",
+            }}
+          >
             Current plan
           </button>
         </div>
 
         {/* Premium Plan */}
-        <div className="bg-gradient-to-br from-[#007AFF] to-[#0051D5] rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden">
+        <div
+          className="rounded-3xl p-8 shadow-2xl relative overflow-hidden"
+          style={{
+            background: "linear-gradient(to bottom right, var(--color-action-primary), var(--color-action-primary-hover))",
+            color: "var(--color-text-on-color)",
+          }}
+        >
           {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20" />
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16" />
@@ -192,8 +241,12 @@ export function Paywall() {
             <button
               onClick={() => handleSubscribe('premium', 'monthly')}
               disabled={loading}
-              className="w-full bg-white text-[#007AFF] rounded-2xl py-4 mb-3 active:scale-98 transition-transform disabled:opacity-60 flex items-center justify-center gap-2"
-              style={{ fontWeight: 600 }}
+              className="w-full rounded-2xl py-4 mb-3 active:scale-98 transition-transform disabled:opacity-60 flex items-center justify-center gap-2"
+              style={{
+                fontWeight: 600,
+                backgroundColor: "var(--color-surface-primary)",
+                color: "var(--color-action-primary)",
+              }}
             >
               {loading ? (
                 <>
@@ -214,7 +267,11 @@ export function Paywall() {
         <button
           onClick={() => handleSubscribe('premium', 'yearly')}
           disabled={loading}
-          className="w-full text-left bg-white rounded-3xl p-6 border-2 border-[#34C759] active:scale-98 transition-transform disabled:opacity-60"
+          className="w-full text-left rounded-3xl p-6 border-2 active:scale-98 transition-transform disabled:opacity-60"
+          style={{
+            backgroundColor: "var(--color-surface-primary)",
+            borderColor: "var(--color-action-success)",
+          }}
         >
           <div className="flex items-center justify-between">
             <div className="flex-1">
@@ -222,23 +279,37 @@ export function Paywall() {
                 <h3 className="text-lg" style={{ fontWeight: 600 }}>
                   Annual Premium
                 </h3>
-                <span className="text-xs bg-[#34C759] text-white px-2 py-0.5 rounded-full" style={{ fontWeight: 600 }}>
+                <span
+                  className="text-xs px-2 py-0.5 rounded-full"
+                  style={{
+                    fontWeight: 600,
+                    backgroundColor: "var(--color-action-success)",
+                    color: "var(--color-text-on-color)",
+                  }}
+                >
                   SAVE 20%
                 </span>
               </div>
-              <p className="text-sm text-[#86868B]">연간 구독 • ₩95,040/year</p>
+              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                연간 구독 • ₩95,040/year
+              </p>
             </div>
             <div className="text-right">
               <p className="text-3xl" style={{ fontWeight: 600 }}>
                 ₩7,920
               </p>
-              <p className="text-sm text-[#86868B]">/month</p>
+              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                /month
+              </p>
             </div>
           </div>
         </button>
 
         {/* FAQ */}
-        <div className="bg-white rounded-3xl p-8">
+        <div
+          className="rounded-3xl p-8"
+          style={{ backgroundColor: "var(--color-surface-primary)" }}
+        >
           <h3 className="text-lg mb-6" style={{ fontWeight: 600 }}>
             Frequently Asked Questions
           </h3>
@@ -247,7 +318,7 @@ export function Paywall() {
               <p className="text-sm mb-2" style={{ fontWeight: 600 }}>
                 Can I cancel anytime?
               </p>
-              <p className="text-sm text-[#86868B]">
+              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
                 Yes, you can cancel your subscription at any time. You'll continue to have access until the end of your billing period.
               </p>
             </div>
@@ -255,7 +326,7 @@ export function Paywall() {
               <p className="text-sm mb-2" style={{ fontWeight: 600 }}>
                 What payment methods do you accept?
               </p>
-              <p className="text-sm text-[#86868B]">
+              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
                 We accept all major credit cards, Korean bank transfers, and mobile payment methods like Kakao Pay and Naver Pay.
               </p>
             </div>
@@ -263,7 +334,7 @@ export function Paywall() {
               <p className="text-sm mb-2" style={{ fontWeight: 600 }}>
                 Is there a refund policy?
               </p>
-              <p className="text-sm text-[#86868B]">
+              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
                 We offer a full refund within 14 days of purchase if you're not satisfied with Premium features.
               </p>
             </div>
@@ -272,10 +343,10 @@ export function Paywall() {
 
         {/* Trust badges */}
         <div className="text-center space-y-3">
-          <p className="text-xs text-[#86868B]">
+          <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
             🔒 Secure payment • 256-bit encryption
           </p>
-          <p className="text-xs text-[#86868B]">
+          <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
             Trusted by 50,000+ expats in Korea
           </p>
         </div>

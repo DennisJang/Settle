@@ -518,25 +518,43 @@ export function Remit() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7]">
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--color-surface-secondary)" }}
+    >
       {/* Header */}
-      <header className="bg-white border-b border-black/5 sticky top-0 z-10 backdrop-blur-xl">
+      <header
+        className="border-b sticky top-0 z-10 backdrop-blur-xl"
+        style={{
+          backgroundColor: "var(--color-surface-primary)",
+          borderColor: "var(--color-border-default)",
+        }}
+      >
         <div className="px-6 py-4">
           <div className="flex items-center gap-4">
             <Link
               to="/home"
               className="w-10 h-10 -ml-2 flex items-center justify-center active:scale-95 transition-transform"
             >
-              <ChevronLeft size={24} className="text-[#007AFF]" strokeWidth={2.5} />
+              <ChevronLeft
+                size={24}
+                strokeWidth={2.5}
+                style={{ color: "var(--color-action-primary)" }}
+              />
             </Link>
             <h1 className="text-xl flex-1" style={{ fontWeight: 600 }}>
               해외 송금 비교
             </h1>
             <button
               onClick={fetchRates}
-              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#F5F5F7] active:scale-95 transition-all"
+              className="w-10 h-10 flex items-center justify-center rounded-full active:scale-95 transition-all"
+              style={{ backgroundColor: loading ? "transparent" : undefined }}
             >
-              <RefreshCw size={18} className={`text-[#86868B] ${loading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                size={18}
+                className={loading ? "animate-spin" : ""}
+                style={{ color: "var(--color-text-secondary)" }}
+              />
             </button>
           </div>
         </div>
@@ -545,19 +563,34 @@ export function Remit() {
       <div className="px-6 py-6 space-y-5 max-w-lg mx-auto">
         {/* Money Flight 위젯 */}
         {flightProgress && !flightProgress.done && (
-          <div className="bg-white rounded-2xl p-4 border border-[#007AFF]/10">
+          <div
+            className="rounded-2xl p-4 border"
+            style={{
+              backgroundColor: "var(--color-surface-primary)",
+              borderColor: "color-mix(in srgb, var(--color-action-primary) 10%, transparent)",
+            }}
+          >
             <div className="flex items-center gap-3 mb-3">
-              <Plane size={16} className="text-[#007AFF]" />
-              <span className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>
+              <Plane size={16} style={{ color: "var(--color-action-primary)" }} />
+              <span
+                className="text-xs"
+                style={{ fontWeight: 500, color: "var(--color-text-secondary)" }}
+              >
                 {flightProgress.providerName} 송금 진행 중
               </span>
             </div>
             <div className="flex items-center gap-3 mb-2">
               <span className="text-lg">🇰🇷</span>
-              <div className="flex-1 relative h-2 bg-[#F5F5F7] rounded-full overflow-hidden">
+              <div
+                className="flex-1 relative h-2 rounded-full overflow-hidden"
+                style={{ backgroundColor: "var(--color-surface-secondary)" }}
+              >
                 <div
-                  className="absolute inset-y-0 left-0 bg-[#007AFF] rounded-full transition-all duration-1000"
-                  style={{ width: `${flightProgress.pct}%` }}
+                  className="absolute inset-y-0 left-0 rounded-full transition-all duration-1000"
+                  style={{
+                    width: `${flightProgress.pct}%`,
+                    backgroundColor: "var(--color-action-primary)",
+                  }}
                 />
                 <div
                   className="absolute top-1/2 -translate-y-1/2 text-xs transition-all duration-1000"
@@ -569,24 +602,36 @@ export function Remit() {
               <span className="text-lg">{flightProgress.country?.flag ?? "🌍"}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-xs text-[#86868B]">
+              <span className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
                 {flightProgress.pct}% 완료
               </span>
-              <span className="text-xs text-[#007AFF]" style={{ fontWeight: 600 }}>
+              <span
+                className="text-xs"
+                style={{ fontWeight: 600, color: "var(--color-action-primary)" }}
+              >
                 약 {flightProgress.remainMin}분 남음
               </span>
             </div>
           </div>
         )}
         {flightProgress && flightProgress.done && (
-          <div className="bg-[#34C759]/5 rounded-2xl p-4 border border-[#34C759]/20">
+          <div
+            className="rounded-2xl p-4 border"
+            style={{
+              backgroundColor: "color-mix(in srgb, var(--color-action-success) 5%, transparent)",
+              borderColor: "color-mix(in srgb, var(--color-action-success) 20%, transparent)",
+            }}
+          >
             <div className="flex items-center gap-3">
               <span className="text-lg">✅</span>
               <div className="flex-1">
                 <p className="text-sm" style={{ fontWeight: 600 }}>
                   {flightProgress.country?.flag} 송금 도착 완료 (추정)
                 </p>
-                <p className="text-xs text-[#86868B] mt-0.5">
+                <p
+                  className="text-xs mt-0.5"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
                   {flightProgress.providerName} · 정확한 상태는 해당 앱에서 확인하세요
                 </p>
               </div>
@@ -596,29 +641,57 @@ export function Remit() {
 
         {/* 비자-은행 알림 배너 */}
         {visaAlert && !visaBannerDismissed && (
-          <div className={`rounded-2xl overflow-hidden ${
-            visaAlert.level === "expired" ? "bg-[#FF3B30]/5 border border-[#FF3B30]/15" :
-            visaAlert.level === "urgent" ? "bg-[#FF9500]/5 border border-[#FF9500]/15" :
-            "bg-[#007AFF]/5 border border-[#007AFF]/10"
-          }`}>
+          <div
+            className="rounded-2xl overflow-hidden border"
+            style={{
+              backgroundColor:
+                visaAlert.level === "expired"
+                  ? "color-mix(in srgb, var(--color-action-error) 5%, transparent)"
+                  : visaAlert.level === "urgent"
+                    ? "color-mix(in srgb, var(--color-action-warning) 5%, transparent)"
+                    : "color-mix(in srgb, var(--color-action-primary) 5%, transparent)",
+              borderColor:
+                visaAlert.level === "expired"
+                  ? "color-mix(in srgb, var(--color-action-error) 15%, transparent)"
+                  : visaAlert.level === "urgent"
+                    ? "color-mix(in srgb, var(--color-action-warning) 15%, transparent)"
+                    : "color-mix(in srgb, var(--color-action-primary) 10%, transparent)",
+            }}
+          >
             <button
               onClick={() => setShowVisaActions(!showVisaActions)}
               className="w-full p-4 flex items-center gap-3 text-left active:opacity-80 transition-opacity"
             >
-              <AlertCircle size={18} className={
-                visaAlert.level === "expired" ? "text-[#FF3B30]" :
-                visaAlert.level === "urgent" ? "text-[#FF9500]" :
-                "text-[#007AFF]"
-              } />
+              <AlertCircle
+                size={18}
+                style={{
+                  color:
+                    visaAlert.level === "expired"
+                      ? "var(--color-action-error)"
+                      : visaAlert.level === "urgent"
+                        ? "var(--color-action-warning)"
+                        : "var(--color-action-primary)",
+                }}
+              />
               <div className="flex-1">
-                <p className="text-sm text-[#1D1D1F]" style={{ fontWeight: 500 }}>
+                <p
+                  className="text-sm"
+                  style={{ fontWeight: 500, color: "var(--color-text-primary)" }}
+                >
                   {visaAlert.message}
                 </p>
-                <p className="text-xs text-[#86868B] mt-0.5">
+                <p
+                  className="text-xs mt-0.5"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
                   {visaAlert.daysLeft > 0 ? `만료까지 ${visaAlert.daysLeft}일` : "비자가 만료되었습니다"}
                 </p>
               </div>
-              <ChevronDown size={16} className={`text-[#86868B] transition-transform ${showVisaActions ? "rotate-180" : ""}`} />
+              <ChevronDown
+                size={16}
+                className={`transition-transform ${showVisaActions ? "rotate-180" : ""}`}
+                style={{ color: "var(--color-text-secondary)" }}
+              />
             </button>
 
             {showVisaActions && (
@@ -627,11 +700,12 @@ export function Remit() {
                   href="https://www.hikorea.go.kr"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 bg-white rounded-xl active:bg-[#F5F5F7] transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-xl transition-colors"
+                  style={{ backgroundColor: "var(--color-surface-primary)" }}
                 >
-                  <Globe size={16} className="text-[#007AFF]" />
+                  <Globe size={16} style={{ color: "var(--color-action-primary)" }} />
                   <span className="text-sm flex-1" style={{ fontWeight: 500 }}>하이코리아 비자 연장</span>
-                  <ChevronRight size={14} className="text-[#C7C7CC]" />
+                  <ChevronRight size={14} style={{ color: "var(--color-text-tertiary)" }} />
                 </a>
                 {userProfile?.primary_bank && (
                   <button
@@ -649,18 +723,20 @@ export function Remit() {
                       const url = bankUrls[userProfile.primary_bank!];
                       if (url) window.open(url, "_blank", "noopener,noreferrer");
                     }}
-                    className="flex items-center gap-3 p-3 bg-white rounded-xl active:bg-[#F5F5F7] transition-colors w-full text-left"
+                    className="flex items-center gap-3 p-3 rounded-xl transition-colors w-full text-left"
+                    style={{ backgroundColor: "var(--color-surface-primary)" }}
                   >
-                    <Building2 size={16} className="text-[#34C759]" />
+                    <Building2 size={16} style={{ color: "var(--color-action-success)" }} />
                     <span className="text-sm flex-1" style={{ fontWeight: 500 }}>
                       {userProfile.primary_bank} 앱으로 이동
                     </span>
-                    <ChevronRight size={14} className="text-[#C7C7CC]" />
+                    <ChevronRight size={14} style={{ color: "var(--color-text-tertiary)" }} />
                   </button>
                 )}
                 <button
                   onClick={() => setVisaBannerDismissed(true)}
-                  className="w-full p-2 text-xs text-[#86868B] text-center"
+                  className="w-full p-2 text-xs text-center"
+                  style={{ color: "var(--color-text-secondary)" }}
                 >
                   다음에 할게요
                 </button>
@@ -671,27 +747,43 @@ export function Remit() {
         {/* 국가 선택 */}
         <button
           onClick={() => setShowCountryPicker(true)}
-          className="w-full flex items-center gap-4 bg-white rounded-2xl p-4 border border-black/5 active:scale-[0.99] transition-transform"
+          className="w-full flex items-center gap-4 rounded-2xl p-4 border active:scale-[0.99] transition-transform"
+          style={{
+            backgroundColor: "var(--color-surface-primary)",
+            borderColor: "var(--color-border-default)",
+          }}
         >
           <span className="text-3xl">{selectedCountry.flag}</span>
           <div className="flex-1 text-left">
             <p className="text-base" style={{ fontWeight: 600 }}>
               {selectedCountry.name}
             </p>
-            <p className="text-xs text-[#86868B] mt-0.5">
+            <p className="text-xs mt-0.5" style={{ color: "var(--color-text-secondary)" }}>
               {selectedCountry.nameEn} · {selectedCountry.currency}
             </p>
           </div>
-          <ChevronDown size={20} className="text-[#86868B]" />
+          <ChevronDown size={20} style={{ color: "var(--color-text-secondary)" }} />
         </button>
 
         {/* 금액 입력 */}
         <div>
-          <label className="text-sm text-[#86868B] mb-2 block" style={{ fontWeight: 500 }}>
+          <label
+            className="text-sm mb-2 block"
+            style={{ fontWeight: 500, color: "var(--color-text-secondary)" }}
+          >
             보내는 금액
           </label>
-          <div className="flex items-center bg-white rounded-2xl border-2 border-[#007AFF] px-4 py-3">
-            <span className="text-xl text-[#007AFF] mr-2" style={{ fontWeight: 700 }}>
+          <div
+            className="flex items-center rounded-2xl border-2 px-4 py-3"
+            style={{
+              backgroundColor: "var(--color-surface-primary)",
+              borderColor: "var(--color-action-primary)",
+            }}
+          >
+            <span
+              className="text-xl mr-2"
+              style={{ fontWeight: 700, color: "var(--color-action-primary)" }}
+            >
               ₩
             </span>
             <input
@@ -703,8 +795,11 @@ export function Remit() {
                 setSendAmount(cleaned);
               }}
               placeholder="금액 입력"
-              className="flex-1 text-2xl bg-transparent outline-none text-[#1D1D1F] placeholder:text-[#C7C7CC]"
-              style={{ fontWeight: 700 }}
+              className="flex-1 text-2xl bg-transparent outline-none"
+              style={{
+                fontWeight: 700,
+                color: "var(--color-text-primary)",
+              }}
             />
           </div>
 
@@ -714,12 +809,18 @@ export function Remit() {
               <button
                 key={amt}
                 onClick={() => setSendAmount(String(amt))}
-                className={`flex-1 py-2 rounded-xl text-sm transition-all ${
-                  sendAmount === String(amt)
-                    ? "bg-[#007AFF] text-white"
-                    : "bg-white text-[#86868B] hover:bg-[#E8E8ED]"
-                }`}
-                style={{ fontWeight: 600 }}
+                className="flex-1 py-2 rounded-xl text-sm transition-all"
+                style={{
+                  fontWeight: 600,
+                  backgroundColor:
+                    sendAmount === String(amt)
+                      ? "var(--color-action-primary)"
+                      : "var(--color-surface-primary)",
+                  color:
+                    sendAmount === String(amt)
+                      ? "var(--color-text-on-color)"
+                      : "var(--color-text-secondary)",
+                }}
               >
                 {(amt / 10000).toFixed(0)}만
               </button>
@@ -730,19 +831,27 @@ export function Remit() {
         {/* 환율 정보 */}
         {midRate && (
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs text-[#86868B]">
+            <span className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
               기준 환율: {formatRate(midRate.rate, selectedCountry.currency)}
             </span>
-            <span className="text-xs text-[#C7C7CC]">{freshness}</span>
+            <span className="text-xs" style={{ color: "var(--color-text-tertiary)" }}>
+              {freshness}
+            </span>
           </div>
         )}
 
         {/* 절약 배너 */}
         {savingsVsBank && (
-          <div className="bg-[#FFF9E6] rounded-2xl p-4 border border-[#FFD60A]/30">
-            <p className="text-sm text-[#1D1D1F]">
+          <div
+            className="rounded-2xl p-4 border"
+            style={{
+              backgroundColor: "color-mix(in srgb, var(--color-action-warning) 8%, var(--color-surface-primary))",
+              borderColor: "color-mix(in srgb, var(--color-action-warning) 20%, transparent)",
+            }}
+          >
+            <p className="text-sm" style={{ color: "var(--color-text-primary)" }}>
               💡 {savingsVsBank.vsName} 대비{" "}
-              <span style={{ fontWeight: 700, color: "#FF9500" }}>
+              <span style={{ fontWeight: 700, color: "var(--color-action-warning)" }}>
                 {formatForeign(savingsVsBank.amount, savingsVsBank.currency)} {savingsVsBank.currency}
               </span>{" "}
               더 받을 수 있어요
@@ -753,12 +862,21 @@ export function Remit() {
         {/* 비교 카드 (Layer 3) */}
         {loading ? (
           <div className="flex flex-col items-center py-16">
-            <RefreshCw size={32} className="text-[#007AFF] animate-spin" />
-            <p className="text-sm text-[#86868B] mt-4">환율 정보 가져오는 중...</p>
+            <RefreshCw
+              size={32}
+              className="animate-spin"
+              style={{ color: "var(--color-action-primary)" }}
+            />
+            <p
+              className="text-sm mt-4"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
+              환율 정보 가져오는 중...
+            </p>
           </div>
         ) : quotes.length === 0 ? (
           <div className="flex flex-col items-center py-16">
-            <p className="text-base text-[#86868B]">
+            <p className="text-base" style={{ color: "var(--color-text-secondary)" }}>
               {midRate ? "금액을 입력해주세요" : "환율 정보를 불러올 수 없습니다"}
             </p>
           </div>
@@ -771,15 +889,27 @@ export function Remit() {
               return (
                 <div
                   key={quote.id}
-                  className={`bg-white rounded-3xl p-5 transition-all ${
-                    isFirst
-                      ? "border-2 border-[#007AFF] shadow-[0_4px_24px_rgba(0,122,255,0.12)]"
-                      : "border border-black/5"
-                  }`}
+                  className="rounded-3xl p-5 transition-all"
+                  style={{
+                    backgroundColor: "var(--color-surface-primary)",
+                    border: isFirst
+                      ? "2px solid var(--color-action-primary)"
+                      : "1px solid var(--color-border-default)",
+                    boxShadow: isFirst
+                      ? "0 4px 24px color-mix(in srgb, var(--color-action-primary) 12%, transparent)"
+                      : undefined,
+                  }}
                 >
                   {/* 1위 뱃지 */}
                   {isFirst && (
-                    <div className="inline-flex items-center gap-1.5 bg-[#007AFF]/10 text-[#007AFF] text-xs px-3 py-1 rounded-full mb-3" style={{ fontWeight: 600 }}>
+                    <div
+                      className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full mb-3"
+                      style={{
+                        fontWeight: 600,
+                        backgroundColor: "color-mix(in srgb, var(--color-action-primary) 10%, transparent)",
+                        color: "var(--color-action-primary)",
+                      }}
+                    >
                       <Trophy size={12} />
                       최저 비용
                     </div>
@@ -792,10 +922,15 @@ export function Remit() {
                       <p className="text-base" style={{ fontWeight: 600 }}>
                         {quote.nameKo}
                       </p>
-                      <p className="text-xs text-[#86868B]">{quote.name}</p>
+                      <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                        {quote.name}
+                      </p>
                     </div>
-                    <div className="flex items-center gap-1 text-[#FF9500]">
-                      <Star size={14} fill="#FF9500" />
+                    <div
+                      className="flex items-center gap-1"
+                      style={{ color: "var(--color-action-warning)" }}
+                    >
+                      <Star size={14} fill="currentColor" />
                       <span className="text-sm" style={{ fontWeight: 600 }}>
                         {quote.rating}
                       </span>
@@ -804,38 +939,73 @@ export function Remit() {
 
                   {/* 핵심: 실수령액 */}
                   <div className="mb-4">
-                    <p className="text-xs text-[#86868B] mb-1">받는 금액</p>
                     <p
-                      className={`text-3xl tracking-tight ${
-                        isFirst ? "text-[#007AFF]" : "text-[#1D1D1F]"
-                      }`}
-                      style={{ fontWeight: 800 }}
+                      className="text-xs mb-1"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      받는 금액
+                    </p>
+                    <p
+                      className="text-3xl tracking-tight"
+                      style={{
+                        fontWeight: 800,
+                        color: isFirst
+                          ? "var(--color-action-primary)"
+                          : "var(--color-text-primary)",
+                      }}
                     >
                       {formatForeign(quote.receiveAmount, selectedCountry.currency)}{" "}
-                      <span className="text-base text-[#86868B]" style={{ fontWeight: 600 }}>
+                      <span
+                        className="text-base"
+                        style={{ fontWeight: 600, color: "var(--color-text-secondary)" }}
+                      >
                         {selectedCountry.currency}
                       </span>
                     </p>
                   </div>
 
                   {/* 요약: 수수료 / 속도 / 적용 환율 */}
-                  <div className="flex items-center bg-[#F5F5F7] rounded-2xl p-3 mb-3">
+                  <div
+                    className="flex items-center rounded-2xl p-3 mb-3"
+                    style={{ backgroundColor: "var(--color-surface-secondary)" }}
+                  >
                     <div className="flex-1 text-center">
-                      <p className="text-[10px] text-[#86868B]">수수료</p>
+                      <p
+                        className="text-[10px]"
+                        style={{ color: "var(--color-text-secondary)" }}
+                      >
+                        수수료
+                      </p>
                       <p className="text-sm mt-0.5" style={{ fontWeight: 600 }}>
                         ₩{formatKRW(quote.fee)}
                       </p>
                     </div>
-                    <div className="w-px h-8 bg-black/5" />
+                    <div
+                      className="w-px h-8"
+                      style={{ backgroundColor: "var(--color-border-default)" }}
+                    />
                     <div className="flex-1 text-center">
-                      <p className="text-[10px] text-[#86868B]">속도</p>
+                      <p
+                        className="text-[10px]"
+                        style={{ color: "var(--color-text-secondary)" }}
+                      >
+                        속도
+                      </p>
                       <p className="text-sm mt-0.5" style={{ fontWeight: 600 }}>
                         {quote.speed}
                       </p>
                     </div>
-                    <div className="w-px h-8 bg-black/5" />
+                    <div
+                      className="w-px h-8"
+                      style={{ backgroundColor: "var(--color-border-default)" }}
+                    />
                     <div className="flex-1 text-center">
-                      <p className="text-[10px] text-[#86868B]">적용 환율</p>
+                      <p
+                        className="text-[10px]"
+                        style={{ color: "var(--color-text-secondary)" }}
+                      >
+                        적용 환율
+                      </p>
                       <p className="text-sm mt-0.5" style={{ fontWeight: 600 }}>
                         {formatRateShort(quote.exchangeRate, selectedCountry.currency)}
                       </p>
@@ -845,7 +1015,8 @@ export function Remit() {
                   {/* 상세 펼치기 */}
                   <button
                     onClick={() => setExpandedCard(isExpanded ? null : quote.id)}
-                    className="w-full flex items-center justify-center gap-1 py-1 text-xs text-[#86868B] hover:text-[#1D1D1F] transition-colors"
+                    className="w-full flex items-center justify-center gap-1 py-1 text-xs transition-colors"
+                    style={{ color: "var(--color-text-secondary)" }}
                   >
                     {isExpanded ? (
                       <>접기 <ChevronUp size={14} /></>
@@ -855,40 +1026,46 @@ export function Remit() {
                   </button>
 
                   {isExpanded && midRate && (
-                    <div className="bg-[#F5F5F7] rounded-2xl p-4 mt-2 mb-3 space-y-2.5 text-sm">
+                    <div
+                      className="rounded-2xl p-4 mt-2 mb-3 space-y-2.5 text-sm"
+                      style={{ backgroundColor: "var(--color-surface-secondary)" }}
+                    >
                       <div className="flex justify-between">
-                        <span className="text-[#86868B]">보내는 금액</span>
+                        <span style={{ color: "var(--color-text-secondary)" }}>보내는 금액</span>
                         <span style={{ fontWeight: 600 }}>₩{formatKRW(parsedAmount)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[#86868B]">수수료</span>
-                        <span className="text-[#FF3B30]" style={{ fontWeight: 600 }}>
+                        <span style={{ color: "var(--color-text-secondary)" }}>수수료</span>
+                        <span style={{ fontWeight: 600, color: "var(--color-action-error)" }}>
                           -₩{formatKRW(quote.fee)}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[#86868B]">환전 금액</span>
+                        <span style={{ color: "var(--color-text-secondary)" }}>환전 금액</span>
                         <span style={{ fontWeight: 600 }}>₩{formatKRW(parsedAmount - quote.fee)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[#86868B]">기준 환율 (mid-market)</span>
+                        <span style={{ color: "var(--color-text-secondary)" }}>기준 환율 (mid-market)</span>
                         <span style={{ fontWeight: 600 }}>{formatRate(midRate.rate, selectedCountry.currency)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[#86868B]">업체 환율 (스프레드 포함)</span>
+                        <span style={{ color: "var(--color-text-secondary)" }}>업체 환율 (스프레드 포함)</span>
                         <span style={{ fontWeight: 600 }}>{formatRate(quote.exchangeRate, selectedCountry.currency)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-[#86868B]">환율 차이 비용</span>
-                        <span className="text-[#FF3B30]" style={{ fontWeight: 600 }}>
+                        <span style={{ color: "var(--color-text-secondary)" }}>환율 차이 비용</span>
+                        <span style={{ fontWeight: 600, color: "var(--color-action-error)" }}>
                           ≈ ₩{formatKRW(
                             (parsedAmount - quote.fee) * (1 - midRate.rate / quote.exchangeRate)
                           )}
                         </span>
                       </div>
-                      <div className="border-t border-black/5 pt-2.5 flex justify-between">
+                      <div
+                        className="pt-2.5 flex justify-between"
+                        style={{ borderTop: "1px solid var(--color-border-default)" }}
+                      >
                         <span style={{ fontWeight: 700 }}>실제 받는 금액</span>
-                        <span className="text-[#007AFF]" style={{ fontWeight: 800 }}>
+                        <span style={{ fontWeight: 800, color: "var(--color-action-primary)" }}>
                           {formatForeign(quote.receiveAmount, selectedCountry.currency)}{" "}
                           {selectedCountry.currency}
                         </span>
@@ -899,12 +1076,16 @@ export function Remit() {
                   {/* CTA */}
                   <button
                     onClick={() => handleProviderClick(quote)}
-                    className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl transition-all active:scale-[0.98] ${
-                      isFirst
-                        ? "bg-[#007AFF] text-white"
-                        : "bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E8E8ED]"
-                    }`}
-                    style={{ fontWeight: 600 }}
+                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl transition-all active:scale-[0.98]"
+                    style={{
+                      fontWeight: 600,
+                      backgroundColor: isFirst
+                        ? "var(--color-action-primary)"
+                        : "var(--color-surface-secondary)",
+                      color: isFirst
+                        ? "var(--color-text-on-color)"
+                        : "var(--color-text-primary)",
+                    }}
                   >
                     {quote.nameKo}로 보내기
                     <ArrowRight size={16} />
@@ -916,10 +1097,20 @@ export function Remit() {
         )}
 
         {/* 면책 문구 */}
-        <div className="bg-white rounded-2xl p-4 mt-4">
+        <div
+          className="rounded-2xl p-4 mt-4"
+          style={{ backgroundColor: "var(--color-surface-primary)" }}
+        >
           <div className="flex gap-2">
-            <Shield size={14} className="text-[#86868B] mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-[#86868B] leading-relaxed">
+            <Shield
+              size={14}
+              className="mt-0.5 flex-shrink-0"
+              style={{ color: "var(--color-text-secondary)" }}
+            />
+            <p
+              className="text-xs leading-relaxed"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
               환율과 수수료는 실시간 변동되며, 표시된 금액은 예상치입니다.
               실제 송금 금액은 각 업체에서 최종 확인해주세요.
               Settle은 송금 중개가 아닌 비교 정보 서비스입니다.
@@ -935,33 +1126,44 @@ export function Remit() {
       {showCountryPicker && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
           <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 backdrop-blur-sm"
+            style={{ backgroundColor: "var(--color-overlay)" }}
             onClick={() => setShowCountryPicker(false)}
           />
-          <div className="relative bg-white rounded-t-3xl w-full max-w-lg max-h-[70vh] flex flex-col animate-[slideUp_0.3s_ease-out]">
+          <div
+            className="relative rounded-t-3xl w-full max-w-lg max-h-[70vh] flex flex-col animate-slide-up"
+            style={{ backgroundColor: "var(--color-surface-primary)" }}
+          >
             {/* 모달 헤더 */}
-            <div className="flex items-center justify-between p-5 border-b border-black/5">
+            <div
+              className="flex items-center justify-between p-5 border-b"
+              style={{ borderColor: "var(--color-border-default)" }}
+            >
               <h2 className="text-lg" style={{ fontWeight: 700 }}>
                 송금 국가 선택
               </h2>
               <button
                 onClick={() => setShowCountryPicker(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#F5F5F7]"
+                className="w-8 h-8 flex items-center justify-center rounded-full"
               >
-                <X size={18} className="text-[#86868B]" />
+                <X size={18} style={{ color: "var(--color-text-secondary)" }} />
               </button>
             </div>
 
             {/* 검색 */}
             <div className="px-5 py-3">
-              <div className="flex items-center gap-2 bg-[#F5F5F7] rounded-xl px-3 py-2.5">
-                <Search size={16} className="text-[#86868B]" />
+              <div
+                className="flex items-center gap-2 rounded-xl px-3 py-2.5"
+                style={{ backgroundColor: "var(--color-surface-secondary)" }}
+              >
+                <Search size={16} style={{ color: "var(--color-text-secondary)" }} />
                 <input
                   type="text"
                   placeholder="국가 검색..."
                   value={countrySearch}
                   onChange={(e) => setCountrySearch(e.target.value)}
-                  className="flex-1 bg-transparent text-sm outline-none placeholder:text-[#C7C7CC]"
+                  className="flex-1 bg-transparent text-sm outline-none"
+                  style={{ color: "var(--color-text-primary)" }}
                 />
               </div>
             </div>
@@ -976,22 +1178,38 @@ export function Remit() {
                     setShowCountryPicker(false);
                     setCountrySearch("");
                   }}
-                  className={`w-full flex items-center gap-4 px-5 py-4 border-b border-black/[0.03] text-left active:bg-[#F5F5F7] transition-colors ${
-                    selectedCountry.code === country.code ? "bg-[#007AFF]/5" : ""
-                  }`}
+                  className="w-full flex items-center gap-4 px-5 py-4 text-left transition-colors"
+                  style={{
+                    borderBottom: "1px solid var(--color-border-default)",
+                    backgroundColor:
+                      selectedCountry.code === country.code
+                        ? "color-mix(in srgb, var(--color-action-primary) 5%, transparent)"
+                        : undefined,
+                  }}
                 >
                   <span className="text-2xl">{country.flag}</span>
                   <div className="flex-1">
                     <p className="text-sm" style={{ fontWeight: 600 }}>
                       {country.name}
                     </p>
-                    <p className="text-xs text-[#86868B] mt-0.5">{country.nameEn}</p>
+                    <p
+                      className="text-xs mt-0.5"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      {country.nameEn}
+                    </p>
                   </div>
-                  <span className="text-sm text-[#86868B]" style={{ fontWeight: 500 }}>
+                  <span
+                    className="text-sm"
+                    style={{ fontWeight: 500, color: "var(--color-text-secondary)" }}
+                  >
                     {country.currency}
                   </span>
                   {selectedCountry.code === country.code && (
-                    <span className="text-[#007AFF] text-lg" style={{ fontWeight: 700 }}>
+                    <span
+                      className="text-lg"
+                      style={{ fontWeight: 700, color: "var(--color-action-primary)" }}
+                    >
                       ✓
                     </span>
                   )}
@@ -1001,13 +1219,6 @@ export function Remit() {
           </div>
         </div>
       )}
-
-      <style>{`
-        @keyframes slideUp {
-          from { transform: translateY(100%); }
-          to { transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }

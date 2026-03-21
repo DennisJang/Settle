@@ -36,6 +36,7 @@ import { RequirementsChecklist } from "../components/visa/RequirementsChecklist"
 import { KiipProgress } from "../components/visa/KiipProgress";
 import { DocumentSubmitCTA } from "../components/visa/DocumentSubmitCTA";
 import { WageCalculator } from "../components/visa/WageCalculator";
+import { DocumentGuide } from "../components/visa/DocumentGuide";
 import { LawyerMatchCTA } from "../components/visa/LawyerMatchCTA";
 import { LiabilitySheet } from "../components/visa/LiabilitySheet";
 
@@ -184,10 +185,16 @@ export function Visa() {
           onSubmit={handleFaxCTA}
         />
 
-        {/* 6. Wage Calculator (🆕) */}
+        {/* 6. AI Document Guide (🆕) */}
+        <DocumentGuide
+          visaType={visaTracker?.visa_type ?? userProfile?.visa_type ?? null}
+          isPremium={userProfile?.subscription_plan === "premium"}
+        />
+
+        {/* 7. Wage Calculator (🆕) */}
         <WageCalculator />
 
-        {/* 7. Lawyer Match CTA */}
+        {/* 8. Lawyer Match CTA */}
         <LawyerMatchCTA />
       </div>
 

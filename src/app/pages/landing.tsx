@@ -70,33 +70,38 @@ export function Landing() {
   const features = [
     {
       icon: FileText,
-      color: "#007AFF",
+      color: "var(--color-action-primary)",
       label: "Visa",
       position: { initial: { x: -100, y: -100 }, animate: { x: 0, y: 0 } },
     },
     {
       icon: Send,
-      color: "#34C759",
+      color: "var(--color-action-success)",
       label: "Remit",
       position: { initial: { x: 100, y: -100 }, animate: { x: 0, y: 0 } },
     },
     {
       icon: Building,
-      color: "#007AFF",
+      color: "var(--color-action-primary)",
       label: "Housing",
       position: { initial: { x: -100, y: 100 }, animate: { x: 0, y: 0 } },
     },
     {
       icon: GraduationCap,
-      color: "#34C759",
+      color: "var(--color-action-success)",
       label: "Education",
       position: { initial: { x: 100, y: 100 }, animate: { x: 0, y: 0 } },
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-[#F5F5F7] flex flex-col items-center justify-center px-6 overflow-hidden">
-      {/* Animated Feature Icons — 디자인 동결, 터치 안 함 */}
+    <div
+      className="min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden"
+      style={{
+        background: "linear-gradient(to bottom, var(--color-surface-primary), var(--color-surface-secondary))",
+      }}
+    >
+      {/* Animated Feature Icons */}
       <div className="relative w-full max-w-md h-96 mb-8">
         {features.map((feature, index) => {
           const Icon = feature.icon;
@@ -130,7 +135,11 @@ export function Landing() {
                 className="w-20 h-20 rounded-3xl flex items-center justify-center shadow-lg"
                 style={{ backgroundColor: feature.color }}
               >
-                <Icon size={40} className="text-white" strokeWidth={2} />
+                <Icon
+                  size={40}
+                  strokeWidth={2}
+                  style={{ color: "var(--color-text-on-color)" }}
+                />
               </div>
             </motion.div>
           );
@@ -159,14 +168,17 @@ export function Landing() {
             >
               Settle
             </h1>
-            <p className="text-lg text-[#86868B] max-w-xs">
+            <p
+              className="text-lg max-w-xs"
+              style={{ color: "var(--color-text-secondary)" }}
+            >
               Your trusted companion for life in Korea
             </p>
           </motion.div>
         </motion.div>
       </div>
 
-      {/* Login Form — 로직만 교체, 디자인 유지 */}
+      {/* Login Form */}
       {showLogin && (
         <motion.div
           className="w-full max-w-md"
@@ -175,17 +187,32 @@ export function Landing() {
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="bg-white rounded-3xl p-6 shadow-lg space-y-4">
+            <div
+              className="rounded-3xl p-6 shadow-lg space-y-4"
+              style={{ backgroundColor: "var(--color-surface-primary)" }}
+            >
               {/* Error display */}
               {error && (
-                <div className="bg-[#FF3B30]/10 text-[#FF3B30] text-sm px-4 py-3 rounded-2xl">
+                <div
+                  className="text-sm px-4 py-3 rounded-2xl"
+                  style={{
+                    backgroundColor: "color-mix(in srgb, var(--color-action-error) 10%, transparent)",
+                    color: "var(--color-action-error)",
+                  }}
+                >
                   {error}
                 </div>
               )}
 
               {/* Reset success message */}
               {resetSent && (
-                <div className="bg-[#34C759]/10 text-[#34C759] text-sm px-4 py-3 rounded-2xl">
+                <div
+                  className="text-sm px-4 py-3 rounded-2xl"
+                  style={{
+                    backgroundColor: "color-mix(in srgb, var(--color-action-success) 10%, transparent)",
+                    color: "var(--color-action-success)",
+                  }}
+                >
                   Password reset email sent. Check your inbox.
                 </div>
               )}
@@ -204,7 +231,8 @@ export function Landing() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Alex Johnson"
-                    className="w-full bg-[#F5F5F7] rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#007AFF] transition-all"
+                    className="w-full rounded-2xl px-4 py-3 outline-none focus:ring-2 transition-all"
+                    style={{ backgroundColor: "var(--color-surface-secondary)" }}
                     required
                   />
                 </div>
@@ -222,7 +250,8 @@ export function Landing() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="alex@example.com"
-                  className="w-full bg-[#F5F5F7] rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#007AFF] transition-all"
+                  className="w-full rounded-2xl px-4 py-3 outline-none focus:ring-2 transition-all"
+                  style={{ backgroundColor: "var(--color-surface-secondary)" }}
                   required
                 />
               </div>
@@ -241,7 +270,8 @@ export function Landing() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-[#F5F5F7] rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#007AFF] transition-all"
+                    className="w-full rounded-2xl px-4 py-3 outline-none focus:ring-2 transition-all"
+                    style={{ backgroundColor: "var(--color-surface-secondary)" }}
                     required
                     minLength={6}
                   />
@@ -253,8 +283,12 @@ export function Landing() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-br from-[#007AFF] to-[#0051D5] text-white rounded-3xl py-4 shadow-lg active:scale-98 transition-transform disabled:opacity-50"
-              style={{ fontWeight: 600 }}
+              className="w-full rounded-3xl py-4 shadow-lg active:scale-98 transition-transform disabled:opacity-50"
+              style={{
+                fontWeight: 600,
+                background: "linear-gradient(to bottom right, var(--color-action-primary), var(--color-action-primary-hover))",
+                color: "var(--color-text-on-color)",
+              }}
             >
               {loading
                 ? "..."
@@ -271,9 +305,15 @@ export function Landing() {
                 type="button"
                 onClick={signInWithGoogle}
                 disabled={loading}
-                className="w-full bg-white border border-black/10 text-[#1D1D1F] rounded-3xl py-4 shadow-sm active:scale-98 transition-transform disabled:opacity-50 flex items-center justify-center gap-3"
-                style={{ fontWeight: 600 }}
+                className="w-full border rounded-3xl py-4 shadow-sm active:scale-98 transition-transform disabled:opacity-50 flex items-center justify-center gap-3"
+                style={{
+                  fontWeight: 600,
+                  backgroundColor: "var(--color-surface-primary)",
+                  borderColor: "var(--color-border-strong)",
+                  color: "var(--color-text-primary)",
+                }}
               >
+                {/* Google logo — 외부 브랜드 색상이므로 토큰 대상 아님 */}
                 <svg width="20" height="20" viewBox="0 0 24 24">
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
@@ -302,16 +342,14 @@ export function Landing() {
                 <>
                   <button
                     type="button"
-                    className="text-[#007AFF]"
-                    style={{ fontWeight: 600 }}
+                    style={{ fontWeight: 600, color: "var(--color-action-primary)" }}
                     onClick={() => switchMode("reset")}
                   >
                     Forgot password?
                   </button>
                   <button
                     type="button"
-                    className="text-[#007AFF]"
-                    style={{ fontWeight: 600 }}
+                    style={{ fontWeight: 600, color: "var(--color-action-primary)" }}
                     onClick={() => switchMode("signup")}
                   >
                     Create account
@@ -321,8 +359,8 @@ export function Landing() {
               {mode === "signup" && (
                 <button
                   type="button"
-                  className="text-[#007AFF] mx-auto"
-                  style={{ fontWeight: 600 }}
+                  className="mx-auto"
+                  style={{ fontWeight: 600, color: "var(--color-action-primary)" }}
                   onClick={() => switchMode("signin")}
                 >
                   Already have an account? Sign in
@@ -331,8 +369,8 @@ export function Landing() {
               {mode === "reset" && (
                 <button
                   type="button"
-                  className="text-[#007AFF] mx-auto"
-                  style={{ fontWeight: 600 }}
+                  className="mx-auto"
+                  style={{ fontWeight: 600, color: "var(--color-action-primary)" }}
                   onClick={() => switchMode("signin")}
                 >
                   Back to sign in
@@ -341,7 +379,7 @@ export function Landing() {
             </div>
 
             <div className="text-center">
-              <p className="text-xs text-[#86868B]">
+              <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
                 By signing in, you agree to our Terms & Privacy Policy
               </p>
             </div>

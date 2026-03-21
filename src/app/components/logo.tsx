@@ -28,15 +28,15 @@ export function Logo({ size = "medium" }: LogoProps) {
           cx={d.container / 2}
           cy={d.container / 2}
           r={d.circle / 2}
-          fill="#007AFF"
+          fill="var(--color-action-primary)"
         />
         
-        {/* Anchor point - Soft Mint accent */}
+        {/* Anchor point - Success accent */}
         <circle
           cx={d.container / 2}
           cy={d.container / 2 + d.circle / 6}
           r={d.dot / 2}
-          fill="#34C759"
+          fill="var(--color-action-success)"
         />
         
         {/* Horizontal line suggesting "settling down" */}

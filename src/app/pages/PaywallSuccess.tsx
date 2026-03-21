@@ -78,16 +78,26 @@ export function PaywallSuccess() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center px-6">
-      <div className="bg-white rounded-3xl p-8 w-full max-w-sm text-center space-y-6">
+    <div
+      className="min-h-screen flex items-center justify-center px-6"
+      style={{ backgroundColor: "var(--color-surface-secondary)" }}
+    >
+      <div
+        className="rounded-3xl p-8 w-full max-w-sm text-center space-y-6"
+        style={{ backgroundColor: "var(--color-surface-primary)" }}
+      >
         {/* Processing */}
         {status === 'processing' && (
           <>
-            <Loader2 size={48} className="text-[#007AFF] animate-spin mx-auto" />
+            <Loader2
+              size={48}
+              className="animate-spin mx-auto"
+              style={{ color: "var(--color-action-primary)" }}
+            />
             <h2 className="text-xl" style={{ fontWeight: 600 }}>
               구독을 활성화하고 있어요
             </h2>
-            <p className="text-sm text-[#86868B]">
+            <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
               잠시만 기다려주세요...
             </p>
           </>
@@ -96,17 +106,25 @@ export function PaywallSuccess() {
         {/* Success */}
         {status === 'success' && (
           <>
-            <CheckCircle2 size={48} className="text-[#34C759] mx-auto" />
+            <CheckCircle2
+              size={48}
+              className="mx-auto"
+              style={{ color: "var(--color-action-success)" }}
+            />
             <h2 className="text-xl" style={{ fontWeight: 600 }}>
               Premium 활성화 완료!
             </h2>
-            <p className="text-sm text-[#86868B]">
+            <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
               잠시 후 홈으로 이동합니다.
             </p>
             <button
               onClick={() => navigate('/home', { replace: true })}
-              className="w-full bg-[#007AFF] text-white rounded-2xl py-4 active:scale-96 transition-transform"
-              style={{ fontWeight: 600 }}
+              className="w-full rounded-2xl py-4 active:scale-96 transition-transform"
+              style={{
+                fontWeight: 600,
+                backgroundColor: "var(--color-action-primary)",
+                color: "var(--color-text-on-color)",
+              }}
             >
               홈으로 이동
             </button>
@@ -116,25 +134,37 @@ export function PaywallSuccess() {
         {/* Error */}
         {status === 'error' && (
           <>
-            <XCircle size={48} className="text-[#FF3B30] mx-auto" />
+            <XCircle
+              size={48}
+              className="mx-auto"
+              style={{ color: "var(--color-action-error)" }}
+            />
             <h2 className="text-xl" style={{ fontWeight: 600 }}>
               구독 활성화 실패
             </h2>
-            <p className="text-sm text-[#FF3B30]">
+            <p className="text-sm" style={{ color: "var(--color-action-error)" }}>
               {errorMessage}
             </p>
             <div className="space-y-3">
               <button
                 onClick={() => navigate('/paywall', { replace: true })}
-                className="w-full bg-[#007AFF] text-white rounded-2xl py-4 active:scale-96 transition-transform"
-                style={{ fontWeight: 600 }}
+                className="w-full rounded-2xl py-4 active:scale-96 transition-transform"
+                style={{
+                  fontWeight: 600,
+                  backgroundColor: "var(--color-action-primary)",
+                  color: "var(--color-text-on-color)",
+                }}
               >
                 다시 시도
               </button>
               <button
                 onClick={() => navigate('/home', { replace: true })}
-                className="w-full bg-[#F5F5F7] text-[#1D1D1F] rounded-2xl py-4 active:scale-96 transition-transform"
-                style={{ fontWeight: 600 }}
+                className="w-full rounded-2xl py-4 active:scale-96 transition-transform"
+                style={{
+                  fontWeight: 600,
+                  backgroundColor: "var(--color-surface-secondary)",
+                  color: "var(--color-text-primary)",
+                }}
               >
                 홈으로 이동
               </button>

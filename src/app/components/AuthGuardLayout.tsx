@@ -46,8 +46,14 @@ export function AuthGuardLayout() {
   // Auth 초기화 중 → 스플래시
   if (!initialized) {
     return (
-      <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
-        <div className="w-8 h-8 border-3 border-[#007AFF] border-t-transparent rounded-full animate-spin" />
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "var(--color-surface-secondary)" }}
+      >
+        <div
+          className="w-8 h-8 border-3 border-t-transparent rounded-full animate-spin"
+          style={{ borderColor: "var(--color-action-primary)", borderTopColor: "transparent" }}
+        />
       </div>
     )
   }
@@ -58,8 +64,14 @@ export function AuthGuardLayout() {
   // 온보딩 체크 중
   if (!checked && location.pathname !== '/onboarding') {
     return (
-      <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center">
-        <div className="w-8 h-8 border-3 border-[#007AFF] border-t-transparent rounded-full animate-spin" />
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "var(--color-surface-secondary)" }}
+      >
+        <div
+          className="w-8 h-8 border-3 border-t-transparent rounded-full animate-spin"
+          style={{ borderColor: "var(--color-action-primary)", borderTopColor: "transparent" }}
+        />
       </div>
     )
   }

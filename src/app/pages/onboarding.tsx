@@ -101,6 +101,19 @@ const COUNTRIES = [
 // COMPONENT
 // ═══════════════════════════════════════
 
+/** 칩 버튼 공통 스타일 (선택/미선택) */
+function chipStyle(selected: boolean): React.CSSProperties {
+  return {
+    fontWeight: 500,
+    backgroundColor: selected
+      ? "var(--color-action-primary)"
+      : "var(--color-surface-secondary)",
+    color: selected
+      ? "var(--color-text-on-color)"
+      : "var(--color-text-primary)",
+  };
+}
+
 export function Onboarding() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
@@ -179,17 +192,25 @@ export function Onboarding() {
   }, [user, fullName, nationality, visaType, visaExpiry, phone, language, primaryBank, frequentCountry, hydrate, navigate]);
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7]">
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--color-surface-secondary)" }}
+    >
       {/* Header */}
-      <div className="bg-white">
+      <div style={{ backgroundColor: "var(--color-surface-primary)" }}>
         <div className="px-6 pt-16 pb-8 text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-[#007AFF] to-[#0051D5] rounded-[20px] mx-auto mb-6 flex items-center justify-center">
-            <span className="text-3xl text-white">S</span>
+          <div
+            className="w-16 h-16 rounded-[20px] mx-auto mb-6 flex items-center justify-center"
+            style={{
+              background: "linear-gradient(to bottom right, var(--color-action-primary), var(--color-action-primary-hover))",
+            }}
+          >
+            <span className="text-3xl" style={{ color: "var(--color-text-on-color)" }}>S</span>
           </div>
-          <h1 className="text-2xl text-[#1D1D1F] mb-2" style={{ fontWeight: 700 }}>
+          <h1 className="text-2xl mb-2" style={{ fontWeight: 700, color: "var(--color-text-primary)" }}>
             {step === 1 ? "Welcome to Settle" : "Almost there"}
           </h1>
-          <p className="text-sm text-[#86868B]">
+          <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
             {step === 1
               ? "기본 정보를 입력해주세요"
               : "몇 가지만 더 알려주세요"}
@@ -199,12 +220,22 @@ export function Onboarding() {
         {/* Progress */}
         <div className="px-6 pb-6">
           <div className="flex gap-2">
-            <div className={`flex-1 h-1 rounded-full transition-colors duration-500 ${
-              step >= 1 ? "bg-[#007AFF]" : "bg-[#E5E5EA]"
-            }`} />
-            <div className={`flex-1 h-1 rounded-full transition-colors duration-500 ${
-              step >= 2 ? "bg-[#007AFF]" : "bg-[#E5E5EA]"
-            }`} />
+            <div
+              className="flex-1 h-1 rounded-full transition-colors duration-500"
+              style={{
+                backgroundColor: step >= 1
+                  ? "var(--color-action-primary)"
+                  : "var(--color-inactive)",
+              }}
+            />
+            <div
+              className="flex-1 h-1 rounded-full transition-colors duration-500"
+              style={{
+                backgroundColor: step >= 2
+                  ? "var(--color-action-primary)"
+                  : "var(--color-inactive)",
+              }}
+            />
           </div>
         </div>
       </div>
@@ -215,30 +246,41 @@ export function Onboarding() {
           {/* ARC 스캔 버튼 */}
           <button
             onClick={() => fileInputRef.current?.click()}
-            className={`w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-dashed transition-all active:scale-[0.99] ${
-              arcScanned
-                ? "border-[#34C759] bg-[#34C759]/5"
-                : "border-[#007AFF]/30 bg-white"
-            }`}
+            className="w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-dashed transition-all active:scale-[0.99]"
+            style={{
+              borderColor: arcScanned
+                ? "var(--color-action-success)"
+                : "color-mix(in srgb, var(--color-action-primary) 30%, transparent)",
+              backgroundColor: arcScanned
+                ? "color-mix(in srgb, var(--color-action-success) 5%, transparent)"
+                : "var(--color-surface-primary)",
+            }}
           >
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-              arcScanned ? "bg-[#34C759]/10" : "bg-[#007AFF]/10"
-            }`}>
+            <div
+              className="w-12 h-12 rounded-2xl flex items-center justify-center"
+              style={{
+                backgroundColor: arcScanned
+                  ? "color-mix(in srgb, var(--color-action-success) 10%, transparent)"
+                  : "color-mix(in srgb, var(--color-action-primary) 10%, transparent)",
+              }}
+            >
               {arcScanned ? (
-                <Check size={22} className="text-[#34C759]" strokeWidth={2.5} />
+                <Check size={22} strokeWidth={2.5} style={{ color: "var(--color-action-success)" }} />
               ) : (
-                <Camera size={22} className="text-[#007AFF]" strokeWidth={2} />
+                <Camera size={22} strokeWidth={2} style={{ color: "var(--color-action-primary)" }} />
               )}
             </div>
             <div className="flex-1 text-left">
               <p className="text-sm" style={{ fontWeight: 600 }}>
                 {arcScanned ? "외국인등록증 스캔 완료" : "외국인등록증 촬영하기"}
               </p>
-              <p className="text-xs text-[#86868B] mt-0.5">
+              <p className="text-xs mt-0.5" style={{ color: "var(--color-text-secondary)" }}>
                 {arcScanned ? "아래 정보를 확인해주세요" : "촬영하면 정보가 자동으로 입력됩니다"}
               </p>
             </div>
-            {!arcScanned && <ChevronRight size={18} className="text-[#86868B]" />}
+            {!arcScanned && (
+              <ChevronRight size={18} style={{ color: "var(--color-text-secondary)" }} />
+            )}
           </button>
           <input
             ref={fileInputRef}
@@ -251,44 +293,52 @@ export function Onboarding() {
 
           {/* 구분선 */}
           <div className="flex items-center gap-3 py-1">
-            <div className="flex-1 h-px bg-black/5" />
-            <span className="text-xs text-[#C7C7CC]">또는 직접 입력</span>
-            <div className="flex-1 h-px bg-black/5" />
+            <div
+              className="flex-1 h-px"
+              style={{ backgroundColor: "var(--color-border-default)" }}
+            />
+            <span className="text-xs" style={{ color: "var(--color-text-tertiary)" }}>
+              또는 직접 입력
+            </span>
+            <div
+              className="flex-1 h-px"
+              style={{ backgroundColor: "var(--color-border-default)" }}
+            />
           </div>
 
           {/* 이름 */}
-          <div className="bg-white rounded-2xl p-4">
+          <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--color-surface-primary)" }}>
             <div className="flex items-center gap-3 mb-3">
-              <User size={16} className="text-[#007AFF]" />
-              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>이름 (영문)</label>
+              <User size={16} style={{ color: "var(--color-action-primary)" }} />
+              <label className="text-xs" style={{ fontWeight: 500, color: "var(--color-text-secondary)" }}>
+                이름 (영문)
+              </label>
             </div>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Full name as on ARC"
-              className="w-full text-base bg-transparent outline-none text-[#1D1D1F] placeholder:text-[#C7C7CC]"
-              style={{ fontWeight: 500 }}
+              className="w-full text-base bg-transparent outline-none"
+              style={{ fontWeight: 500, color: "var(--color-text-primary)" }}
             />
           </div>
 
           {/* 국적 */}
-          <div className="bg-white rounded-2xl p-4">
+          <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--color-surface-primary)" }}>
             <div className="flex items-center gap-3 mb-3">
-              <Flag size={16} className="text-[#007AFF]" />
-              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>국적</label>
+              <Flag size={16} style={{ color: "var(--color-action-primary)" }} />
+              <label className="text-xs" style={{ fontWeight: 500, color: "var(--color-text-secondary)" }}>
+                국적
+              </label>
             </div>
             <div className="flex flex-wrap gap-2">
               {NATIONALITIES.map((n) => (
                 <button
                   key={n}
                   onClick={() => setNationality(n)}
-                  className={`px-3 py-1.5 rounded-full text-sm transition-all ${
-                    nationality === n
-                      ? "bg-[#007AFF] text-white"
-                      : "bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E8E8ED]"
-                  }`}
-                  style={{ fontWeight: 500 }}
+                  className="px-3 py-1.5 rounded-full text-sm transition-all"
+                  style={chipStyle(nationality === n)}
                 >
                   {n}
                 </button>
@@ -297,22 +347,20 @@ export function Onboarding() {
           </div>
 
           {/* 비자 유형 */}
-          <div className="bg-white rounded-2xl p-4">
+          <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--color-surface-primary)" }}>
             <div className="flex items-center gap-3 mb-3">
-              <FileText size={16} className="text-[#007AFF]" />
-              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>비자 유형</label>
+              <FileText size={16} style={{ color: "var(--color-action-primary)" }} />
+              <label className="text-xs" style={{ fontWeight: 500, color: "var(--color-text-secondary)" }}>
+                비자 유형
+              </label>
             </div>
             <div className="flex flex-wrap gap-2">
               {VISA_TYPES.map((v) => (
                 <button
                   key={v}
                   onClick={() => setVisaType(v)}
-                  className={`px-3 py-1.5 rounded-full text-sm transition-all ${
-                    visaType === v
-                      ? "bg-[#007AFF] text-white"
-                      : "bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E8E8ED]"
-                  }`}
-                  style={{ fontWeight: 500 }}
+                  className="px-3 py-1.5 rounded-full text-sm transition-all"
+                  style={chipStyle(visaType === v)}
                 >
                   {v}
                 </button>
@@ -321,17 +369,19 @@ export function Onboarding() {
           </div>
 
           {/* 비자 만료일 */}
-          <div className="bg-white rounded-2xl p-4">
+          <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--color-surface-primary)" }}>
             <div className="flex items-center gap-3 mb-3">
-              <Calendar size={16} className="text-[#007AFF]" />
-              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>비자 만료일</label>
+              <Calendar size={16} style={{ color: "var(--color-action-primary)" }} />
+              <label className="text-xs" style={{ fontWeight: 500, color: "var(--color-text-secondary)" }}>
+                비자 만료일
+              </label>
             </div>
             <input
               type="date"
               value={visaExpiry}
               onChange={(e) => setVisaExpiry(e.target.value)}
-              className="w-full text-base bg-transparent outline-none text-[#1D1D1F]"
-              style={{ fontWeight: 500 }}
+              className="w-full text-base bg-transparent outline-none"
+              style={{ fontWeight: 500, color: "var(--color-text-primary)" }}
             />
           </div>
 
@@ -339,12 +389,16 @@ export function Onboarding() {
           <button
             onClick={() => step1Valid && setStep(2)}
             disabled={!step1Valid}
-            className={`w-full py-4 rounded-2xl text-base transition-all ${
-              step1Valid
-                ? "bg-[#007AFF] text-white active:scale-[0.98]"
-                : "bg-[#E5E5EA] text-[#C7C7CC]"
-            }`}
-            style={{ fontWeight: 600 }}
+            className="w-full py-4 rounded-2xl text-base transition-all active:scale-[0.98]"
+            style={{
+              fontWeight: 600,
+              backgroundColor: step1Valid
+                ? "var(--color-action-primary)"
+                : "var(--color-inactive)",
+              color: step1Valid
+                ? "var(--color-text-on-color)"
+                : "var(--color-text-tertiary)",
+            }}
           >
             다음
           </button>
@@ -355,38 +409,38 @@ export function Onboarding() {
       {step === 2 && (
         <div className="px-6 py-6 space-y-4">
           {/* 전화번호 */}
-          <div className="bg-white rounded-2xl p-4">
+          <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--color-surface-primary)" }}>
             <div className="flex items-center gap-3 mb-3">
-              <Phone size={16} className="text-[#007AFF]" />
-              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>전화번호</label>
+              <Phone size={16} style={{ color: "var(--color-action-primary)" }} />
+              <label className="text-xs" style={{ fontWeight: 500, color: "var(--color-text-secondary)" }}>
+                전화번호
+              </label>
             </div>
             <input
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="010-0000-0000"
-              className="w-full text-base bg-transparent outline-none text-[#1D1D1F] placeholder:text-[#C7C7CC]"
-              style={{ fontWeight: 500 }}
+              className="w-full text-base bg-transparent outline-none"
+              style={{ fontWeight: 500, color: "var(--color-text-primary)" }}
             />
           </div>
 
           {/* 언어 */}
-          <div className="bg-white rounded-2xl p-4">
+          <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--color-surface-primary)" }}>
             <div className="flex items-center gap-3 mb-3">
-              <Globe size={16} className="text-[#007AFF]" />
-              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>선호 언어</label>
+              <Globe size={16} style={{ color: "var(--color-action-primary)" }} />
+              <label className="text-xs" style={{ fontWeight: 500, color: "var(--color-text-secondary)" }}>
+                선호 언어
+              </label>
             </div>
             <div className="flex flex-wrap gap-2">
               {LANGUAGES.map((l) => (
                 <button
                   key={l.code}
                   onClick={() => setLanguage(l.code)}
-                  className={`px-3 py-1.5 rounded-full text-sm transition-all ${
-                    language === l.code
-                      ? "bg-[#007AFF] text-white"
-                      : "bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E8E8ED]"
-                  }`}
-                  style={{ fontWeight: 500 }}
+                  className="px-3 py-1.5 rounded-full text-sm transition-all"
+                  style={chipStyle(language === l.code)}
                 >
                   {l.label}
                 </button>
@@ -395,22 +449,20 @@ export function Onboarding() {
           </div>
 
           {/* 주거래 은행 */}
-          <div className="bg-white rounded-2xl p-4">
+          <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--color-surface-primary)" }}>
             <div className="flex items-center gap-3 mb-3">
-              <Building2 size={16} className="text-[#007AFF]" />
-              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>주거래 은행 (선택)</label>
+              <Building2 size={16} style={{ color: "var(--color-action-primary)" }} />
+              <label className="text-xs" style={{ fontWeight: 500, color: "var(--color-text-secondary)" }}>
+                주거래 은행 (선택)
+              </label>
             </div>
             <div className="flex flex-wrap gap-2">
               {BANKS.map((b) => (
                 <button
                   key={b}
                   onClick={() => setPrimaryBank(primaryBank === b ? "" : b)}
-                  className={`px-3 py-1.5 rounded-full text-sm transition-all ${
-                    primaryBank === b
-                      ? "bg-[#007AFF] text-white"
-                      : "bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E8E8ED]"
-                  }`}
-                  style={{ fontWeight: 500 }}
+                  className="px-3 py-1.5 rounded-full text-sm transition-all"
+                  style={chipStyle(primaryBank === b)}
                 >
                   {b}
                 </button>
@@ -419,22 +471,20 @@ export function Onboarding() {
           </div>
 
           {/* 자주 보내는 국가 */}
-          <div className="bg-white rounded-2xl p-4">
+          <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--color-surface-primary)" }}>
             <div className="flex items-center gap-3 mb-3">
-              <Send size={16} className="text-[#007AFF]" />
-              <label className="text-xs text-[#86868B]" style={{ fontWeight: 500 }}>자주 보내는 국가 (선택)</label>
+              <Send size={16} style={{ color: "var(--color-action-primary)" }} />
+              <label className="text-xs" style={{ fontWeight: 500, color: "var(--color-text-secondary)" }}>
+                자주 보내는 국가 (선택)
+              </label>
             </div>
             <div className="flex flex-wrap gap-2">
               {COUNTRIES.map((c) => (
                 <button
                   key={c.code}
                   onClick={() => setFrequentCountry(frequentCountry === c.code ? "" : c.code)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all ${
-                    frequentCountry === c.code
-                      ? "bg-[#007AFF] text-white"
-                      : "bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E8E8ED]"
-                  }`}
-                  style={{ fontWeight: 500 }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm transition-all"
+                  style={chipStyle(frequentCountry === c.code)}
                 >
                   <span>{c.flag}</span>
                   {c.name}
@@ -447,20 +497,28 @@ export function Onboarding() {
           <div className="flex gap-3 pt-2">
             <button
               onClick={() => setStep(1)}
-              className="px-6 py-4 rounded-2xl bg-white text-[#1D1D1F] text-base active:scale-[0.98] transition-all"
-              style={{ fontWeight: 600 }}
+              className="px-6 py-4 rounded-2xl text-base active:scale-[0.98] transition-all"
+              style={{
+                fontWeight: 600,
+                backgroundColor: "var(--color-surface-primary)",
+                color: "var(--color-text-primary)",
+              }}
             >
               이전
             </button>
             <button
               onClick={handleComplete}
               disabled={!step2Valid || saving}
-              className={`flex-1 py-4 rounded-2xl text-base transition-all ${
-                step2Valid && !saving
-                  ? "bg-[#007AFF] text-white active:scale-[0.98]"
-                  : "bg-[#E5E5EA] text-[#C7C7CC]"
-              }`}
-              style={{ fontWeight: 600 }}
+              className="flex-1 py-4 rounded-2xl text-base transition-all active:scale-[0.98]"
+              style={{
+                fontWeight: 600,
+                backgroundColor: step2Valid && !saving
+                  ? "var(--color-action-primary)"
+                  : "var(--color-inactive)",
+                color: step2Valid && !saving
+                  ? "var(--color-text-on-color)"
+                  : "var(--color-text-tertiary)",
+              }}
             >
               {saving ? "저장 중..." : "시작하기"}
             </button>

@@ -42,6 +42,9 @@ import { supabase } from "../../lib/supabase";
 //   - 직업: 모국어 → 영어 번역
 //   - 연소득: KRW/USD 토글 + 숫자
 //   - auto-advance: Enter/완성 → 다음 필드
+//
+// Phase 0-B: 하드코딩 색상 → 시맨틱 토큰 전환
+//   인라인 slideUp → theme.css animate-slide-up
 // ============================================
 
 // ── 번역 헬퍼 ──
@@ -203,9 +206,29 @@ export function Profile() {
     : 'Not set';
 
   const specs = [
-    { icon: FileText, label: "Visa status", labelKr: "비자 상태", value: visaStatusText, color: visaDDay !== null && visaDDay <= 30 ? "#FF9500" : "#007AFF" },
-    { icon: Award, label: "KIIP Level", labelKr: "KIIP 단계", value: kiipText, color: "#34C759" },
-    { icon: Briefcase, label: "Nationality", labelKr: "국적", value: userProfile?.nationality || 'Not set', color: "#007AFF" },
+    {
+      icon: FileText,
+      label: "Visa status",
+      labelKr: "비자 상태",
+      value: visaStatusText,
+      color: visaDDay !== null && visaDDay <= 30
+        ? "var(--color-action-warning)"
+        : "var(--color-action-primary)",
+    },
+    {
+      icon: Award,
+      label: "KIIP Level",
+      labelKr: "KIIP 단계",
+      value: kiipText,
+      color: "var(--color-action-success)",
+    },
+    {
+      icon: Briefcase,
+      label: "Nationality",
+      labelKr: "국적",
+      value: userProfile?.nationality || 'Not set',
+      color: "var(--color-action-primary)",
+    },
   ];
 
   const subscriptionLabel = userProfile?.subscription_plan === 'premium' ? 'Premium' : userProfile?.subscription_plan === 'basic' ? 'Basic' : 'Free';
@@ -384,15 +407,25 @@ const settings = [
 
   return (
     <div className="min-h-screen">
-      {/* Header — 동결 */}
-      <header className="bg-white border-b border-black/5">
+      {/* Header */}
+      <header
+        className="border-b"
+        style={{
+          backgroundColor: "var(--color-surface-primary)",
+          borderColor: "var(--color-border-default)",
+        }}
+      >
         <div className="px-6 py-4">
           <div className="flex items-center gap-4">
             <Link
               to="/home"
               className="w-10 h-10 -ml-2 flex items-center justify-center active:scale-95 transition-transform"
             >
-              <ChevronLeft size={24} className="text-[#007AFF]" strokeWidth={2.5} />
+              <ChevronLeft
+                size={24}
+                strokeWidth={2.5}
+                style={{ color: "var(--color-action-primary)" }}
+              />
             </Link>
             <h1 className="text-xl" style={{ fontWeight: 600 }}>{t('title')}</h1>
           </div>
@@ -400,44 +433,79 @@ const settings = [
       </header>
 
       <div className="px-6 py-8 space-y-8">
-        {/* User Info — 동결 */}
-        <div className="bg-white rounded-3xl p-8">
+        {/* User Info */}
+        <div
+          className="rounded-3xl p-8"
+          style={{ backgroundColor: "var(--color-surface-primary)" }}
+        >
           <div className="flex flex-col items-center text-center space-y-4">
-            <div className="w-24 h-24 bg-gradient-to-br from-[#007AFF] to-[#0051D5] rounded-full flex items-center justify-center text-white text-4xl">
+            <div
+              className="w-24 h-24 rounded-full flex items-center justify-center text-4xl"
+              style={{
+                background: "linear-gradient(to bottom right, var(--color-action-primary), var(--color-action-primary-hover))",
+                color: "var(--color-text-on-color)",
+              }}
+            >
               👤
             </div>
             <div>
               <h2 className="text-2xl mb-1" style={{ fontWeight: 600 }}>
                 {loading ? '...' : displayName}
               </h2>
-              <p className="text-sm text-[#86868B]">{displayEmail}</p>
+              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                {displayEmail}
+              </p>
             </div>
             {memberSince && (
-              <div className="flex items-center gap-2 bg-[#F5F5F7] px-4 py-2 rounded-full">
-                <span className="text-xs text-[#86868B]">Member since</span>
+              <div
+                className="flex items-center gap-2 px-4 py-2 rounded-full"
+                style={{ backgroundColor: "var(--color-surface-secondary)" }}
+              >
+                <span className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
+                  Member since
+                </span>
                 <span className="text-xs" style={{ fontWeight: 600 }}>{memberSince}</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Your Information — 동결 */}
+        {/* Your Information */}
         <div>
           <h2 className="text-lg mb-4" style={{ fontWeight: 600 }}>Your Information</h2>
-          <div className="bg-white rounded-3xl divide-y divide-black/5">
+          <div
+            className="rounded-3xl divide-y"
+            style={{
+              backgroundColor: "var(--color-surface-primary)",
+              borderColor: "var(--color-border-default)",
+            }}
+          >
             {specs.map((spec, index) => {
               const Icon = spec.icon;
               return (
-                <button key={index} className="w-full flex items-start gap-4 p-5 text-left active:bg-[#F5F5F7] transition-colors">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${spec.color}15` }}>
+                <button
+                  key={index}
+                  className="w-full flex items-start gap-4 p-5 text-left transition-colors"
+                  style={{ borderColor: "var(--color-border-default)" }}
+                >
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: `color-mix(in srgb, ${spec.color} 12%, transparent)` }}
+                  >
                     <Icon size={20} style={{ color: spec.color }} strokeWidth={2} />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm mb-0.5" style={{ fontWeight: 600 }}>{spec.label}</p>
-                    <p className="text-xs text-[#86868B] mb-1">{spec.labelKr}</p>
+                    <p className="text-xs mb-1" style={{ color: "var(--color-text-secondary)" }}>
+                      {spec.labelKr}
+                    </p>
                     <p className="text-sm">{spec.value}</p>
                   </div>
-                  <ChevronRight size={20} className="text-[#86868B] flex-shrink-0 mt-2" />
+                  <ChevronRight
+                    size={20}
+                    className="flex-shrink-0 mt-2"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  />
                 </button>
               );
             })}
@@ -450,102 +518,166 @@ const settings = [
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg" style={{ fontWeight: 600 }}>Immigration Profile</h2>
-            <span className="text-xs text-[#86868B]">
+            <span className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
               {coreCompletion}/{totalCoreFields} complete
             </span>
           </div>
 
           {/* Progress bar */}
-          <div className="w-full bg-[#F5F5F7] rounded-full h-2 mb-6 overflow-hidden">
+          <div
+            className="w-full rounded-full h-2 mb-6 overflow-hidden"
+            style={{ backgroundColor: "var(--color-surface-secondary)" }}
+          >
             <div
-              className="h-full bg-gradient-to-r from-[#007AFF] to-[#34C759] rounded-full transition-all duration-500"
-              style={{ width: `${(coreCompletion / totalCoreFields) * 100}%` }}
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: `${(coreCompletion / totalCoreFields) * 100}%`,
+                background: "linear-gradient(to right, var(--color-action-primary), var(--color-action-success))",
+              }}
             />
           </div>
 
           {/* Core fields card */}
           <button
             onClick={() => openEditSheet('core')}
-            className="w-full bg-white rounded-3xl p-5 text-left active:bg-[#F5F5F7] transition-colors mb-3"
+            className="w-full rounded-3xl p-5 text-left transition-colors mb-3"
+            style={{ backgroundColor: "var(--color-surface-primary)" }}
           >
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-[#007AFF]/10">
-                <CreditCard size={20} className="text-[#007AFF]" strokeWidth={2} />
+              <div
+                className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: "color-mix(in srgb, var(--color-action-primary) 10%, transparent)" }}
+              >
+                <CreditCard
+                  size={20}
+                  strokeWidth={2}
+                  style={{ color: "var(--color-action-primary)" }}
+                />
               </div>
               <div className="flex-1">
                 <p className="text-sm mb-0.5" style={{ fontWeight: 600 }}>Personal & Passport</p>
-                <p className="text-xs text-[#86868B] mb-2">신분증 · 여권 · 주소 · 연락처</p>
+                <p className="text-xs mb-2" style={{ color: "var(--color-text-secondary)" }}>
+                  신분증 · 여권 · 주소 · 연락처
+                </p>
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs">
-                    <span className="text-[#86868B]">ARC</span>
+                    <span style={{ color: "var(--color-text-secondary)" }}>ARC</span>
                     <span style={{ fontWeight: 500 }}>{getFieldDisplay('foreign_reg_no')}</span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-[#86868B]">Passport</span>
+                    <span style={{ color: "var(--color-text-secondary)" }}>Passport</span>
                     <span style={{ fontWeight: 500 }}>{getFieldDisplay('passport_no')}</span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-[#86868B]">Address (KR)</span>
-                    <span style={{ fontWeight: 500 }} className="text-right max-w-[60%] truncate">{getFieldDisplay('address_korea')}</span>
+                    <span style={{ color: "var(--color-text-secondary)" }}>Address (KR)</span>
+                    <span style={{ fontWeight: 500 }} className="text-right max-w-[60%] truncate">
+                      {getFieldDisplay('address_korea')}
+                    </span>
                   </div>
                 </div>
               </div>
-              <ChevronRight size={20} className="text-[#86868B] flex-shrink-0 mt-2" />
+              <ChevronRight
+                size={20}
+                className="flex-shrink-0 mt-2"
+                style={{ color: "var(--color-text-secondary)" }}
+              />
             </div>
           </button>
 
           {/* Contextual fields card */}
           <button
             onClick={() => openEditSheet('contextual')}
-            className="w-full bg-white rounded-3xl p-5 text-left active:bg-[#F5F5F7] transition-colors"
+            className="w-full rounded-3xl p-5 text-left transition-colors"
+            style={{ backgroundColor: "var(--color-surface-primary)" }}
           >
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-[#34C759]/10">
-                <Building2 size={20} className="text-[#34C759]" strokeWidth={2} />
+              <div
+                className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: "color-mix(in srgb, var(--color-action-success) 10%, transparent)" }}
+              >
+                <Building2
+                  size={20}
+                  strokeWidth={2}
+                  style={{ color: "var(--color-action-success)" }}
+                />
               </div>
               <div className="flex-1">
                 <p className="text-sm mb-0.5" style={{ fontWeight: 600 }}>Employment & Income</p>
-                <p className="text-xs text-[#86868B] mb-2">근무처 · 직업 · 소득 (신청 유형별)</p>
+                <p className="text-xs mb-2" style={{ color: "var(--color-text-secondary)" }}>
+                  근무처 · 직업 · 소득 (신청 유형별)
+                </p>
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs">
-                    <span className="text-[#86868B]">Workplace</span>
-                    <span style={{ fontWeight: 500 }} className="text-right max-w-[60%] truncate">{getFieldDisplay('current_workplace')}</span>
+                    <span style={{ color: "var(--color-text-secondary)" }}>Workplace</span>
+                    <span style={{ fontWeight: 500 }} className="text-right max-w-[60%] truncate">
+                      {getFieldDisplay('current_workplace')}
+                    </span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-[#86868B]">Occupation</span>
+                    <span style={{ color: "var(--color-text-secondary)" }}>Occupation</span>
                     <span style={{ fontWeight: 500 }}>{getFieldDisplay('occupation')}</span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-[#86868B]">Income</span>
+                    <span style={{ color: "var(--color-text-secondary)" }}>Income</span>
                     <span style={{ fontWeight: 500 }}>
                       {userProfile?.annual_income ? `${userProfile.annual_income.toLocaleString()} ${userProfile.income_currency || 'KRW'}` : 'Not set'}
                     </span>
                   </div>
                 </div>
               </div>
-              <ChevronRight size={20} className="text-[#86868B] flex-shrink-0 mt-2" />
+              <ChevronRight
+                size={20}
+                className="flex-shrink-0 mt-2"
+                style={{ color: "var(--color-text-secondary)" }}
+              />
             </div>
           </button>
         </div>
 
-        {/* Settings — 동결 */}
+        {/* Settings */}
         {settings.map((section) => (
           <div key={section.section}>
             <h2 className="text-lg mb-4" style={{ fontWeight: 600 }}>{section.section}</h2>
-            <div className="bg-white rounded-3xl divide-y divide-black/5">
+            <div
+              className="rounded-3xl divide-y"
+              style={{
+                backgroundColor: "var(--color-surface-primary)",
+                borderColor: "var(--color-border-default)",
+              }}
+            >
               {section.items.map((item, index) => {
                 const Icon = item.icon;
                 const Component = item.link ? Link : "button";
                 const props = item.link ? { to: item.link } : { onClick: item.onPress };
                 return (
-                  <Component key={index} {...(props as any)} className="w-full flex items-center gap-4 p-5 text-left active:bg-[#F5F5F7] transition-colors">
-                    <Icon size={20} className="text-[#007AFF] flex-shrink-0" strokeWidth={2} />
+                  <Component
+                    key={index}
+                    {...(props as any)}
+                    className="w-full flex items-center gap-4 p-5 text-left transition-colors"
+                    style={{ borderColor: "var(--color-border-default)" }}
+                  >
+                    <Icon
+                      size={20}
+                      className="flex-shrink-0"
+                      strokeWidth={2}
+                      style={{ color: "var(--color-action-primary)" }}
+                    />
                     <div className="flex-1">
                       <p className="text-sm" style={{ fontWeight: 600 }}>{item.label}</p>
-                      <p className="text-xs text-[#86868B] mt-0.5">{item.labelKr}</p>
+                      <p className="text-xs mt-0.5" style={{ color: "var(--color-text-secondary)" }}>
+                        {item.labelKr}
+                      </p>
                     </div>
-                    {item.value && <span className="text-sm text-[#86868B]">{item.value}</span>}
-                    <ChevronRight size={20} className="text-[#86868B] flex-shrink-0" />
+                    {item.value && (
+                      <span className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                        {item.value}
+                      </span>
+                    )}
+                    <ChevronRight
+                      size={20}
+                      className="flex-shrink-0"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    />
                   </Component>
                 );
               })}
@@ -553,10 +685,20 @@ const settings = [
           </div>
         ))}
 
-        {/* Premium CTA — 동결 */}
-        <Link to="/paywall" className="block bg-gradient-to-br from-[#007AFF] to-[#0051D5] rounded-3xl p-6 text-white shadow-lg active:scale-98 transition-transform">
+        {/* Premium CTA */}
+        <Link
+          to="/paywall"
+          className="block rounded-3xl p-6 shadow-lg active:scale-98 transition-transform"
+          style={{
+            background: "linear-gradient(to bottom right, var(--color-action-primary), var(--color-action-primary-hover))",
+            color: "var(--color-text-on-color)",
+          }}
+        >
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+            <div
+              className="w-14 h-14 backdrop-blur-sm rounded-2xl flex items-center justify-center"
+              style={{ backgroundColor: "rgba(255, 255, 255, 0.20)" }}
+            >
               <Crown size={28} strokeWidth={2} />
             </div>
             <div className="flex-1">
@@ -568,11 +710,21 @@ const settings = [
         </Link>
 
         {/* Logout — 규칙 #10 */}
-        <button onClick={handleSignOut} className="w-full bg-white rounded-3xl p-5 text-[#FF3B30] active:bg-[#F5F5F7] transition-colors" style={{ fontWeight: 600 }}>
+        <button
+          onClick={handleSignOut}
+          className="w-full rounded-3xl p-5 transition-colors"
+          style={{
+            fontWeight: 600,
+            backgroundColor: "var(--color-surface-primary)",
+            color: "var(--color-action-error)",
+          }}
+        >
           Log out
         </button>
 
-        <p className="text-center text-xs text-[#86868B]">Settle v1.0.0</p>
+        <p className="text-center text-xs" style={{ color: "var(--color-text-secondary)" }}>
+          Settle v1.0.0
+        </p>
       </div>
 
       {/* ============================================
@@ -580,10 +732,13 @@ const settings = [
           auto-advance + auto-translate
           ============================================ */}
       {editMode && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end justify-center">
+        <div
+          className="fixed inset-0 z-50 backdrop-blur-sm flex items-end justify-center"
+          style={{ backgroundColor: "var(--color-overlay)" }}
+        >
           <div
-            className="w-full max-w-lg bg-white rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto"
-            style={{ animation: 'slideUp 400ms cubic-bezier(0.32, 0.72, 0, 1)' }}
+            className="w-full max-w-lg rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto animate-slide-up"
+            style={{ backgroundColor: "var(--color-surface-primary)" }}
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
@@ -592,9 +747,10 @@ const settings = [
               </h3>
               <button
                 onClick={() => setEditMode(null)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F5F5F7]"
+                className="w-8 h-8 flex items-center justify-center rounded-full"
+                style={{ backgroundColor: "var(--color-surface-secondary)" }}
               >
-                <X size={16} className="text-[#86868B]" />
+                <X size={16} style={{ color: "var(--color-text-secondary)" }} />
               </button>
             </div>
 
@@ -602,8 +758,9 @@ const settings = [
             <div className="space-y-4">
               {currentFields.map((field, index) => (
                 <div key={field.key}>
-                  <label className="text-xs text-[#86868B] mb-1 block">
-                    {field.label} <span className="text-[#86868B]/60">{field.labelKr}</span>
+                  <label className="text-xs mb-1 block" style={{ color: "var(--color-text-secondary)" }}>
+                    {field.label}{" "}
+                    <span style={{ color: "var(--color-text-tertiary)" }}>{field.labelKr}</span>
                   </label>
 
                   {/* 소득 필드: 통화 토글 */}
@@ -615,9 +772,13 @@ const settings = [
                           onClick={() => setIncomeCurrency(cur)}
                           className="text-xs px-3 py-1 rounded-full transition-colors"
                           style={{
-                            backgroundColor: incomeCurrency === cur ? '#007AFF' : '#F5F5F7',
-                            color: incomeCurrency === cur ? '#fff' : '#86868B',
                             fontWeight: 600,
+                            backgroundColor: incomeCurrency === cur
+                              ? "var(--color-action-primary)"
+                              : "var(--color-surface-secondary)",
+                            color: incomeCurrency === cur
+                              ? "var(--color-text-on-color)"
+                              : "var(--color-text-secondary)",
                           }}
                         >
                           {cur === 'KRW' ? '₩ 원화' : '$ USD'}
@@ -632,7 +793,11 @@ const settings = [
                       value={editValues[field.key] || ''}
                       onChange={(e) => handleSelectChange(field, e.target.value, index)}
                       onKeyDown={(e) => handleKeyDown(e, index)}
-                      className="w-full p-3 bg-[#F5F5F7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#007AFF]/30"
+                      className="w-full p-3 rounded-xl text-sm outline-none"
+                      style={{
+                        backgroundColor: "var(--color-surface-secondary)",
+                        color: "var(--color-text-primary)",
+                      }}
                     >
                       <option value="">Select</option>
                       {field.options?.map((opt) => (
@@ -652,11 +817,19 @@ const settings = [
                         onBlur={() => handleBlur(field)}
                         placeholder={field.placeholder}
                         maxLength={field.maxLength}
-                        className="w-full p-3 bg-[#F5F5F7] rounded-xl text-sm outline-none focus:ring-2 focus:ring-[#007AFF]/30 placeholder:text-[#86868B]/50"
+                        className="w-full p-3 rounded-xl text-sm outline-none focus:ring-2"
+                        style={{
+                          backgroundColor: "var(--color-surface-secondary)",
+                          color: "var(--color-text-primary)",
+                        }}
                       />
                       {translating === field.key && (
                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                          <Loader2 size={16} className="animate-spin text-[#007AFF]" />
+                          <Loader2
+                            size={16}
+                            className="animate-spin"
+                            style={{ color: "var(--color-action-primary)" }}
+                          />
                         </div>
                       )}
                     </div>
@@ -664,12 +837,14 @@ const settings = [
 
                   {/* 힌트 텍스트 */}
                   {field.hint && (
-                    <p className="text-[10px] text-[#86868B]/60 mt-1">{field.hint}</p>
+                    <p className="text-[10px] mt-1" style={{ color: "var(--color-text-tertiary)" }}>
+                      {field.hint}
+                    </p>
                   )}
 
                   {/* 번역 원문 표시 (있으면) */}
                   {field.originalKey && editValues[field.originalKey] && editValues[field.originalKey] !== editValues[field.key] && (
-                    <p className="text-[10px] text-[#86868B] mt-1">
+                    <p className="text-[10px] mt-1" style={{ color: "var(--color-text-secondary)" }}>
                       Original: {editValues[field.originalKey]}
                     </p>
                   )}
@@ -681,8 +856,12 @@ const settings = [
             <button
               onClick={handleSave}
               disabled={saving}
-              className="w-full mt-6 py-4 bg-[#007AFF] text-white rounded-2xl active:scale-98 transition-transform disabled:opacity-50"
-              style={{ fontWeight: 600 }}
+              className="w-full mt-6 py-4 rounded-2xl active:scale-98 transition-transform disabled:opacity-50"
+              style={{
+                fontWeight: 600,
+                backgroundColor: "var(--color-action-primary)",
+                color: "var(--color-text-on-color)",
+              }}
             >
               {saving ? (
                 <span className="flex items-center justify-center gap-2">
@@ -701,12 +880,14 @@ const settings = [
       )}
       {/* 언어 선택 바텀시트 */}
       {langPickerOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end justify-center"
+        <div
+          className="fixed inset-0 z-50 backdrop-blur-sm flex items-end justify-center"
+          style={{ backgroundColor: "var(--color-overlay)" }}
           onClick={() => setLangPickerOpen(false)}
         >
           <div
-            className="w-full max-w-lg bg-white rounded-t-3xl p-6"
-            style={{ animation: 'slideUp 400ms cubic-bezier(0.32, 0.72, 0, 1)' }}
+            className="w-full max-w-lg rounded-t-3xl p-6 animate-slide-up"
+            style={{ backgroundColor: "var(--color-surface-primary)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-lg mb-4" style={{ fontWeight: 600 }}>언어 선택 / Language</h3>
@@ -715,11 +896,11 @@ const settings = [
                 <button
                   key={lang.code}
                   onClick={() => handleLangChange(lang.code)}
-                  className="w-full flex items-center justify-between p-4 rounded-2xl active:bg-[#F5F5F7] transition-colors"
+                  className="w-full flex items-center justify-between p-4 rounded-2xl transition-colors"
                 >
                   <span className="text-sm" style={{ fontWeight: 600 }}>{lang.label}</span>
                   {(userProfile?.language || 'ko') === lang.code && (
-                    <Check size={18} className="text-[#007AFF]" />
+                    <Check size={18} style={{ color: "var(--color-action-primary)" }} />
                   )}
                 </button>
               ))}
@@ -727,12 +908,6 @@ const settings = [
           </div>
         </div>
       )}
-      <style>{`
-        @keyframes slideUp {
-          from { transform: translateY(100%); }
-          to { transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }
