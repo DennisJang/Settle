@@ -38,7 +38,11 @@
     "activity_empty_cta": "Check visa status",
     "premium_title": "Unlock all features",
     "premium_desc": "AI contract scanner, document auto-submit & more",
-    "premium_cta": "Start free trial"
+    "premium_cta": "Start free trial",
+    "premium_feature_scanner": "AI Contract Scanner",
+    "premium_feature_remit": "Unlimited remittance comparison",
+    "premium_feature_submit": "Auto document submission",
+    "premium_feature_lawyer": "Priority consultant matching"
   },
   "housing": {
     "title": "Housing · Contracts",
@@ -81,6 +85,8 @@
     "title": "Visa",
     "notifications": "Notifications",
     "services_title": "Services",
+    "wage_call_1350_desc": "Free multilingual labor consultation",
+    "wage_find_labor_desc": "Find a certified labor attorney",
     "tools_title": "Tools",
     "score_title": "Eligibility Score",
     "score_subtitle_type": "{{type}} visa",
@@ -202,6 +208,12 @@
   },
   "remit": {
     "title": "Remit",
+    "show_more_providers": "More providers ({{count}})",
+    "hide_more_providers": "Show less",
+    "exclusion_high_fee": "Higher fees than top picks",
+    "exclusion_slow": "Slower transfer, {{pct}}% less received",
+    "exclusion_less_receive": "{{pct}}% less received than #1",
+    "send_short": "Send →",
     "flight_in_progress": "{{provider}} remittance in progress",
     "flight_pct": "{{pct}}% complete",
     "flight_remain": "About {{min}} min remaining",

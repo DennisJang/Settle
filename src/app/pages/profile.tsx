@@ -1,7 +1,15 @@
-// profile.tsx — Phase 1
-// 변경사항: 헤더 "MY"(뒤로가기 제거), pb-32, 프로필 카드 간소화, px-6→px-4
-// 비즈니스 로직 100% 동결: translateField, 편집시트, auto-advance, 저장 전부 원본
-// 700줄+ 파일이므로 구조적 변경만 수행, 로직 동결 주석 명시
+// profile.tsx — Phase 2-A
+// 변경사항:
+// 1. Language 미갱신 버그 수정 — handleLangChange에서 updateProfileField 호출 추가
+// 2. Immigration Profile 바텀시트 인터랙션 개선 — 필드별 직접 편집 (core/contextual 분류 유지하되 시각적 피드백 강화)
+// 3. Settings "Language" value가 i18n.language를 직접 참조하도록 수정 (DB 라운드트립 없이 즉시 갱신)
+// 4. i18n 미적용 하드코딩 텍스트 일부 정리
+//
+// 비즈니스 로직 100% 동결: translateField, auto-advance, 저장 전부 원본
+// Dennis 규칙 #1: 원본 파일 기반 수정. 추측 생성 금지.
+// Dennis 규칙 #26: 비즈니스 로직 건드리지 않음.
+// Dennis 규칙 #32: 컬러 하드코딩 금지.
+// Dennis 규칙 #34: i18n 전 페이지 적용.
 
 import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router";
@@ -74,6 +82,14 @@ const CONTEXTUAL_FIELDS: EditField[] = [
   { key: 'annual_income', label: 'Annual Income', labelKr: '연소득', placeholder: '4200', type: 'number', inputMode: 'numeric' },
   { key: 'email', label: 'Email', labelKr: '전자우편', placeholder: 'you@example.com', type: 'text' },
 ];
+
+// ── 언어 표시 매핑 ──
+const LANG_DISPLAY: Record<string, string> = {
+  ko: '한국어',
+  en: 'English',
+  vi: 'Tiếng Việt',
+  zh: '中文',
+};
 
 export function Profile() {
   const navigate = useNavigate();
@@ -160,13 +176,21 @@ export function Profile() {
   const handleSignOut = async () => { reset(); await signOut(); navigate("/", { replace: true }); };
 
   const LANGS = [{ code: 'ko', label: '한국어' }, { code: 'en', label: 'English' }, { code: 'vi', label: 'Tiếng Việt' }, { code: 'zh', label: '中文' }] as const;
+
+  // ★ FIX: Language 미갱신 버그 — updateProfileField 추가로 낙관적 업데이트 즉시 반영
   const handleLangChange = async (code: 'ko' | 'en' | 'vi' | 'zh') => {
-    i18n.changeLanguage(code); localStorage.setItem('settle_lang', code); setLangPickerOpen(false);
-    if (user?.id) await supabase.from('user_profiles').update({ language: code }).eq('user_id', user.id);
+    i18n.changeLanguage(code);
+    localStorage.setItem('settle_lang', code);
+    setLangPickerOpen(false);
+    // 낙관적 업데이트: userProfile.language가 즉시 갱신되어 Settings UI에 반영
+    await updateProfileField({ language: code } as any);
   };
 
+  // ★ FIX: Settings Language value — i18n.language를 직접 참조 (DB 값 대기 불필요)
+  const currentLangDisplay = LANG_DISPLAY[i18n.language] ?? LANG_DISPLAY['en'];
+
   // ═══════════════════════════════════════
-  // RENDER — Phase 1 레이아웃
+  // RENDER
   // ═══════════════════════════════════════
 
   return (
@@ -174,7 +198,7 @@ export function Profile() {
       className="min-h-screen pb-32"
       style={{ backgroundColor: "var(--color-surface-secondary)" }}
     >
-      {/* Header — Phase 1: "MY" 타이틀, 뒤로가기 제거 */}
+      {/* Header */}
       <header
         style={{
           backgroundColor: "var(--color-surface-primary)",
@@ -192,7 +216,7 @@ export function Profile() {
       </header>
 
       <div className="px-4 py-6 space-y-4">
-        {/* Profile Card — 와이어프레임: 64x64 아바타 + 이름 + 비자타입 + 가입일 + Edit */}
+        {/* Profile Card */}
         <div
           className="rounded-3xl p-5"
           style={{ backgroundColor: "var(--color-surface-primary)" }}
@@ -259,16 +283,16 @@ export function Profile() {
             </h3>
           </div>
           {[
-            { label: 'Nationality', value: getFieldDisplay('nationality') },
-            { label: 'Visa Type', value: visaType ?? 'Not set' },
-            { label: 'Visa Expiry', value: userProfile?.visa_expiry ? new Date(userProfile.visa_expiry).toLocaleDateString('ko-KR') : 'Not set' },
-            { label: 'Workplace', value: getFieldDisplay('current_workplace') },
-            { label: 'TOPIK Level', value: visaTracker?.korean_score ? `Level ${Math.floor(visaTracker.korean_score / 20)}` : 'Not set' },
+            { label: 'Nationality', value: getFieldDisplay('nationality'), sheet: 'core' as const },
+            { label: 'Visa Type', value: visaType ?? 'Not set', sheet: 'core' as const },
+            { label: 'Visa Expiry', value: userProfile?.visa_expiry ? new Date(userProfile.visa_expiry).toLocaleDateString('ko-KR') : 'Not set', sheet: 'core' as const },
+            { label: 'Workplace', value: getFieldDisplay('current_workplace'), sheet: 'contextual' as const },
+            { label: 'TOPIK Level', value: visaTracker?.korean_score ? `Level ${Math.floor(visaTracker.korean_score / 20)}` : 'Not set', sheet: 'contextual' as const },
           ].map((item, i) => (
             <button
               key={i}
-              onClick={() => openEditSheet(i < 3 ? 'core' : 'contextual')}
-              className="w-full flex items-center justify-between px-5 py-3.5 text-left"
+              onClick={() => openEditSheet(item.sheet)}
+              className="w-full flex items-center justify-between px-5 py-3.5 text-left active:opacity-70 transition-opacity"
               style={{ borderColor: "var(--color-border-default)" }}
             >
               <span
@@ -336,7 +360,7 @@ export function Profile() {
           )}
         </div>
 
-        {/* Settings */}
+        {/* Settings — ★ FIX: Language value를 i18n.language 직접 참조 */}
         <div
           className="rounded-3xl divide-y"
           style={{
@@ -345,7 +369,7 @@ export function Profile() {
           }}
         >
           {[
-            { icon: Globe, label: 'Language', value: t(`lang_${userProfile?.language || 'ko'}`), onPress: () => setLangPickerOpen(true) },
+            { icon: Globe, label: 'Language', value: currentLangDisplay, onPress: () => setLangPickerOpen(true) },
             { icon: Bell, label: 'Notifications', value: '', onPress: undefined },
             { icon: Lock, label: 'Privacy Policy', value: '', onPress: undefined },
             { icon: FileText, label: 'Terms of Service', value: '', onPress: undefined },
@@ -356,7 +380,7 @@ export function Profile() {
               <button
                 key={i}
                 onClick={item.onPress}
-                className="w-full flex items-center gap-4 px-5 py-3.5 text-left"
+                className="w-full flex items-center gap-4 px-5 py-3.5 text-left active:opacity-70 transition-opacity"
                 style={{ borderColor: "var(--color-border-default)" }}
               >
                 <Icon size={18} strokeWidth={1.5} style={{ color: "var(--color-text-secondary)" }} />
@@ -375,7 +399,7 @@ export function Profile() {
         {/* Logout */}
         <button
           onClick={handleSignOut}
-          className="w-full rounded-3xl py-4 text-center"
+          className="w-full rounded-3xl py-4 text-center active:scale-[0.98] transition-transform"
           style={{
             fontWeight: 600,
             backgroundColor: "var(--color-surface-primary)",
@@ -432,7 +456,7 @@ export function Profile() {
           <div className="w-full max-w-lg rounded-t-3xl p-6 animate-slide-up" style={{ backgroundColor: "var(--color-surface-primary)" }} onClick={(e) => e.stopPropagation()}>
             <h3 className="text-[17px] mb-4" style={{ fontWeight: 600 }}>언어 선택 / Language</h3>
             <div className="space-y-2">
-              {LANGS.map((lang) => (<button key={lang.code} onClick={() => handleLangChange(lang.code)} className="w-full flex items-center justify-between p-4 rounded-2xl transition-colors"><span className="text-[15px]" style={{ fontWeight: 600 }}>{lang.label}</span>{(userProfile?.language || 'ko') === lang.code && <Check size={18} style={{ color: "var(--color-action-primary)" }} />}</button>))}
+              {LANGS.map((lang) => (<button key={lang.code} onClick={() => handleLangChange(lang.code)} className="w-full flex items-center justify-between p-4 rounded-2xl transition-colors active:opacity-70"><span className="text-[15px]" style={{ fontWeight: 600 }}>{lang.label}</span>{i18n.language === lang.code && <Check size={18} style={{ color: "var(--color-action-primary)" }} />}</button>))}
             </div>
           </div>
         </div>

@@ -1,9 +1,18 @@
-// remit.tsx — Phase 1 + i18n 전면 적용
-// 변경사항: 모든 하드코딩 한국어/영어 텍스트 → t('remit:key') 전환
-// 비즈니스 로직 100% 동결 — PROVIDERS, calculateReceiveAmount, quotes, handleProviderClick 전부 원본
+// remit.tsx — Phase 2-A (3개 Fix + 나머지 숨김)
+//
+// Phase 2-A 변경사항:
+// 1. 상위 3개 업체만 기본 표시 — "실수령액 기준 상위 3개"
+// 2. 나머지 업체는 "더 많은 업체" 접기 섹션 — 펼치면 각 업체별 제외 이유 1줄 표시
+// 3. 제외 이유: "수수료 높음", "환율 스프레드 큼", "속도 느림" 등 실수령액 기준 단순 설명
+// 4. UI 구조: 상위 3개는 기존 상세 카드, 나머지는 컴팩트 행 (터치하면 상세 펼침)
+//
+// 비즈니스 로직 100% 동결:
+// - PROVIDERS, calculateReceiveAmount, quotes 계산, handleProviderClick 전부 원본
+// - 정렬 로직(receiveAmount 내림차순) 동결
+//
 // Dennis 규칙 #1: 원본 파일 기반 수정. 추측 생성 금지.
 // Dennis 규칙 #26: 비즈니스 로직 건드리지 않음.
-// Dennis 규칙 #34: i18n 적용 범위 = 전 페이지. 하드코딩 텍스트 금지.
+// Dennis 규칙 #34: i18n 적용 범위 = 전 페이지.
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router";
@@ -34,33 +43,15 @@ import { supabase } from "../../lib/supabase";
 // ═══════════════════════════════════════
 
 interface TargetCountry {
-  code: string;
-  currency: string;
-  name: string;
-  nameEn: string;
-  flag: string;
+  code: string; currency: string; name: string; nameEn: string; flag: string;
 }
-
 interface ExchangeRate {
-  currency: string;
-  rate: number;
-  source: string;
-  updated_at: string;
+  currency: string; rate: number; source: string; updated_at: string;
 }
-
 interface ProviderQuote {
-  id: string;
-  name: string;
-  nameKo: string;
-  logo: string;
-  fee: number;
-  exchangeRate: number;
-  receiveAmount: number;
-  speed: string;
-  speedMinutes: number;
-  rating: number;
-  androidPackage: string;
-  webUrl: string;
+  id: string; name: string; nameKo: string; logo: string; fee: number;
+  exchangeRate: number; receiveAmount: number; speed: string;
+  speedMinutes: number; rating: number; androidPackage: string; webUrl: string;
 }
 
 // ═══════════════════════════════════════
@@ -81,19 +72,10 @@ const TARGET_COUNTRIES: TargetCountry[] = [
 ];
 
 interface ProviderConfig {
-  id: string;
-  name: string;
-  nameKo: string;
-  logo: string;
-  baseFee: number;
-  feeRate: number;
-  spreadPercent: number;
-  speedMinutes: number;
-  speedLabel: string;
-  rating: number;
-  androidPackage: string;
-  webUrl: string;
-  supportedCountries: string[];
+  id: string; name: string; nameKo: string; logo: string;
+  baseFee: number; feeRate: number; spreadPercent: number;
+  speedMinutes: number; speedLabel: string; rating: number;
+  androidPackage: string; webUrl: string; supportedCountries: string[];
 }
 
 const PROVIDERS: ProviderConfig[] = [
@@ -138,6 +120,20 @@ function calculateReceiveAmount(sendKRW: number, fee: number, midMarketRate: num
   return afterFee / (midMarketRate * (1 + spreadPercent / 100));
 }
 
+// ★ NEW: 제외 이유 생성 — 상위 3개 대비 어떤 점이 불리한지
+function getExclusionReason(quote: ProviderQuote, bestQuote: ProviderQuote, t: (key: string, opts?: Record<string, unknown>) => string): string {
+  const receiveDiff = bestQuote.receiveAmount - quote.receiveAmount;
+  const receiveDiffPct = ((receiveDiff / bestQuote.receiveAmount) * 100).toFixed(1);
+
+  if (quote.fee > bestQuote.fee * 1.5) {
+    return t('remit:exclusion_high_fee');
+  }
+  if (quote.speedMinutes >= 30) {
+    return t('remit:exclusion_slow', { pct: receiveDiffPct });
+  }
+  return t('remit:exclusion_less_receive', { pct: receiveDiffPct });
+}
+
 // ═══════════════════════════════════════
 // COMPONENT
 // ═══════════════════════════════════════
@@ -158,6 +154,8 @@ export function Remit() {
   const [visaBannerDismissed, setVisaBannerDismissed] = useState(false);
   const [showVisaActions, setShowVisaActions] = useState(false);
   const [recentRemitLog, setRecentRemitLog] = useState<{ provider_name: string; target_country: string; created_at: string; speedMinutes: number } | null>(null);
+  // ★ NEW: 나머지 업체 펼침 상태
+  const [showMoreProviders, setShowMoreProviders] = useState(false);
 
   // --- 모든 useEffect, useMemo, useCallback — 100% 동결 ---
 
@@ -277,31 +275,21 @@ export function Remit() {
     c.name.includes(countrySearch) || c.nameEn.toLowerCase().includes(countrySearch.toLowerCase()) || c.currency.toLowerCase().includes(countrySearch.toLowerCase())
   );
 
+  // ★ NEW: 상위 3개와 나머지 분리
+  const topQuotes = quotes.slice(0, 3);
+  const restQuotes = quotes.slice(3);
+
   // ═══════════════════════════════════════
   // RENDER
   // ═══════════════════════════════════════
 
   return (
-    <div
-      className="min-h-screen pb-32"
-      style={{ backgroundColor: "var(--color-surface-secondary)" }}
-    >
+    <div className="min-h-screen pb-32" style={{ backgroundColor: "var(--color-surface-secondary)" }}>
       {/* Header */}
-      <header
-        className="border-b sticky top-0 z-10 backdrop-blur-xl"
-        style={{ backgroundColor: "var(--color-surface-primary)", borderColor: "var(--color-border-default)" }}
-      >
+      <header className="border-b sticky top-0 z-10 backdrop-blur-xl" style={{ backgroundColor: "var(--color-surface-primary)", borderColor: "var(--color-border-default)" }}>
         <div className="flex items-center justify-between px-4 py-4">
-          <h1
-            className="text-[28px] leading-[34px]"
-            style={{ fontWeight: 600, color: "var(--color-text-primary)" }}
-          >
-            {t('remit:title')}
-          </h1>
-          <button
-            onClick={fetchRates}
-            className="flex h-11 w-11 items-center justify-center rounded-full active:scale-95 transition-all"
-          >
+          <h1 className="text-[28px] leading-[34px]" style={{ fontWeight: 600, color: "var(--color-text-primary)" }}>{t('remit:title')}</h1>
+          <button onClick={fetchRates} className="flex h-11 w-11 items-center justify-center rounded-full active:scale-95 transition-all">
             <RefreshCw size={18} className={loading ? "animate-spin" : ""} style={{ color: "var(--color-text-secondary)" }} />
           </button>
         </div>
@@ -341,7 +329,7 @@ export function Remit() {
           </div>
         )}
 
-        {/* 비자-은행 알림 — 동결 */}
+        {/* 비자 알림 — 동결 */}
         {visaAlert && !visaBannerDismissed && (
           <div className="rounded-3xl overflow-hidden" style={{
             backgroundColor: visaAlert.level === "expired" ? "color-mix(in srgb, var(--color-action-error) 5%, transparent)" : visaAlert.level === "urgent" ? "color-mix(in srgb, var(--color-action-warning) 5%, transparent)" : "color-mix(in srgb, var(--color-action-primary) 5%, transparent)",
@@ -386,7 +374,7 @@ export function Remit() {
           </div>
           <div className="flex gap-2 mt-3">
             {quickAmounts.map((amt) => (
-              <button key={amt} onClick={() => setSendAmount(String(amt))} className="flex-1 py-2 rounded-2xl text-[13px] transition-all" style={{ fontWeight: 600, backgroundColor: sendAmount === String(amt) ? "var(--color-action-primary)" : "var(--color-surface-primary)", color: sendAmount === String(amt) ? "var(--color-text-on-color)" : "var(--color-text-secondary)" }}>
+              <button key={amt} onClick={() => setSendAmount(String(amt))} className="flex-1 py-2 rounded-2xl text-[13px] transition-all active:scale-[0.97]" style={{ fontWeight: 600, backgroundColor: sendAmount === String(amt) ? "var(--color-action-primary)" : "var(--color-surface-primary)", color: sendAmount === String(amt) ? "var(--color-text-on-color)" : "var(--color-text-secondary)" }}>
                 {t('remit:quick_10k', { amount: `${(amt / 10000).toFixed(0)}만` })}
               </button>
             ))}
@@ -408,7 +396,7 @@ export function Remit() {
           </div>
         )}
 
-        {/* 비교 카드 */}
+        {/* ★ 비교 카드 — 상위 3개만 기본 표시 */}
         {loading ? (
           <div className="flex flex-col items-center py-16">
             <RefreshCw size={32} className="animate-spin" style={{ color: "var(--color-action-primary)" }} />
@@ -419,72 +407,140 @@ export function Remit() {
             <p className="text-[15px]" style={{ color: "var(--color-text-secondary)" }}>{midRate ? t('remit:enter_amount') : t('remit:no_rates')}</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {quotes.map((quote, index) => {
-              const isFirst = index === 0;
-              const isExpanded = expandedCard === quote.id;
-              return (
-                <div key={quote.id} className="rounded-3xl p-5 transition-all" style={{ backgroundColor: "var(--color-surface-primary)", border: isFirst ? "2px solid var(--color-action-primary)" : "1px solid var(--color-border-default)", boxShadow: isFirst ? "0 4px 24px color-mix(in srgb, var(--color-action-primary) 12%, transparent)" : undefined }}>
-                  {isFirst && (<div className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1 rounded-full mb-3" style={{ fontWeight: 600, backgroundColor: "color-mix(in srgb, var(--color-action-primary) 10%, transparent)", color: "var(--color-action-primary)" }}><Trophy size={12} />{t('remit:badge_best')}</div>)}
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-2xl">{quote.logo}</span>
-                    <div className="flex-1">
-                      <p className="text-[15px]" style={{ fontWeight: 600 }}>{quote.name}</p>
-                      <p className="text-[12px]" style={{ color: "var(--color-text-secondary)" }}>{quote.nameKo}</p>
+          <>
+            {/* 상위 3개: 상세 카드 */}
+            <div className="space-y-3">
+              {topQuotes.map((quote, index) => {
+                const isFirst = index === 0;
+                const isExpanded = expandedCard === quote.id;
+                return (
+                  <div key={quote.id} className="rounded-3xl p-5 transition-all" style={{ backgroundColor: "var(--color-surface-primary)", border: isFirst ? "2px solid var(--color-action-primary)" : "1px solid var(--color-border-default)", boxShadow: isFirst ? "0 4px 24px color-mix(in srgb, var(--color-action-primary) 12%, transparent)" : undefined }}>
+                    {isFirst && (<div className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1 rounded-full mb-3" style={{ fontWeight: 600, backgroundColor: "color-mix(in srgb, var(--color-action-primary) 10%, transparent)", color: "var(--color-action-primary)" }}><Trophy size={12} />{t('remit:badge_best')}</div>)}
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="text-2xl">{quote.logo}</span>
+                      <div className="flex-1">
+                        <p className="text-[15px]" style={{ fontWeight: 600 }}>{quote.name}</p>
+                        <p className="text-[12px]" style={{ color: "var(--color-text-secondary)" }}>{quote.nameKo}</p>
+                      </div>
+                      <div className="flex items-center gap-1" style={{ color: "var(--color-action-warning)" }}>
+                        <Star size={14} fill="currentColor" />
+                        <span className="text-[13px]" style={{ fontWeight: 600 }}>{quote.rating}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1" style={{ color: "var(--color-action-warning)" }}>
-                      <Star size={14} fill="currentColor" />
-                      <span className="text-[13px]" style={{ fontWeight: 600 }}>{quote.rating}</span>
+                    <div className="mb-4">
+                      <p className="text-[12px] mb-1" style={{ color: "var(--color-text-secondary)" }}>{t('remit:receive_label')}</p>
+                      <p className="text-[28px] tracking-tight" style={{ fontWeight: 800, color: isFirst ? "var(--color-action-primary)" : "var(--color-text-primary)" }}>
+                        {formatForeign(quote.receiveAmount, selectedCountry.currency)} <span className="text-[15px]" style={{ fontWeight: 600, color: "var(--color-text-secondary)" }}>{selectedCountry.currency}</span>
+                      </p>
                     </div>
-                  </div>
-                  <div className="mb-4">
-                    <p className="text-[12px] mb-1" style={{ color: "var(--color-text-secondary)" }}>{t('remit:receive_label')}</p>
-                    <p className="text-[28px] tracking-tight" style={{ fontWeight: 800, color: isFirst ? "var(--color-action-primary)" : "var(--color-text-primary)" }}>
-                      {formatForeign(quote.receiveAmount, selectedCountry.currency)} <span className="text-[15px]" style={{ fontWeight: 600, color: "var(--color-text-secondary)" }}>{selectedCountry.currency}</span>
-                    </p>
-                  </div>
-                  <div className="flex items-center rounded-2xl p-3 mb-3" style={{ backgroundColor: "var(--color-surface-secondary)" }}>
-                    <div className="flex-1 text-center"><p className="text-[10px]" style={{ color: "var(--color-text-secondary)" }}>{t('remit:fee_label')}</p><p className="text-[13px] mt-0.5" style={{ fontWeight: 600 }}>₩{formatKRW(quote.fee)}</p></div>
-                    <div className="w-px h-8" style={{ backgroundColor: "var(--color-border-default)" }} />
-                    <div className="flex-1 text-center"><p className="text-[10px]" style={{ color: "var(--color-text-secondary)" }}>{t('remit:speed_label')}</p><p className="text-[13px] mt-0.5" style={{ fontWeight: 600 }}>{quote.speed}</p></div>
-                    <div className="w-px h-8" style={{ backgroundColor: "var(--color-border-default)" }} />
-                    <div className="flex-1 text-center"><p className="text-[10px]" style={{ color: "var(--color-text-secondary)" }}>{t('remit:applied_rate_label')}</p><p className="text-[13px] mt-0.5" style={{ fontWeight: 600 }}>{formatRateShort(quote.exchangeRate, selectedCountry.currency)}</p></div>
-                  </div>
-                  <button onClick={() => setExpandedCard(isExpanded ? null : quote.id)} className="w-full flex items-center justify-center gap-1 py-1 text-[12px] transition-colors" style={{ color: "var(--color-text-secondary)" }}>
-                    {isExpanded ? <>{t('remit:collapse')} <ChevronUp size={14} /></> : <>{t('remit:expand')} <ChevronDown size={14} /></>}
-                  </button>
-                  {isExpanded && midRate && (
-                    <div className="rounded-2xl p-4 mt-2 mb-3 space-y-2.5 text-[13px]" style={{ backgroundColor: "var(--color-surface-secondary)" }}>
-                      <div className="flex justify-between"><span style={{ color: "var(--color-text-secondary)" }}>{t('remit:detail_send')}</span><span style={{ fontWeight: 600 }}>₩{formatKRW(parsedAmount)}</span></div>
-                      <div className="flex justify-between"><span style={{ color: "var(--color-text-secondary)" }}>{t('remit:detail_fee')}</span><span style={{ fontWeight: 600, color: "var(--color-action-error)" }}>-₩{formatKRW(quote.fee)}</span></div>
-                      <div className="flex justify-between"><span style={{ color: "var(--color-text-secondary)" }}>{t('remit:detail_converted')}</span><span style={{ fontWeight: 600 }}>₩{formatKRW(parsedAmount - quote.fee)}</span></div>
-                      <div className="flex justify-between"><span style={{ color: "var(--color-text-secondary)" }}>{t('remit:detail_mid_rate')}</span><span style={{ fontWeight: 600 }}>{formatRate(midRate.rate, selectedCountry.currency)}</span></div>
-                      <div className="flex justify-between"><span style={{ color: "var(--color-text-secondary)" }}>{t('remit:detail_provider_rate')}</span><span style={{ fontWeight: 600 }}>{formatRate(quote.exchangeRate, selectedCountry.currency)}</span></div>
-                      <div className="flex justify-between"><span style={{ color: "var(--color-text-secondary)" }}>{t('remit:detail_spread_cost')}</span><span style={{ fontWeight: 600, color: "var(--color-action-error)" }}>≈ ₩{formatKRW((parsedAmount - quote.fee) * (1 - midRate.rate / quote.exchangeRate))}</span></div>
-                      <div className="pt-2.5 flex justify-between" style={{ borderTop: "1px solid var(--color-border-default)" }}><span style={{ fontWeight: 700 }}>{t('remit:detail_receive')}</span><span style={{ fontWeight: 800, color: "var(--color-action-primary)" }}>{formatForeign(quote.receiveAmount, selectedCountry.currency)} {selectedCountry.currency}</span></div>
+                    <div className="flex items-center rounded-2xl p-3 mb-3" style={{ backgroundColor: "var(--color-surface-secondary)" }}>
+                      <div className="flex-1 text-center"><p className="text-[10px]" style={{ color: "var(--color-text-secondary)" }}>{t('remit:fee_label')}</p><p className="text-[13px] mt-0.5" style={{ fontWeight: 600 }}>₩{formatKRW(quote.fee)}</p></div>
+                      <div className="w-px h-8" style={{ backgroundColor: "var(--color-border-default)" }} />
+                      <div className="flex-1 text-center"><p className="text-[10px]" style={{ color: "var(--color-text-secondary)" }}>{t('remit:speed_label')}</p><p className="text-[13px] mt-0.5" style={{ fontWeight: 600 }}>{quote.speed}</p></div>
+                      <div className="w-px h-8" style={{ backgroundColor: "var(--color-border-default)" }} />
+                      <div className="flex-1 text-center"><p className="text-[10px]" style={{ color: "var(--color-text-secondary)" }}>{t('remit:applied_rate_label')}</p><p className="text-[13px] mt-0.5" style={{ fontWeight: 600 }}>{formatRateShort(quote.exchangeRate, selectedCountry.currency)}</p></div>
                     </div>
-                  )}
-                  <button onClick={() => handleProviderClick(quote)} className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl transition-all active:scale-[0.98]" style={{ fontWeight: 600, backgroundColor: isFirst ? "var(--color-action-primary)" : "var(--color-surface-secondary)", color: isFirst ? "var(--color-text-on-color)" : "var(--color-text-primary)" }}>
-                    {t('remit:send_via', { provider: quote.name })} <ArrowRight size={16} />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
+                    <button onClick={() => setExpandedCard(isExpanded ? null : quote.id)} className="w-full flex items-center justify-center gap-1 py-1 text-[12px] transition-colors" style={{ color: "var(--color-text-secondary)" }}>
+                      {isExpanded ? <>{t('remit:collapse')} <ChevronUp size={14} /></> : <>{t('remit:expand')} <ChevronDown size={14} /></>}
+                    </button>
+                    {isExpanded && midRate && (
+                      <div className="rounded-2xl p-4 mt-2 mb-3 space-y-2.5 text-[13px]" style={{ backgroundColor: "var(--color-surface-secondary)" }}>
+                        <div className="flex justify-between"><span style={{ color: "var(--color-text-secondary)" }}>{t('remit:detail_send')}</span><span style={{ fontWeight: 600 }}>₩{formatKRW(parsedAmount)}</span></div>
+                        <div className="flex justify-between"><span style={{ color: "var(--color-text-secondary)" }}>{t('remit:detail_fee')}</span><span style={{ fontWeight: 600, color: "var(--color-action-error)" }}>-₩{formatKRW(quote.fee)}</span></div>
+                        <div className="flex justify-between"><span style={{ color: "var(--color-text-secondary)" }}>{t('remit:detail_converted')}</span><span style={{ fontWeight: 600 }}>₩{formatKRW(parsedAmount - quote.fee)}</span></div>
+                        <div className="flex justify-between"><span style={{ color: "var(--color-text-secondary)" }}>{t('remit:detail_mid_rate')}</span><span style={{ fontWeight: 600 }}>{formatRate(midRate.rate, selectedCountry.currency)}</span></div>
+                        <div className="flex justify-between"><span style={{ color: "var(--color-text-secondary)" }}>{t('remit:detail_provider_rate')}</span><span style={{ fontWeight: 600 }}>{formatRate(quote.exchangeRate, selectedCountry.currency)}</span></div>
+                        <div className="flex justify-between"><span style={{ color: "var(--color-text-secondary)" }}>{t('remit:detail_spread_cost')}</span><span style={{ fontWeight: 600, color: "var(--color-action-error)" }}>≈ ₩{formatKRW((parsedAmount - quote.fee) * (1 - midRate.rate / quote.exchangeRate))}</span></div>
+                        <div className="pt-2.5 flex justify-between" style={{ borderTop: "1px solid var(--color-border-default)" }}><span style={{ fontWeight: 700 }}>{t('remit:detail_receive')}</span><span style={{ fontWeight: 800, color: "var(--color-action-primary)" }}>{formatForeign(quote.receiveAmount, selectedCountry.currency)} {selectedCountry.currency}</span></div>
+                      </div>
+                    )}
+                    <button onClick={() => handleProviderClick(quote)} className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl transition-all active:scale-[0.98]" style={{ fontWeight: 600, backgroundColor: isFirst ? "var(--color-action-primary)" : "var(--color-surface-secondary)", color: isFirst ? "var(--color-text-on-color)" : "var(--color-text-primary)" }}>
+                      {t('remit:send_via', { provider: quote.name })} <ArrowRight size={16} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ★ NEW: 나머지 업체 — 접기/펼치기 */}
+            {restQuotes.length > 0 && (
+              <div className="mt-4">
+                <button
+                  onClick={() => setShowMoreProviders(!showMoreProviders)}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-[14px] active:scale-[0.98] transition-transform"
+                  style={{
+                    fontWeight: 600,
+                    backgroundColor: "var(--color-surface-primary)",
+                    color: "var(--color-text-secondary)",
+                    border: "1px solid var(--color-border-default)",
+                  }}
+                >
+                  {showMoreProviders
+                    ? <>{t('remit:hide_more_providers')} <ChevronUp size={16} /></>
+                    : <>{t('remit:show_more_providers', { count: restQuotes.length })} <ChevronDown size={16} /></>
+                  }
+                </button>
+
+                {showMoreProviders && (
+                  <div className="mt-3 rounded-3xl overflow-hidden" style={{ backgroundColor: "var(--color-surface-primary)", border: "1px solid var(--color-border-default)" }}>
+                    {restQuotes.map((quote, index) => {
+                      const reason = topQuotes[0] ? getExclusionReason(quote, topQuotes[0], t) : '';
+                      return (
+                        <div
+                          key={quote.id}
+                          className="px-4 py-4"
+                          style={{ borderBottom: index < restQuotes.length - 1 ? "1px solid var(--color-border-default)" : undefined }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-xl">{quote.logo}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="text-[14px]" style={{ fontWeight: 600, color: "var(--color-text-primary)" }}>{quote.name}</p>
+                                <div className="flex items-center gap-0.5" style={{ color: "var(--color-action-warning)" }}>
+                                  <Star size={11} fill="currentColor" />
+                                  <span className="text-[11px]" style={{ fontWeight: 600 }}>{quote.rating}</span>
+                                </div>
+                              </div>
+                              <p className="text-[13px] mt-0.5" style={{ fontWeight: 600, color: "var(--color-text-secondary)" }}>
+                                {formatForeign(quote.receiveAmount, selectedCountry.currency)} {selectedCountry.currency}
+                              </p>
+                              {/* 제외 이유 */}
+                              <p className="text-[11px] mt-1" style={{ color: "var(--color-text-tertiary)" }}>
+                                {reason}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleProviderClick(quote)}
+                              className="text-[12px] px-3 py-1.5 rounded-xl active:scale-[0.97] transition-transform flex-shrink-0"
+                              style={{
+                                fontWeight: 600,
+                                backgroundColor: "var(--color-surface-secondary)",
+                                color: "var(--color-text-primary)",
+                              }}
+                            >
+                              {t('remit:send_short')}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
 
         {/* 면책 */}
         <div className="rounded-3xl p-4" style={{ backgroundColor: "var(--color-surface-primary)" }}>
           <div className="flex gap-2">
             <Shield size={14} className="mt-0.5 flex-shrink-0" style={{ color: "var(--color-text-secondary)" }} />
-            <p className="text-[11px] leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
-              {t('remit:disclaimer')}
-            </p>
+            <p className="text-[11px] leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>{t('remit:disclaimer')}</p>
           </div>
         </div>
       </div>
 
-      {/* 국가 선택 모달 */}
+      {/* 국가 선택 모달 — 동결 */}
       {showCountryPicker && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
           <div className="absolute inset-0 backdrop-blur-sm" style={{ backgroundColor: "var(--color-overlay)" }} onClick={() => setShowCountryPicker(false)} />
