@@ -403,8 +403,8 @@ export function Profile() {
           {[
             { icon: Globe, label: 'Language', value: currentLangDisplay, onPress: () => setLangPickerOpen(true) },
             { icon: Bell, label: 'Notifications', value: '', onPress: () => { /* Phase 3: push notification settings */ } },
-            { icon: Lock, label: 'Privacy Policy', value: '', onPress: () => window.open('https://settle.app/privacy', '_blank') },
-            { icon: FileText, label: 'Terms of Service', value: '', onPress: () => window.open('https://settle.app/terms', '_blank') },
+            { icon: Lock, label: 'Privacy Policy', value: '', onPress: () => navigate('/privacy') },
+            { icon: FileText, label: 'Terms of Service', value: '', onPress: () => navigate('/terms') },
             { icon: Info, label: 'App Version', value: 'v1.0.0', onPress: undefined },
           ].map((item, i) => {
             const Icon = item.icon;

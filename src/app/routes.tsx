@@ -1,10 +1,8 @@
 /**
- * routes.tsx — Phase 0-A (4-Tab Structure)
+ * routes.tsx — Phase 2-B (4-Tab + Privacy/Terms)
  *
- * 변경 사항:
- * - Housing(/housing), Education(/education) 라우트 제거
- * - 기존 URL 직접 접근 시 /home으로 리다이렉트
- * - 4탭: Home / Visa / Remit / Profile(MY)
+ * Phase 2-B 변경사항:
+ * - /privacy, /terms 라우트 추가 (AuthGuard 내부 — 로그인 필요)
  *
  * Dennis 규칙 준수:
  * #2  window.location.href 금지 → Navigate 컴포넌트 사용
@@ -14,7 +12,6 @@
  */
 
 import { createBrowserRouter, Navigate } from "react-router";
-import { Outlet, useLocation, useNavigate } from "react-router";
 // === Page imports ===
 import { Landing } from "./pages/landing";
 import { AuthGuardLayout } from "./components/AuthGuardLayout";
@@ -25,6 +22,9 @@ import { Profile } from "./pages/profile";
 import { Paywall } from "./pages/paywall";
 import { PaywallSuccess } from "./pages/PaywallSuccess";
 import { Onboarding } from "./pages/onboarding";
+import { Privacy } from "./pages/privacy";
+import { Terms } from "./pages/terms";
+
 export const router = createBrowserRouter([
   // === Public route (Auth) ===
   {
@@ -47,10 +47,10 @@ export const router = createBrowserRouter([
       { path: "paywall", Component: Paywall },
       { path: "paywall/success", Component: PaywallSuccess },
       { path: "onboarding", Component: Onboarding },
+      { path: "privacy", Component: Privacy },
+      { path: "terms", Component: Terms },
 
       // --- 삭제된 탭 리다이렉트 ---
-      // Housing/Education 직접 URL 접근 시 /home으로 이동
-      // 파일(housing.tsx, education.tsx)은 보존 — 데이터 확보 시 부활
       {
         path: "housing",
         element: <Navigate to="/home" replace />,
@@ -60,7 +60,7 @@ export const router = createBrowserRouter([
         element: <Navigate to="/home" replace />,
       },
 
-      // --- Catch-all: 알 수 없는 경로 → /home ---
+      // --- Catch-all ---
       {
         path: "*",
         element: <Navigate to="/home" replace />,
