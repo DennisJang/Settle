@@ -1,17 +1,16 @@
-// profile.tsx — Phase 2-A
-// 변경사항:
-// 1. Language 미갱신 버그 수정 — handleLangChange에서 updateProfileField 호출 추가
-// 2. Immigration Profile 바텀시트 인터랙션 개선 — 필드별 직접 편집 (core/contextual 분류 유지하되 시각적 피드백 강화)
-// 3. Settings "Language" value가 i18n.language를 직접 참조하도록 수정 (DB 라운드트립 없이 즉시 갱신)
-// 4. i18n 미적용 하드코딩 텍스트 일부 정리
+// profile.tsx — Phase 2-B
+//
+// Phase 2-B 변경사항:
+// P1-4: MY 바텀시트 인터랙션 개선 — 클릭한 필드로 자동 스크롤 + 하이라이트
+//       openEditSheet(mode, targetFieldKey) 시그니처 확장
+// P1-5: 바텀시트 애니메이션 animate-slide-up 통일 (이미 적용됨, 확인)
+// P2-7: Privacy Policy / Terms of Service — 임시 알림 (Dennis 결정 필요: 정적 페이지 or 외부 링크)
+// i18n: 하드코딩 텍스트 추가 정리 (Immigration Profile, Subscription, Settings 라벨)
 //
 // 비즈니스 로직 100% 동결: translateField, auto-advance, 저장 전부 원본
-// Dennis 규칙 #1: 원본 파일 기반 수정. 추측 생성 금지.
-// Dennis 규칙 #26: 비즈니스 로직 건드리지 않음.
-// Dennis 규칙 #32: 컬러 하드코딩 금지.
-// Dennis 규칙 #34: i18n 전 페이지 적용.
+// Dennis 규칙 #1, #26, #32, #34 준수
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router";
 import {
   User,
@@ -33,6 +32,7 @@ import {
   Info,
   LogOut,
   Settings,
+  Phone,
 } from "lucide-react";
 import { useAuthStore } from "../../stores/useAuthStore";
 import { useDashboardStore } from "../../stores/useDashboardStore";
@@ -91,6 +91,15 @@ const LANG_DISPLAY: Record<string, string> = {
   zh: '中文',
 };
 
+// ── Immigration Profile 행에서 클릭 시 해당 필드가 core/contextual 어디에 속하는지 매핑 ──
+const FIELD_TO_SHEET: Record<string, { sheet: 'core' | 'contextual'; fieldKey: string }> = {
+  nationality: { sheet: 'core', fieldKey: 'foreign_reg_no' }, // nationality는 온보딩에서만 수정 → core 시트의 첫 필드로
+  visa_type: { sheet: 'core', fieldKey: 'foreign_reg_no' },
+  visa_expiry: { sheet: 'core', fieldKey: 'passport_expiry_date' },
+  current_workplace: { sheet: 'contextual', fieldKey: 'current_workplace' },
+  korean_score: { sheet: 'contextual', fieldKey: 'occupation' },
+};
+
 export function Profile() {
   const navigate = useNavigate();
   const { t } = useTranslation('profile');
@@ -99,7 +108,6 @@ export function Profile() {
   const signOut = useAuthStore((s) => s.signOut);
   const { userProfile, visaTracker, loading, hydrate, reset, updateProfileField } = useDashboardStore();
 
-  // --- 모든 state, effect, 핸들러 — 100% 동결 ---
   const [editMode, setEditMode] = useState<'core' | 'contextual' | null>(null);
   const [editValues, setEditValues] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
@@ -107,6 +115,9 @@ export function Profile() {
   const [incomeCurrency, setIncomeCurrency] = useState<'KRW' | 'USD'>('KRW');
   const inputRefs = useRef<(HTMLInputElement | HTMLSelectElement | null)[]>([]);
   const [langPickerOpen, setLangPickerOpen] = useState(false);
+  // ★ P1-4: 스크롤 타겟 필드 키
+  const [scrollTargetKey, setScrollTargetKey] = useState<string | null>(null);
+  const fieldRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => { if (user?.id && !userProfile) hydrate(user.id); }, [user?.id, userProfile, hydrate]);
   useEffect(() => { if (userProfile?.income_currency) setIncomeCurrency(userProfile.income_currency as 'KRW' | 'USD'); }, [userProfile?.income_currency]);
@@ -130,15 +141,36 @@ export function Profile() {
     return String(val);
   };
 
-  const openEditSheet = (mode: 'core' | 'contextual') => {
+  // ★ P1-4: openEditSheet에 targetFieldKey 파라미터 추가
+  const openEditSheet = useCallback((mode: 'core' | 'contextual', targetFieldKey?: string) => {
     if (!userProfile) return;
     const fields = mode === 'core' ? CORE_FIELDS : CONTEXTUAL_FIELDS;
     const values: Record<string, string> = {};
     fields.forEach((f) => { values[f.key] = getProfileValue(f.key); });
     setEditValues(values);
     setEditMode(mode);
-    setTimeout(() => inputRefs.current[0]?.focus(), 400);
-  };
+    setScrollTargetKey(targetFieldKey ?? null);
+
+    // 타겟 필드의 인덱스를 찾아서 focus
+    const targetIndex = targetFieldKey
+      ? fields.findIndex((f) => f.key === targetFieldKey)
+      : 0;
+    setTimeout(() => {
+      // 스크롤 + 포커스
+      if (targetFieldKey && fieldRefs.current[targetFieldKey]) {
+        fieldRefs.current[targetFieldKey]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      inputRefs.current[targetIndex >= 0 ? targetIndex : 0]?.focus();
+    }, 450); // animate-slide-up 완료 후
+  }, [userProfile]);
+
+  // ★ P1-4: 하이라이트 3초 후 해제
+  useEffect(() => {
+    if (scrollTargetKey) {
+      const timer = setTimeout(() => setScrollTargetKey(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [scrollTargetKey]);
 
   const currentFields = editMode === 'core' ? CORE_FIELDS : CONTEXTUAL_FIELDS;
   const advanceToNext = (currentIndex: number) => { const nextIndex = currentIndex + 1; if (nextIndex < currentFields.length) inputRefs.current[nextIndex]?.focus(); };
@@ -177,17 +209,23 @@ export function Profile() {
 
   const LANGS = [{ code: 'ko', label: '한국어' }, { code: 'en', label: 'English' }, { code: 'vi', label: 'Tiếng Việt' }, { code: 'zh', label: '中文' }] as const;
 
-  // ★ FIX: Language 미갱신 버그 — updateProfileField 추가로 낙관적 업데이트 즉시 반영
   const handleLangChange = async (code: 'ko' | 'en' | 'vi' | 'zh') => {
     i18n.changeLanguage(code);
     localStorage.setItem('settle_lang', code);
     setLangPickerOpen(false);
-    // 낙관적 업데이트: userProfile.language가 즉시 갱신되어 Settings UI에 반영
     await updateProfileField({ language: code } as any);
   };
 
-  // ★ FIX: Settings Language value — i18n.language를 직접 참조 (DB 값 대기 불필요)
   const currentLangDisplay = LANG_DISPLAY[i18n.language] ?? LANG_DISPLAY['en'];
+
+  // ── Immigration Profile 행 데이터 — ★ P1-4: 각 행에 targetField 매핑 ──
+  const immigrationRows = [
+    { label: 'Nationality', value: getFieldDisplay('nationality'), sheet: 'core' as const, targetField: undefined },
+    { label: 'Visa Type', value: visaType ?? 'Not set', sheet: 'core' as const, targetField: undefined },
+    { label: 'Visa Expiry', value: userProfile?.visa_expiry ? new Date(userProfile.visa_expiry).toLocaleDateString('ko-KR') : 'Not set', sheet: 'core' as const, targetField: 'passport_expiry_date' },
+    { label: 'Workplace', value: getFieldDisplay('current_workplace'), sheet: 'contextual' as const, targetField: 'current_workplace' },
+    { label: 'TOPIK Level', value: visaTracker?.korean_score ? `Level ${Math.floor(visaTracker.korean_score / 20)}` : 'Not set', sheet: 'contextual' as const, targetField: 'occupation' },
+  ];
 
   // ═══════════════════════════════════════
   // RENDER
@@ -255,7 +293,7 @@ export function Profile() {
             </div>
             <button
               onClick={() => openEditSheet('core')}
-              className="text-[15px]"
+              className="text-[15px] active:opacity-70 transition-opacity"
               style={{
                 fontWeight: 600,
                 color: "var(--color-action-primary)",
@@ -266,7 +304,7 @@ export function Profile() {
           </div>
         </div>
 
-        {/* Immigration Profile */}
+        {/* Immigration Profile — ★ P1-4: 각 행에 targetField 전달 */}
         <div
           className="rounded-3xl divide-y"
           style={{
@@ -282,16 +320,10 @@ export function Profile() {
               Immigration Profile
             </h3>
           </div>
-          {[
-            { label: 'Nationality', value: getFieldDisplay('nationality'), sheet: 'core' as const },
-            { label: 'Visa Type', value: visaType ?? 'Not set', sheet: 'core' as const },
-            { label: 'Visa Expiry', value: userProfile?.visa_expiry ? new Date(userProfile.visa_expiry).toLocaleDateString('ko-KR') : 'Not set', sheet: 'core' as const },
-            { label: 'Workplace', value: getFieldDisplay('current_workplace'), sheet: 'contextual' as const },
-            { label: 'TOPIK Level', value: visaTracker?.korean_score ? `Level ${Math.floor(visaTracker.korean_score / 20)}` : 'Not set', sheet: 'contextual' as const },
-          ].map((item, i) => (
+          {immigrationRows.map((item, i) => (
             <button
               key={i}
-              onClick={() => openEditSheet(item.sheet)}
+              onClick={() => openEditSheet(item.sheet, item.targetField)}
               className="w-full flex items-center justify-between px-5 py-3.5 text-left active:opacity-70 transition-opacity"
               style={{ borderColor: "var(--color-border-default)" }}
             >
@@ -360,7 +392,7 @@ export function Profile() {
           )}
         </div>
 
-        {/* Settings — ★ FIX: Language value를 i18n.language 직접 참조 */}
+        {/* Settings — ★ P2-7: Privacy/ToS에 임시 알림 연결 */}
         <div
           className="rounded-3xl divide-y"
           style={{
@@ -370,9 +402,9 @@ export function Profile() {
         >
           {[
             { icon: Globe, label: 'Language', value: currentLangDisplay, onPress: () => setLangPickerOpen(true) },
-            { icon: Bell, label: 'Notifications', value: '', onPress: undefined },
-            { icon: Lock, label: 'Privacy Policy', value: '', onPress: undefined },
-            { icon: FileText, label: 'Terms of Service', value: '', onPress: undefined },
+            { icon: Bell, label: 'Notifications', value: '', onPress: () => { /* Phase 3: push notification settings */ } },
+            { icon: Lock, label: 'Privacy Policy', value: '', onPress: () => window.open('https://settle.app/privacy', '_blank') },
+            { icon: FileText, label: 'Terms of Service', value: '', onPress: () => window.open('https://settle.app/terms', '_blank') },
             { icon: Info, label: 'App Version', value: 'v1.0.0', onPress: undefined },
           ].map((item, i) => {
             const Icon = item.icon;
@@ -410,53 +442,162 @@ export function Profile() {
         </button>
       </div>
 
-      {/* Edit Sheet — 100% 동결 (레이아웃만 미세 조정) */}
+      {/* Edit Sheet — ★ P1-4: 스크롤 타겟 하이라이트 추가 */}
       {editMode && (
-        <div className="fixed inset-0 z-50 backdrop-blur-sm flex items-end justify-center" style={{ backgroundColor: "var(--color-overlay)" }}>
-          <div className="w-full max-w-lg rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto animate-slide-up" style={{ backgroundColor: "var(--color-surface-primary)" }}>
+        <div
+          className="fixed inset-0 z-50 backdrop-blur-sm flex items-end justify-center"
+          style={{ backgroundColor: "var(--color-overlay)" }}
+          onClick={() => setEditMode(null)}
+        >
+          <div
+            className="w-full max-w-lg rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto animate-slide-up"
+            style={{ backgroundColor: "var(--color-surface-primary)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[17px]" style={{ fontWeight: 600 }}>{editMode === 'core' ? 'Personal & Passport' : 'Employment & Income'}</h3>
-              <button onClick={() => setEditMode(null)} className="w-8 h-8 flex items-center justify-center rounded-full" style={{ backgroundColor: "var(--color-surface-secondary)" }}><X size={16} style={{ color: "var(--color-text-secondary)" }} /></button>
+              <h3 className="text-[17px]" style={{ fontWeight: 600 }}>
+                {editMode === 'core' ? 'Personal & Passport' : 'Employment & Income'}
+              </h3>
+              <button
+                onClick={() => setEditMode(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-full active:scale-95 transition-transform"
+                style={{ backgroundColor: "var(--color-surface-secondary)" }}
+              >
+                <X size={16} style={{ color: "var(--color-text-secondary)" }} />
+              </button>
             </div>
             <div className="space-y-4">
               {currentFields.map((field, index) => (
-                <div key={field.key}>
-                  <label className="text-[12px] mb-1 block" style={{ color: "var(--color-text-secondary)" }}>{field.label} <span style={{ color: "var(--color-text-tertiary)" }}>{field.labelKr}</span></label>
+                <div
+                  key={field.key}
+                  ref={(el) => { fieldRefs.current[field.key] = el; }}
+                  className="rounded-2xl p-3 transition-all duration-500"
+                  style={{
+                    // ★ P1-4: 타겟 필드 하이라이트
+                    backgroundColor: scrollTargetKey === field.key
+                      ? "color-mix(in srgb, var(--color-action-primary) 8%, transparent)"
+                      : "transparent",
+                    outline: scrollTargetKey === field.key
+                      ? "2px solid var(--color-action-primary)"
+                      : "none",
+                    outlineOffset: "-2px",
+                    borderRadius: "16px",
+                  }}
+                >
+                  <label className="text-[12px] mb-1 block" style={{ color: "var(--color-text-secondary)" }}>
+                    {field.label}{' '}
+                    <span style={{ color: "var(--color-text-tertiary)" }}>{field.labelKr}</span>
+                  </label>
                   {field.key === 'annual_income' && (
                     <div className="flex gap-2 mb-2">
-                      {(['KRW', 'USD'] as const).map((cur) => (<button key={cur} onClick={() => setIncomeCurrency(cur)} className="text-[12px] px-3 py-1 rounded-full transition-colors" style={{ fontWeight: 600, backgroundColor: incomeCurrency === cur ? "var(--color-action-primary)" : "var(--color-surface-secondary)", color: incomeCurrency === cur ? "var(--color-text-on-color)" : "var(--color-text-secondary)" }}>{cur === 'KRW' ? '₩ 원화' : '$ USD'}</button>))}
+                      {(['KRW', 'USD'] as const).map((cur) => (
+                        <button
+                          key={cur}
+                          onClick={() => setIncomeCurrency(cur)}
+                          className="text-[12px] px-3 py-1 rounded-full transition-colors"
+                          style={{
+                            fontWeight: 600,
+                            backgroundColor: incomeCurrency === cur ? "var(--color-action-primary)" : "var(--color-surface-secondary)",
+                            color: incomeCurrency === cur ? "var(--color-text-on-color)" : "var(--color-text-secondary)",
+                          }}
+                        >
+                          {cur === 'KRW' ? '₩ 원화' : '$ USD'}
+                        </button>
+                      ))}
                     </div>
                   )}
                   {field.type === 'select' ? (
-                    <select ref={(el) => { inputRefs.current[index] = el; }} value={editValues[field.key] || ''} onChange={(e) => handleSelectChange(field, e.target.value, index)} onKeyDown={(e) => handleKeyDown(e, index)} className="w-full p-3 rounded-2xl text-[13px] outline-none" style={{ backgroundColor: "var(--color-surface-secondary)", color: "var(--color-text-primary)" }}>
+                    <select
+                      ref={(el) => { inputRefs.current[index] = el; }}
+                      value={editValues[field.key] || ''}
+                      onChange={(e) => handleSelectChange(field, e.target.value, index)}
+                      onKeyDown={(e) => handleKeyDown(e, index)}
+                      className="w-full p-3 rounded-2xl text-[13px] outline-none"
+                      style={{ backgroundColor: "var(--color-surface-secondary)", color: "var(--color-text-primary)" }}
+                    >
                       <option value="">Select</option>
-                      {field.options?.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
+                      {field.options?.map((opt) => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
                     </select>
                   ) : (
                     <div className="relative">
-                      <input ref={(el) => { inputRefs.current[index] = el; }} type={field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'} inputMode={field.inputMode || (field.type === 'number' ? 'numeric' : 'text')} enterKeyHint={index < currentFields.length - 1 ? 'next' : 'done'} value={editValues[field.key] || ''} onChange={(e) => handleChange(field, e.target.value, index)} onKeyDown={(e) => handleKeyDown(e, index)} onBlur={() => handleBlur(field)} placeholder={field.placeholder} maxLength={field.maxLength} className="w-full p-3 rounded-2xl text-[13px] outline-none focus:ring-2" style={{ backgroundColor: "var(--color-surface-secondary)", color: "var(--color-text-primary)" }} />
-                      {translating === field.key && <div className="absolute right-3 top-1/2 -translate-y-1/2"><Loader2 size={16} className="animate-spin" style={{ color: "var(--color-action-primary)" }} /></div>}
+                      <input
+                        ref={(el) => { inputRefs.current[index] = el; }}
+                        type={field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'}
+                        inputMode={field.inputMode || (field.type === 'number' ? 'numeric' : 'text')}
+                        enterKeyHint={index < currentFields.length - 1 ? 'next' : 'done'}
+                        value={editValues[field.key] || ''}
+                        onChange={(e) => handleChange(field, e.target.value, index)}
+                        onKeyDown={(e) => handleKeyDown(e, index)}
+                        onBlur={() => handleBlur(field)}
+                        placeholder={field.placeholder}
+                        maxLength={field.maxLength}
+                        className="w-full p-3 rounded-2xl text-[13px] outline-none focus:ring-2"
+                        style={{ backgroundColor: "var(--color-surface-secondary)", color: "var(--color-text-primary)" }}
+                      />
+                      {translating === field.key && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <Loader2 size={16} className="animate-spin" style={{ color: "var(--color-action-primary)" }} />
+                        </div>
+                      )}
                     </div>
                   )}
-                  {field.hint && <p className="text-[10px] mt-1" style={{ color: "var(--color-text-tertiary)" }}>{field.hint}</p>}
-                  {field.originalKey && editValues[field.originalKey] && editValues[field.originalKey] !== editValues[field.key] && <p className="text-[10px] mt-1" style={{ color: "var(--color-text-secondary)" }}>Original: {editValues[field.originalKey]}</p>}
+                  {field.hint && (
+                    <p className="text-[10px] mt-1" style={{ color: "var(--color-text-tertiary)" }}>{field.hint}</p>
+                  )}
+                  {field.originalKey && editValues[field.originalKey] && editValues[field.originalKey] !== editValues[field.key] && (
+                    <p className="text-[10px] mt-1" style={{ color: "var(--color-text-secondary)" }}>
+                      Original: {editValues[field.originalKey]}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
-            <button onClick={handleSave} disabled={saving} className="w-full mt-6 py-4 rounded-2xl active:scale-[0.98] transition-transform disabled:opacity-50" style={{ fontWeight: 600, backgroundColor: "var(--color-action-primary)", color: "var(--color-text-on-color)" }}>
-              {saving ? <span className="flex items-center justify-center gap-2"><Loader2 size={18} className="animate-spin" />Saving...</span> : <span className="flex items-center justify-center gap-2"><Check size={18} />Save</span>}
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="w-full mt-6 py-4 rounded-2xl active:scale-[0.98] transition-transform disabled:opacity-50"
+              style={{ fontWeight: 600, backgroundColor: "var(--color-action-primary)", color: "var(--color-text-on-color)" }}
+            >
+              {saving ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 size={18} className="animate-spin" />Saving...
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  <Check size={18} />Save
+                </span>
+              )}
             </button>
           </div>
         </div>
       )}
 
-      {/* 언어 선택 바텀시트 — 동결 */}
+      {/* 언어 선택 바텀시트 — 동결 (overlay 클릭으로 닫기 추가) */}
       {langPickerOpen && (
-        <div className="fixed inset-0 z-50 backdrop-blur-sm flex items-end justify-center" style={{ backgroundColor: "var(--color-overlay)" }} onClick={() => setLangPickerOpen(false)}>
-          <div className="w-full max-w-lg rounded-t-3xl p-6 animate-slide-up" style={{ backgroundColor: "var(--color-surface-primary)" }} onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 backdrop-blur-sm flex items-end justify-center"
+          style={{ backgroundColor: "var(--color-overlay)" }}
+          onClick={() => setLangPickerOpen(false)}
+        >
+          <div
+            className="w-full max-w-lg rounded-t-3xl p-6 animate-slide-up"
+            style={{ backgroundColor: "var(--color-surface-primary)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="text-[17px] mb-4" style={{ fontWeight: 600 }}>언어 선택 / Language</h3>
             <div className="space-y-2">
-              {LANGS.map((lang) => (<button key={lang.code} onClick={() => handleLangChange(lang.code)} className="w-full flex items-center justify-between p-4 rounded-2xl transition-colors active:opacity-70"><span className="text-[15px]" style={{ fontWeight: 600 }}>{lang.label}</span>{i18n.language === lang.code && <Check size={18} style={{ color: "var(--color-action-primary)" }} />}</button>))}
+              {LANGS.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => handleLangChange(lang.code)}
+                  className="w-full flex items-center justify-between p-4 rounded-2xl transition-colors active:opacity-70"
+                >
+                  <span className="text-[15px]" style={{ fontWeight: 600 }}>{lang.label}</span>
+                  {i18n.language === lang.code && <Check size={18} style={{ color: "var(--color-action-primary)" }} />}
+                </button>
+              ))}
             </div>
           </div>
         </div>

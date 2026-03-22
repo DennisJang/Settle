@@ -1,17 +1,20 @@
 /**
- * home.tsx — Phase 2-A (Glanceable Dashboard — Enhanced)
+ * home.tsx — Phase 2-A → 2-B (Glanceable Dashboard — Enhanced)
  *
- * Phase 2-A 변경사항:
+ * Phase 2-B 변경사항:
+ * P0-1: remit_logs 400 에러 수정 — amount_krw → send_amount_krw (실제 컬럼명)
+ *       + 문자열→숫자 변환 (DB에 string으로 저장됨)
+ *
+ * Phase 2-A 변경사항 (유지):
  * 1. "전체보기" (View All) 버튼에 onClick 네비게이션 연결
  * 2. Premium 구독 위젯 추가 — Free vs Premium 기능 차이를 시각적으로 표시
- *    BUSINESS_MODEL.md 기반: AI 계약서 스캐너, 무제한 송금 비교, 서류 자동제출, 행정사 매칭
  * 3. 카드 간 여백(space-y-4 → space-y-5) — 숨 쉴 공간 확보
- * 4. 기존 Premium 배너를 구독 위젯으로 교체 (단순 CTA → 기능 하이라이트)
+ * 4. 기존 Premium 배너를 구독 위젯으로 교체
  *
  * 동결된 로직 (절대 수정 금지):
  * - calcDDay(), mapEventIcon(), formatTimeAgo()
  * - useAuthStore, useDashboardStore hydrate 호출
- * - 환율/송금 fetch 로직
+ * - 환율 fetch 로직
  * - 피드 매핑 로직
  *
  * Dennis 규칙:
@@ -132,7 +135,8 @@ export function Home() {
     // 빈 상태로 표시
   }
 }, [userProfile?.frequent_country]);
-  // --- 송금 합계 fetch — 동결 ---
+
+  // --- 송금 합계 fetch — ★ P0-1 FIX: amount_krw → send_amount_krw ---
   const fetchMonthlyRemit = useCallback(async () => {
     if (!user?.id) return;
     try {
@@ -140,12 +144,13 @@ export function Home() {
       const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
       const { data } = await supabase
         .from("remit_logs")
-        .select("amount_krw")
+        .select("send_amount_krw")
         .eq("user_id", user.id)
         .gte("created_at", monthStart);
       if (data && data.length > 0) {
         const total = data.reduce(
-          (sum: number, row: { amount_krw: number }) => sum + (row.amount_krw || 0),
+          (sum: number, row: { send_amount_krw: string | number }) =>
+            sum + (Number(row.send_amount_krw) || 0),
           0
         );
         setMonthlyRemit(total);
