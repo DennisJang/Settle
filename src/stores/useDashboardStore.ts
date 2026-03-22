@@ -9,9 +9,17 @@ import type {
 } from '../types'
 
 // ============================================
-// Dashboard Store — Phase 2 데이터 바인딩 허브
-// Blueprint 확정 함수명: hydrate, saveWorkLog, updateSpecOptimistic
-// Phase 5 추가: toggleChecklistItem
+// Dashboard Store — Phase 2-B
+//
+// Phase 2-B 변경사항:
+// - hydrate: .single() → .maybeSingle() (user_profiles, visa_trackers)
+//   원인: Google OAuth 리턴 직후 Auth 토큰이 완전히 세팅되기 전에 hydrate 호출 시
+//         RLS가 auth.uid()를 null로 봄 → 0행 반환 → .single()이 406 에러
+//   수정: .maybeSingle()은 0행이면 data: null 반환 (에러 아님)
+// - hydrate 실패 시 1회 재시도 (500ms 딜레이) — Auth 토큰 안정화 대기
+//
+// 비즈니스 로직 동결: saveWorkLog, updateSpecOptimistic, toggleChecklistItem,
+//                     updateProfileField, reset 100% 원본 유지
 // ============================================
 
 interface DashboardState {
@@ -52,12 +60,13 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   // ============================================
   // hydrate — 로그인 직후 1회 호출
   // 4개 테이블 병렬 fetch (RLS가 user_id 필터링)
+  //
+  // ★ Phase 2-B: .single() → .maybeSingle() + 재시도
   // ============================================
   hydrate: async (userId: string) => {
     set({ loading: true, error: null })
 
     try {
-      // 당월 첫째날 계산 (workLogs 범위 제한)
       const now = new Date()
       const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
 
@@ -66,13 +75,13 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
           .from('user_profiles')
           .select('*')
           .eq('user_id', userId)
-          .single(),
+          .maybeSingle(),  // ★ .single() → .maybeSingle()
 
         supabase
           .from('visa_trackers')
           .select('*')
           .eq('user_id', userId)
-          .single(),
+          .maybeSingle(),  // ★ .single() → .maybeSingle()
 
         supabase
           .from('daily_work_logs')
@@ -89,13 +98,40 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
           .limit(10),
       ])
 
-      // 에러 감지: Supabase 에러 직렬화 실패 시 {} 빈 객체 (규칙 #16)
       const errors = [profileRes.error, visaRes.error, logsRes.error, eventsRes.error]
         .filter(Boolean)
         .map((e) => e?.message ?? 'Unknown error')
 
       if (errors.length > 0) {
         console.error('[Dashboard hydrate] errors:', errors)
+      }
+
+      // ★ Phase 2-B: 프로필이 null이고 에러도 있으면 → Auth 토큰 레이스 가능성
+      // 500ms 후 1회 재시도
+      if (!profileRes.data && profileRes.error) {
+        console.warn('[Dashboard hydrate] Profile fetch failed, retrying in 500ms...')
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        const retryProfile = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle()
+
+        const retryVisa = await supabase
+          .from('visa_trackers')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle()
+
+        set({
+          userProfile: retryProfile.data ?? null,
+          visaTracker: retryVisa.data ?? null,
+          workLogs: logsRes.data ?? [],
+          lifeEvents: eventsRes.data ?? [],
+          loading: false,
+        })
+        return
       }
 
       set({
@@ -112,9 +148,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   },
 
   // ============================================
-  // saveWorkLog — 출퇴근 기록 upsert
-  // 규칙 #15: Supabase .upsert() Partial Index onConflict 사용 불가
-  // → select 후 insert or update 패턴 사용
+  // saveWorkLog — 100% 동결
   // ============================================
   saveWorkLog: async (log) => {
     const { userProfile, workLogs } = get()
@@ -123,7 +157,6 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
     const userId = userProfile.user_id
 
     try {
-      // 기존 레코드 확인
       const { data: existing } = await supabase
         .from('daily_work_logs')
         .select('id')
@@ -134,7 +167,6 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       let result
 
       if (existing) {
-        // UPDATE
         result = await supabase
           .from('daily_work_logs')
           .update({
@@ -147,7 +179,6 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
           .select()
           .single()
       } else {
-        // INSERT
         result = await supabase
           .from('daily_work_logs')
           .insert({
@@ -163,7 +194,6 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       }
 
       if (result.error) {
-        // 규칙 #14: PostgREST 409 = PG 23505 병행 감지
         const isPgConflict =
           result.error.code === '23505' ||
           result.error.message?.includes('duplicate') ||
@@ -176,7 +206,6 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       }
 
       if (result.data) {
-        // 낙관적 업데이트: 리스트에서 교체 or 추가
         const updated = existing
           ? workLogs.map((w) => (w.id === existing.id ? result.data! : w))
           : [result.data, ...workLogs]
@@ -190,18 +219,14 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   },
 
   // ============================================
-  // updateSpecOptimistic — user_profiles 필드 업데이트
-  // 규칙 #29: update_user_spec RPC는 user_profiles 타겟 (visa_trackers 아님)
-  // 낙관적 업데이트 패턴: UI 즉시 반영 → 실패 시 롤백
+  // updateSpecOptimistic — 100% 동결
   // ============================================
   updateSpecOptimistic: async (field, value) => {
     const { userProfile } = get()
     if (!userProfile) return
 
-    // 이전 값 저장 (롤백용)
     const prev = userProfile[field]
 
-    // 즉시 UI 반영
     set({
       userProfile: { ...userProfile, [field]: value },
     })
@@ -214,7 +239,6 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
 
       if (error) throw error
     } catch (err) {
-      // 롤백
       set({
         userProfile: { ...get().userProfile!, [field]: prev },
         error: err instanceof Error ? err.message : 'Failed to update profile',
@@ -223,9 +247,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   },
 
   // ============================================
-  // toggleChecklistItem — Phase 5: 체크리스트 항목 토글
-  // 낙관적 업데이트: UI 즉시 반영 → DB 저장 → 실패 시 롤백
-  // visa_trackers.checklist (JSONB) 업데이트
+  // toggleChecklistItem — 100% 동결
   // ============================================
   toggleChecklistItem: async (itemId: number) => {
     const { visaTracker } = get()
@@ -233,7 +255,6 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
 
     const prevChecklist = visaTracker.checklist
 
-    // 낙관적 업데이트: 토글 즉시 반영
     const updatedChecklist = prevChecklist.map((item: ChecklistItem) =>
       item.id === itemId ? { ...item, completed: !item.completed } : item
     )
@@ -253,7 +274,6 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
 
       if (error) throw error
     } catch (err) {
-      // 롤백
       set({
         visaTracker: { ...get().visaTracker!, checklist: prevChecklist },
         error: err instanceof Error ? err.message : 'Failed to update checklist',
@@ -262,19 +282,14 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   },
 
   // ============================================
-  // updateProfileField — Phase 5: Layer 2 필드 범용 업데이트
-  // 낙관적 업데이트: UI 즉시 반영 → DB 저장 → 실패 시 롤백
-  // user_profiles 대상 (규칙 #29)
-  // 여러 필드를 한 번에 업데이트 가능 (Partial<UserProfile>)
+  // updateProfileField — 100% 동결
   // ============================================
   updateProfileField: async (updates: Partial<UserProfile>) => {
     const { userProfile } = get()
     if (!userProfile) return
 
-    // 이전 값 저장 (롤백용)
     const prevProfile = { ...userProfile }
 
-    // 즉시 UI 반영
     set({
       userProfile: { ...userProfile, ...updates, updated_at: new Date().toISOString() },
     })
@@ -287,7 +302,6 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
 
       if (error) throw error
     } catch (err) {
-      // 롤백
       set({
         userProfile: prevProfile,
         error: err instanceof Error ? err.message : 'Failed to update profile',
@@ -296,7 +310,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   },
 
   // ============================================
-  // reset — signOut 시 호출 (규칙 #10)
+  // reset — 100% 동결
   // ============================================
   reset: () => set(initialState),
 }))
