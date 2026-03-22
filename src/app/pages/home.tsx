@@ -1,12 +1,9 @@
 /**
  * home.tsx — Phase 1 (Glanceable Dashboard)
  *
- * Phase 0-A → Phase 1 변경사항:
- * - D-Day 카드: 비자타입 배지 + 만료일 날짜 표시
- * - 환율/KIIP: 2-column → 각각 독립 컴팩트 카드
- * - 카드 간격: space-y-6 → space-y-4 (16pt)
- * - pb-32 추가 (부유형 탭바 겹침 방지)
- * - Premium 배너: "Start trial" 버튼 텍스트
+ * Phase 1 i18n 마무리 변경사항:
+ * - 국기 이모지 → CountryFlag SVG 컴포넌트로 교체 (환율 카드)
+ * - 기존 i18n t() 유지
  *
  * 동결된 로직 (절대 수정 금지):
  * - calcDDay(), mapEventIcon(), formatTimeAgo()
@@ -34,6 +31,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Logo } from "../components/logo";
+import { CountryFlag } from "../components/CountryFlag";
 import { useAuthStore } from "../../stores/useAuthStore";
 import { useDashboardStore } from "../../stores/useDashboardStore";
 import { supabase } from "../../lib/supabase";
@@ -71,6 +69,13 @@ function formatTimeAgo(dateStr: string): string {
   if (days === 1) return "Yesterday";
   return `${days}d ago`;
 }
+
+/** 통화 코드 → 국가 코드 매핑 (CountryFlag용) */
+const CURRENCY_TO_COUNTRY: Record<string, string> = {
+  VND: "VN", CNY: "CN", THB: "TH", PHP: "PH", IDR: "ID",
+  NPR: "NP", KHR: "KH", UZS: "UZ", MNT: "MN", BDT: "BD",
+  USD: "US", KRW: "KR",
+};
 
 // ============================================
 // 타입
@@ -278,7 +283,7 @@ export function Home() {
           </div>
         )}
 
-        {/* Visa D-Day Card — 히어로 카드 */}
+        {/* Visa D-Day Card */}
         <Link
           to="/visa"
           className="block rounded-3xl p-5 active:scale-[0.98] transition-transform"
@@ -365,7 +370,7 @@ export function Home() {
           )}
         </Link>
 
-        {/* Exchange Rate — 컴팩트 독립 카드 */}
+        {/* Exchange Rate — CountryFlag 적용 */}
         <div
           className="rounded-3xl px-5 py-4"
           style={{
@@ -394,7 +399,11 @@ export function Home() {
                 }}
               />
             ) : exchangeRate ? (
-              <div className="flex items-baseline gap-1.5">
+              <div className="flex items-center gap-2">
+                <CountryFlag
+                  code={CURRENCY_TO_COUNTRY[exchangeRate.currency_code] ?? exchangeRate.currency_code}
+                  size={18}
+                />
                 <span
                   className="text-[13px] leading-[18px]"
                   style={{ color: "var(--color-text-secondary)" }}
@@ -422,7 +431,7 @@ export function Home() {
           </div>
         </div>
 
-        {/* KIIP Progress — 컴팩트 독립 카드 */}
+        {/* KIIP Progress */}
         <div
           className="rounded-3xl px-5 py-4"
           style={{

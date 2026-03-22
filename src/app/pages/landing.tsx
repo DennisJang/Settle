@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import { Logo } from "../components/logo";
 import { FileText, Send, Building, GraduationCap } from "lucide-react";
 import { useAuthStore } from "../../stores/useAuthStore";
 
 export function Landing() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     session,
@@ -24,7 +26,6 @@ export function Landing() {
   const [fullName, setFullName] = useState("");
   const [resetSent, setResetSent] = useState(false);
 
-  // 이미 인증된 유저 → /home 리다이렉트
   useEffect(() => {
     if (initialized && session) {
       navigate("/home", { replace: true });
@@ -49,7 +50,6 @@ export function Landing() {
       } else if (mode === "signup") {
         const { signUpWithEmail } = useAuthStore.getState();
         await signUpWithEmail(email, password, fullName);
-        // 회원가입 성공 → 이메일 확인 안내 (Supabase 설정에 따라)
         navigate("/home");
       } else if (mode === "reset") {
         const { resetPassword } = useAuthStore.getState();
@@ -172,7 +172,7 @@ export function Landing() {
               className="text-lg max-w-xs"
               style={{ color: "var(--color-text-secondary)" }}
             >
-              Your trusted companion for life in Korea
+              {t('landing:tagline')}
             </p>
           </motion.div>
         </motion.div>
@@ -191,7 +191,6 @@ export function Landing() {
               className="rounded-3xl p-6 shadow-lg space-y-4"
               style={{ backgroundColor: "var(--color-surface-primary)" }}
             >
-              {/* Error display */}
               {error && (
                 <div
                   className="text-sm px-4 py-3 rounded-2xl"
@@ -204,7 +203,6 @@ export function Landing() {
                 </div>
               )}
 
-              {/* Reset success message */}
               {resetSent && (
                 <div
                   className="text-sm px-4 py-3 rounded-2xl"
@@ -213,24 +211,23 @@ export function Landing() {
                     color: "var(--color-action-success)",
                   }}
                 >
-                  Password reset email sent. Check your inbox.
+                  {t('landing:reset_sent')}
                 </div>
               )}
 
-              {/* Full name — 회원가입 모드에서만 */}
               {mode === "signup" && (
                 <div>
                   <label
                     className="block text-sm mb-2"
                     style={{ fontWeight: 600 }}
                   >
-                    Full Name
+                    {t('landing:label_fullname')}
                   </label>
                   <input
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Alex Johnson"
+                    placeholder={t('landing:placeholder_name')}
                     className="w-full rounded-2xl px-4 py-3 outline-none focus:ring-2 transition-all"
                     style={{ backgroundColor: "var(--color-surface-secondary)" }}
                     required
@@ -243,33 +240,32 @@ export function Landing() {
                   className="block text-sm mb-2"
                   style={{ fontWeight: 600 }}
                 >
-                  Email
+                  {t('landing:label_email')}
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="alex@example.com"
+                  placeholder={t('landing:placeholder_email')}
                   className="w-full rounded-2xl px-4 py-3 outline-none focus:ring-2 transition-all"
                   style={{ backgroundColor: "var(--color-surface-secondary)" }}
                   required
                 />
               </div>
 
-              {/* Password — 비밀번호 리셋 모드에서는 숨김 */}
               {mode !== "reset" && (
                 <div>
                   <label
                     className="block text-sm mb-2"
                     style={{ fontWeight: 600 }}
                   >
-                    Password
+                    {t('landing:label_password')}
                   </label>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder={t('landing:placeholder_password')}
                     className="w-full rounded-2xl px-4 py-3 outline-none focus:ring-2 transition-all"
                     style={{ backgroundColor: "var(--color-surface-secondary)" }}
                     required
@@ -279,7 +275,6 @@ export function Landing() {
               )}
             </div>
 
-            {/* Submit button */}
             <button
               type="submit"
               disabled={loading}
@@ -293,13 +288,12 @@ export function Landing() {
               {loading
                 ? "..."
                 : mode === "signin"
-                  ? "Sign in"
+                  ? t('landing:btn_signin')
                   : mode === "signup"
-                    ? "Create account"
-                    : "Send reset link"}
+                    ? t('landing:btn_signup')
+                    : t('landing:btn_reset')}
             </button>
 
-            {/* Google OAuth */}
             {mode !== "reset" && (
               <button
                 type="button"
@@ -315,28 +309,15 @@ export function Landing() {
               >
                 {/* Google logo — 외부 브랜드 색상이므로 토큰 대상 아님 */}
                 <svg width="20" height="20" viewBox="0 0 24 24">
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-                    fill="#4285F4"
-                  />
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853"
-                  />
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    fill="#FBBC05"
-                  />
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    fill="#EA4335"
-                  />
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                 </svg>
-                Continue with Google
+                {t('landing:btn_google')}
               </button>
             )}
 
-            {/* Mode switches */}
             <div className="flex items-center justify-between text-sm">
               {mode === "signin" && (
                 <>
@@ -345,14 +326,14 @@ export function Landing() {
                     style={{ fontWeight: 600, color: "var(--color-action-primary)" }}
                     onClick={() => switchMode("reset")}
                   >
-                    Forgot password?
+                    {t('landing:link_forgot')}
                   </button>
                   <button
                     type="button"
                     style={{ fontWeight: 600, color: "var(--color-action-primary)" }}
                     onClick={() => switchMode("signup")}
                   >
-                    Create account
+                    {t('landing:link_create')}
                   </button>
                 </>
               )}
@@ -363,7 +344,7 @@ export function Landing() {
                   style={{ fontWeight: 600, color: "var(--color-action-primary)" }}
                   onClick={() => switchMode("signin")}
                 >
-                  Already have an account? Sign in
+                  {t('landing:link_back_signin')}
                 </button>
               )}
               {mode === "reset" && (
@@ -373,14 +354,14 @@ export function Landing() {
                   style={{ fontWeight: 600, color: "var(--color-action-primary)" }}
                   onClick={() => switchMode("signin")}
                 >
-                  Back to sign in
+                  {t('landing:link_back_signin_short')}
                 </button>
               )}
             </div>
 
             <div className="text-center">
               <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
-                By signing in, you agree to our Terms & Privacy Policy
+                {t('landing:terms')}
               </p>
             </div>
           </form>

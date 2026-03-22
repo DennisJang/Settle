@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, Check, Crown, Sparkles, Loader2 } from "lucide-react";
 import { Logo } from "../components/logo";
 import { useAuthStore } from "../../stores/useAuthStore";
@@ -19,15 +20,12 @@ type PlanType = 'premium'
 type BillingCycle = 'monthly' | 'yearly'
 
 export function Paywall() {
+  const { t } = useTranslation();
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // ============================================
-  // requestBillingAuth — Toss 결제창 열기
-  // 카드 등록 + 본인인증 → /paywall/success로 redirect
-  // ============================================
   const handleSubscribe = async (plan: PlanType, cycle: BillingCycle) => {
     if (!user) {
       navigate('/')
@@ -35,7 +33,7 @@ export function Paywall() {
     }
 
     if (!TOSS_CLIENT_KEY) {
-      setError('결제 설정이 완료되지 않았습니다. 관리자에게 문의하세요.')
+      setError(t('paywall:error_no_key'))
       return
     }
 
@@ -46,7 +44,6 @@ export function Paywall() {
       const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY)
       const payment = tossPayments.payment({ customerKey: crypto.randomUUID() })
 
-      // 규칙 #19: successUrl → /paywall/success (Vite 라우트 기준)
       const origin = window.location.origin
 
       await payment.requestBillingAuth({
@@ -55,30 +52,15 @@ export function Paywall() {
         failUrl: `${origin}/paywall?error=payment_failed`,
       })
     } catch (err) {
-      const message = err instanceof Error ? err.message : '결제 요청에 실패했습니다.'
+      const message = err instanceof Error ? err.message : t('paywall:error_generic')
       setError(message)
     } finally {
       setLoading(false)
     }
   }
 
-  const basicFeatures = [
-    "Visa status tracking",
-    "Exchange rate alerts",
-    "KIIP schedule",
-    "Community support",
-  ];
-
-  const premiumFeatures = [
-    "Everything in Basic",
-    "AI contract scanner",
-    "Priority immigration lawyer matching",
-    "Unlimited remittance comparisons",
-    "Insurance & legal service discounts",
-    "Personalized E-7-4 improvement plan",
-    "24/7 priority support",
-    "Ad-free experience",
-  ];
+  const basicFeatureKeys = ["basic_f1", "basic_f2", "basic_f3", "basic_f4"] as const;
+  const premiumFeatureKeys = ["premium_f1", "premium_f2", "premium_f3", "premium_f4", "premium_f5", "premium_f6", "premium_f7", "premium_f8"] as const;
 
   return (
     <div
@@ -108,14 +90,13 @@ export function Paywall() {
               />
             </Link>
             <h1 className="text-xl" style={{ fontWeight: 600 }}>
-              Subscription
+              {t('paywall:title')}
             </h1>
           </div>
         </div>
       </header>
 
       <div className="px-6 py-8 space-y-8">
-        {/* Error banner */}
         {error && (
           <div
             className="border rounded-2xl px-4 py-3"
@@ -134,10 +115,10 @@ export function Paywall() {
         <div className="text-center space-y-4 py-8">
           <Logo size="large" />
           <h1 className="text-3xl" style={{ fontWeight: 600 }}>
-            Choose your plan
+            {t('paywall:hero_title')}
           </h1>
           <p style={{ color: "var(--color-text-secondary)" }}>
-            플랜을 선택하세요 • Start with Basic, upgrade anytime
+            {t('paywall:hero_desc')}
           </p>
         </div>
 
@@ -152,29 +133,24 @@ export function Paywall() {
           <div className="flex items-start justify-between mb-6">
             <div>
               <h2 className="text-2xl mb-2" style={{ fontWeight: 600 }}>
-                Basic
+                {t('paywall:basic_name')}
               </h2>
               <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                Essential tools for your life in Korea
+                {t('paywall:basic_desc')}
               </p>
             </div>
             <div className="text-right">
               <p className="text-4xl" style={{ fontWeight: 600 }}>
-                Free
+                {t('paywall:basic_price')}
               </p>
             </div>
           </div>
 
           <div className="space-y-3 mb-6">
-            {basicFeatures.map((feature, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <Check
-                  size={20}
-                  className="flex-shrink-0"
-                  strokeWidth={2.5}
-                  style={{ color: "var(--color-action-success)" }}
-                />
-                <span className="text-sm">{feature}</span>
+            {basicFeatureKeys.map((key) => (
+              <div key={key} className="flex items-center gap-3">
+                <Check size={20} className="flex-shrink-0" strokeWidth={2.5} style={{ color: "var(--color-action-success)" }} />
+                <span className="text-sm">{t(`paywall:${key}`)}</span>
               </div>
             ))}
           </div>
@@ -187,7 +163,7 @@ export function Paywall() {
               color: "var(--color-text-primary)",
             }}
           >
-            Current plan
+            {t('paywall:basic_btn')}
           </button>
         </div>
 
@@ -199,7 +175,6 @@ export function Paywall() {
             color: "var(--color-text-on-color)",
           }}
         >
-          {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20" />
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16" />
 
@@ -207,7 +182,7 @@ export function Paywall() {
             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
               <Sparkles size={16} />
               <span className="text-xs" style={{ fontWeight: 600 }}>
-                MOST POPULAR
+                {t('paywall:premium_badge')}
               </span>
             </div>
 
@@ -216,24 +191,24 @@ export function Paywall() {
                 <div className="flex items-center gap-2 mb-2">
                   <Crown size={28} strokeWidth={2} />
                   <h2 className="text-2xl" style={{ fontWeight: 600 }}>
-                    Premium
+                    {t('paywall:premium_name')}
                   </h2>
                 </div>
-                <p className="text-sm opacity-90">Complete solution for settling in Korea</p>
+                <p className="text-sm opacity-90">{t('paywall:premium_desc')}</p>
               </div>
               <div className="text-right">
                 <p className="text-4xl" style={{ fontWeight: 600 }}>
-                  ₩9,900
+                  {t('paywall:premium_price')}
                 </p>
-                <p className="text-sm opacity-75">/month</p>
+                <p className="text-sm opacity-75">{t('paywall:premium_per_month')}</p>
               </div>
             </div>
 
             <div className="space-y-3 mb-8">
-              {premiumFeatures.map((feature, index) => (
-                <div key={index} className="flex items-center gap-3">
+              {premiumFeatureKeys.map((key) => (
+                <div key={key} className="flex items-center gap-3">
                   <Check size={20} className="flex-shrink-0" strokeWidth={2.5} />
-                  <span className="text-sm">{feature}</span>
+                  <span className="text-sm">{t(`paywall:${key}`)}</span>
                 </div>
               ))}
             </div>
@@ -251,14 +226,14 @@ export function Paywall() {
               {loading ? (
                 <>
                   <Loader2 size={20} className="animate-spin" />
-                  Processing...
+                  {t('paywall:premium_processing')}
                 </>
               ) : (
-                'Start free 7-day trial'
+                t('paywall:premium_btn')
               )}
             </button>
             <p className="text-center text-xs opacity-75">
-              Cancel anytime • No commitment
+              {t('paywall:premium_cancel_note')}
             </p>
           </div>
         </div>
@@ -277,7 +252,7 @@ export function Paywall() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="text-lg" style={{ fontWeight: 600 }}>
-                  Annual Premium
+                  {t('paywall:annual_name')}
                 </h3>
                 <span
                   className="text-xs px-2 py-0.5 rounded-full"
@@ -287,19 +262,19 @@ export function Paywall() {
                     color: "var(--color-text-on-color)",
                   }}
                 >
-                  SAVE 20%
+                  {t('paywall:annual_badge')}
                 </span>
               </div>
               <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                연간 구독 • ₩95,040/year
+                {t('paywall:annual_desc')}
               </p>
             </div>
             <div className="text-right">
               <p className="text-3xl" style={{ fontWeight: 600 }}>
-                ₩7,920
+                {t('paywall:annual_price')}
               </p>
               <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                /month
+                {t('paywall:annual_per_month')}
               </p>
             </div>
           </div>
@@ -311,32 +286,20 @@ export function Paywall() {
           style={{ backgroundColor: "var(--color-surface-primary)" }}
         >
           <h3 className="text-lg mb-6" style={{ fontWeight: 600 }}>
-            Frequently Asked Questions
+            {t('paywall:faq_title')}
           </h3>
           <div className="space-y-6">
             <div>
-              <p className="text-sm mb-2" style={{ fontWeight: 600 }}>
-                Can I cancel anytime?
-              </p>
-              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                Yes, you can cancel your subscription at any time. You'll continue to have access until the end of your billing period.
-              </p>
+              <p className="text-sm mb-2" style={{ fontWeight: 600 }}>{t('paywall:faq_q1')}</p>
+              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{t('paywall:faq_a1')}</p>
             </div>
             <div>
-              <p className="text-sm mb-2" style={{ fontWeight: 600 }}>
-                What payment methods do you accept?
-              </p>
-              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                We accept all major credit cards, Korean bank transfers, and mobile payment methods like Kakao Pay and Naver Pay.
-              </p>
+              <p className="text-sm mb-2" style={{ fontWeight: 600 }}>{t('paywall:faq_q2')}</p>
+              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{t('paywall:faq_a2')}</p>
             </div>
             <div>
-              <p className="text-sm mb-2" style={{ fontWeight: 600 }}>
-                Is there a refund policy?
-              </p>
-              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                We offer a full refund within 14 days of purchase if you're not satisfied with Premium features.
-              </p>
+              <p className="text-sm mb-2" style={{ fontWeight: 600 }}>{t('paywall:faq_q3')}</p>
+              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>{t('paywall:faq_a3')}</p>
             </div>
           </div>
         </div>
@@ -344,10 +307,10 @@ export function Paywall() {
         {/* Trust badges */}
         <div className="text-center space-y-3">
           <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
-            🔒 Secure payment • 256-bit encryption
+            {t('paywall:trust_secure')}
           </p>
           <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
-            Trusted by 50,000+ expats in Korea
+            {t('paywall:trust_users')}
           </p>
         </div>
       </div>

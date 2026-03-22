@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { useTranslation } from "react-i18next";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { usePaymentStore } from "../../stores/usePaymentStore";
 import { useAuthStore } from "../../stores/useAuthStore";
@@ -14,7 +15,7 @@ import { useDashboardStore } from "../../stores/useDashboardStore";
 type Status = 'processing' | 'success' | 'error'
 
 export function PaywallSuccess() {
-  // 규칙 #2: window.location.href 금지 → useNavigate()
+  const { t } = useTranslation();
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const user = useAuthStore((s) => s.user)
@@ -30,23 +31,21 @@ export function PaywallSuccess() {
     const plan = searchParams.get('plan') as 'basic' | 'premium' | null
     const cycle = searchParams.get('cycle') as 'monthly' | 'yearly' | null
 
-    // Toss가 보내는 에러 파라미터 체크
     const errorCode = searchParams.get('code')
     const errorMsg = searchParams.get('message')
 
     if (errorCode || errorMsg) {
       setStatus('error')
-      setErrorMessage(errorMsg ?? '결제 인증에 실패했습니다.')
+      setErrorMessage(errorMsg ?? t('paywall:success_error_auth'))
       return
     }
 
     if (!authKey || !customerKey || !plan || !user) {
       setStatus('error')
-      setErrorMessage('결제 정보가 올바르지 않습니다.')
+      setErrorMessage(t('paywall:success_error_invalid'))
       return
     }
 
-    // Edge Function 호출
     const activate = async () => {
       try {
         await activateSubscription({
@@ -56,19 +55,17 @@ export function PaywallSuccess() {
           billingCycle: cycle ?? 'monthly',
         })
 
-        // 구독 활성화 후 dashboard 재로드 (subscription_plan 갱신 반영)
         await hydrate(user.id)
 
         setStatus('success')
 
-        // 3초 후 홈으로 이동
         setTimeout(() => {
           navigate('/home', { replace: true })
         }, 3000)
       } catch (err) {
         setStatus('error')
         setErrorMessage(
-          err instanceof Error ? err.message : '구독 활성화에 실패했습니다.'
+          err instanceof Error ? err.message : t('paywall:success_error_activate')
         )
       }
     }
@@ -95,10 +92,10 @@ export function PaywallSuccess() {
               style={{ color: "var(--color-action-primary)" }}
             />
             <h2 className="text-xl" style={{ fontWeight: 600 }}>
-              구독을 활성화하고 있어요
+              {t('paywall:success_processing_title')}
             </h2>
             <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-              잠시만 기다려주세요...
+              {t('paywall:success_processing_desc')}
             </p>
           </>
         )}
@@ -112,10 +109,10 @@ export function PaywallSuccess() {
               style={{ color: "var(--color-action-success)" }}
             />
             <h2 className="text-xl" style={{ fontWeight: 600 }}>
-              Premium 활성화 완료!
+              {t('paywall:success_done_title')}
             </h2>
             <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-              잠시 후 홈으로 이동합니다.
+              {t('paywall:success_done_desc')}
             </p>
             <button
               onClick={() => navigate('/home', { replace: true })}
@@ -126,7 +123,7 @@ export function PaywallSuccess() {
                 color: "var(--color-text-on-color)",
               }}
             >
-              홈으로 이동
+              {t('paywall:success_go_home')}
             </button>
           </>
         )}
@@ -140,7 +137,7 @@ export function PaywallSuccess() {
               style={{ color: "var(--color-action-error)" }}
             />
             <h2 className="text-xl" style={{ fontWeight: 600 }}>
-              구독 활성화 실패
+              {t('paywall:success_error_title')}
             </h2>
             <p className="text-sm" style={{ color: "var(--color-action-error)" }}>
               {errorMessage}
@@ -155,7 +152,7 @@ export function PaywallSuccess() {
                   color: "var(--color-text-on-color)",
                 }}
               >
-                다시 시도
+                {t('paywall:success_retry')}
               </button>
               <button
                 onClick={() => navigate('/home', { replace: true })}
@@ -166,7 +163,7 @@ export function PaywallSuccess() {
                   color: "var(--color-text-primary)",
                 }}
               >
-                홈으로 이동
+                {t('paywall:success_go_home')}
               </button>
             </div>
           </>
