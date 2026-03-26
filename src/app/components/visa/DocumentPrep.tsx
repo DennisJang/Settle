@@ -12,7 +12,6 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import {
   FileCheck,
   FileX,
@@ -67,6 +66,7 @@ interface DocumentPrepProps {
   visaType: string | null;
   isPremium: boolean;
   userProfile: Record<string, unknown> | null;
+  onUpgrade?: () => void;
 }
 
 // ─── Helpers ───
@@ -112,9 +112,8 @@ function getLocalizedAgency(item: DocumentRequirement, lang: string): string {
 
 // ─── Component ───
 
-export function DocumentPrep({ visaType, isPremium, userProfile }: DocumentPrepProps) {
+export function DocumentPrep({ visaType, isPremium, userProfile, onUpgrade }: DocumentPrepProps) {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
   const lang = i18n.language || "en";
 
   const [civilType, setCivilType] = useState<string>("extension");
@@ -470,7 +469,7 @@ export function DocumentPrep({ visaType, isPremium, userProfile }: DocumentPrepP
             </button>
           ) : (
             <button
-              onClick={() => navigate("/paywall")}
+              onClick={() => onUpgrade?.()}
               className="w-full py-3 rounded-2xl text-[15px] leading-[20px] transition-all active:scale-[0.98]"
               style={{
                 fontWeight: 600,

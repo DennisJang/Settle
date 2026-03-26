@@ -24,6 +24,7 @@ import { Bell } from "lucide-react";
 import { useAuthStore } from "../../stores/useAuthStore";
 import { useDashboardStore } from "../../stores/useDashboardStore";
 import { useSubmitStore } from "../../stores/useSubmitStore";
+import { useNavigate } from "react-router-dom";
 
 // --- Section Components ---
 import { KpointSimulator } from "../components/visa/KpointSimulator";
@@ -50,6 +51,7 @@ const DEFAULT_CHECKLIST = [
 
 export function Visa() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const { visaTracker, userProfile, loading, hydrate, toggleChecklistItem } =
     useDashboardStore();
@@ -185,6 +187,7 @@ export function Visa() {
               visaType={visaTracker?.visa_type ?? userProfile?.visa_type ?? null}
               isPremium={isPremium}
               userProfile={userProfile as Record<string, unknown> | null}
+              onUpgrade={() => navigate("/paywall")}
             />
 
             {/* 4. AI Document Guide */}
