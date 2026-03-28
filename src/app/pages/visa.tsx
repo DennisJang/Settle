@@ -1,15 +1,11 @@
 /**
- * visa.tsx — Phase 3-C (Accordion UX 리뉴얼)
+ * visa.tsx — Phase 3-C (Accordion UX + VisaIntent 통합)
  *
- * Phase 3-C 변경사항:
- * - AccordionCard로 각 섹션 래핑
- * - openSection state: 한 번에 1개만 펼침
- * - D-Day ≤ 30: DocumentPrep 자동 펼침 + 긴급 배너
- * - 접힌 상태에서 요약값 표시 (점수, 완성도 등)
- * - Block A/B/C 섹션 헤더 제거 → 카드 자체가 계층 구조
- *
- * 비즈니스 로직 100% 동결 (#26)
- * 모든 state, handler, import, prop 전달 — 변경 없음.
+ * VisaIntent 변경사항:
+ * - useVisaIntentStore import + hydrate 연결
+ * - civilType 변경 시 intent 업데이트
+ * - DocumentPrep 업로드 후 intent score refresh
+ * - 기존 모든 비즈니스 로직 100% 동결
  *
  * Dennis 규칙:
  * #3  submitFax() 인자 없음
@@ -20,7 +16,7 @@
  * #35 급여 계산기 면책 3중 구조 필수
  */
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Bell, Target, ClipboardCheck, GraduationCap, FileCheck,
@@ -29,6 +25,7 @@ import {
 import { useAuthStore } from "../../stores/useAuthStore";
 import { useDashboardStore } from "../../stores/useDashboardStore";
 import { useSubmitStore } from "../../stores/useSubmitStore";
+import { useVisaIntentStore } from "../../stores/useVisaIntentStore";
 import { useNavigate } from "react-router-dom";
 
 // --- Section Components ---
@@ -72,6 +69,15 @@ export function Visa() {
     submitFax,
   } = useSubmitStore();
 
+  // ★ VisaIntent store
+  const {
+    intent,
+    hydrate: hydrateIntent,
+    createIntent,
+    refreshScore,
+    setCivilType: setIntentCivilType,
+  } = useVisaIntentStore();
+
   const [faxSheetOpen, setFaxSheetOpen] = useState(false);
 
   // ★ Sprint 3: civilType state for SubmissionGuide sync
@@ -84,12 +90,35 @@ export function Visa() {
     setOpenSection((prev) => (prev === id ? null : id));
   };
 
-  // --- Hydrate (최초 1회) — 로직 동결 ---
+  // --- Hydrate (최초 1회) — 로직 동결 + VisaIntent hydrate 추가 ---
   useEffect(() => {
     if (user?.id && !visaTracker) {
       hydrate(user.id);
     }
-  }, [user?.id, visaTracker, hydrate]);
+    // ★ VisaIntent hydrate
+    if (user?.id) {
+      hydrateIntent(user.id);
+    }
+  }, [user?.id, visaTracker, hydrate, hydrateIntent]);
+
+  // ★ VisaIntent: 유저의 비자 정보가 로드되면 활성 intent 없으면 자동 생성
+  useEffect(() => {
+    if (!user?.id || !userProfile?.visa_type) return;
+    if (intent !== null) return; // 이미 활성 intent 있으면 skip
+    // intent가 null이고 loading 끝났으면 자동 생성
+    const store = useVisaIntentStore.getState();
+    if (!store.loading && store.intent === null) {
+      createIntent(user.id, userProfile.visa_type as string, "extension");
+    }
+  }, [user?.id, userProfile?.visa_type, intent, createIntent]);
+
+  // ★ civilType 변경 핸들러 (DocumentPrep + SubmissionGuide + VisaIntent 동기화)
+  const handleCivilTypeChange = useCallback((ct: string) => {
+    setCivilType(ct);
+    if (user?.id) {
+      setIntentCivilType(user.id, ct);
+    }
+  }, [user?.id, setIntentCivilType]);
 
   // --- 동적 데이터 ---
   const kiipStage = visaTracker?.kiip_stage ?? 0;
@@ -344,7 +373,7 @@ export function Visa() {
             userProfile={userProfile as Record<string, unknown> | null}
             userId={user?.id}
             onUpgrade={() => navigate("/paywall")}
-            onCivilTypeChange={setCivilType}
+            onCivilTypeChange={handleCivilTypeChange}
           />
         </AccordionCard>
 
