@@ -1,10 +1,10 @@
 /**
- * visa.tsx — Phase 3-B Sprint 3 (Submission Guide 추가)
+ * visa.tsx — Phase 3-B Sprint 3 (civilType 동기화 완성)
  *
  * Sprint 3 변경사항:
- * - SubmissionGuide 섹션 추가 (DocumentPrep 아래, DocumentGuide 위)
- * - civilType state 추가 (DocumentPrep ↔ SubmissionGuide 동기화)
- * - completeness를 SubmissionGuide에 전달
+ * - SubmissionGuide 섹션 추가
+ * - civilType state: visa.tsx에서 관리 → DocumentPrep + SubmissionGuide 동기화
+ * - DocumentPrep.onCivilTypeChange → setCivilType
  *
  * 비즈니스 로직 100% 동결 (#26)
  *
@@ -185,13 +185,14 @@ export function Visa() {
           </h2>
 
           <div className="space-y-4">
-            {/* ★ Phase 3-A: Document Prep (서류 준비 현황) */}
+            {/* ★ Document Prep (서류 준비) */}
             <DocumentPrep
               visaType={visaTracker?.visa_type ?? userProfile?.visa_type ?? null}
               isPremium={isPremium}
               userProfile={userProfile as Record<string, unknown> | null}
               userId={user?.id}
               onUpgrade={() => navigate("/paywall")}
+              onCivilTypeChange={setCivilType}
             />
 
             {/* ★ Sprint 3: Submission Guide (제출 가이드) */}

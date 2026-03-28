@@ -1,13 +1,11 @@
 /**
- * DocumentPrep.tsx — Phase 3-B Sprint 2 (서류 준비 + 업로드 + PDF 자동완성)
+ * DocumentPrep.tsx — Phase 3-B Sprint 3 (civilType 동기화 추가)
  *
- * Sprint 1 → Sprint 2 변경사항:
- * - Bottom CTA가 실제 generateUnifiedPdf() 호출
- * - Premium: PDF 다운로드 + 성공 토스트
- * - Free: Premium 전환 유도
- * - 생성 중 로딩 상태
+ * Sprint 3 변경사항:
+ * - onCivilTypeChange?: (ct: string) => void prop 추가
+ * - setCivilType 호출 시 부모에도 알림
  *
- * 비즈니스 로직: completeness 계산, vault, 면책 — 동결 (#26)
+ * 비즈니스 로직 동결 (#26). 변경점은 prop 1개 + 콜백 호출 1줄.
  */
 
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
@@ -41,6 +39,7 @@ interface DocumentPrepProps {
   visaType: string | null; isPremium: boolean;
   userProfile: Record<string, unknown> | null; userId?: string;
   onUpgrade?: () => void;
+  onCivilTypeChange?: (civilType: string) => void;
 }
 
 const CIVIL_TYPE_OPTIONS = [
@@ -64,11 +63,11 @@ function locAgency(item: DocumentRequirement, lang: string): string {
   return (lang==="ko" && item.issuing_agency_ko) ? item.issuing_agency_ko : item.issuing_agency_en || item.issuing_agency_ko || "";
 }
 
-export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgrade }: DocumentPrepProps) {
+export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgrade, onCivilTypeChange }: DocumentPrepProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "en";
 
-  const [civilType, setCivilType] = useState("extension");
+  const [civilType, setCivilTypeLocal] = useState("extension");
   const [requirements, setRequirements] = useState<DocumentRequirement[]>([]);
   const [vaultItems, setVaultItems] = useState<DocumentVaultItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,6 +82,12 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [pdfError, setPdfError] = useState<string|null>(null);
   const [pdfSuccess, setPdfSuccess] = useState(false);
+
+  // ★ Sprint 3: civilType 변경 시 부모에도 알림
+  const setCivilType = useCallback((ct: string) => {
+    setCivilTypeLocal(ct);
+    onCivilTypeChange?.(ct);
+  }, [onCivilTypeChange]);
 
   useEffect(() => {
     async function fetchDocs() {
