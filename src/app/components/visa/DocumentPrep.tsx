@@ -1,11 +1,10 @@
 /**
- * DocumentPrep.tsx — Phase 3-C (ReadinessScore 통합)
+ * DocumentPrep.tsx — Phase 3-C (ReadinessScore 통합 + civil_type 확장)
  *
- * 변경사항:
- * - ReadinessScore 로직을 상단에 통합 (점수 링 + 이슈 배너)
- * - 서류 목록에 유효기간 경과/임박 상태 색상 반영
- * - 하단에 총 수수료 + 예상 처리일 합산
- * - 기존 업로드/PDF/civil_type 로직 100% 동결
+ * 변경사항 (이번 세션):
+ * - civil_type 2개(extension, status_change) → DB 기반 동적 로딩 (최대 8개)
+ * - 비자별로 해당되는 civil_type만 표시
+ * - 기존 ReadinessScore/업로드/PDF 로직 100% 동결
  *
  * 법적 안전: G-029 LOW (체크리스트 대조, 검증 아님)
  *
@@ -53,10 +52,23 @@ interface DocumentPrepProps {
   onCivilTypeChange?: (civilType: string) => void;
 }
 
-const CIVIL_TYPE_OPTIONS = [
-  { value: "extension", labelKey: "visa:doc_prep.civil_extension" },
-  { value: "status_change", labelKey: "visa:doc_prep.civil_status_change" },
-] as const;
+// ★ Phase 3-C: Full civil_type label mapping — shown dynamically based on DB
+const CIVIL_TYPE_LABELS: Record<string, string> = {
+  extension: "visa:doc_prep.civil_extension",
+  status_change: "visa:doc_prep.civil_status_change",
+  info_change: "visa:doc_prep.civil_info_change",
+  reentry: "visa:doc_prep.civil_reentry",
+  activities_permission: "visa:doc_prep.civil_activities_permission",
+  workplace_change: "visa:doc_prep.civil_workplace_change",
+  initial_registration: "visa:doc_prep.civil_initial_registration",
+  arc_reissue: "visa:doc_prep.civil_arc_reissue",
+};
+
+// Display order for civil_type chips
+const CIVIL_TYPE_ORDER = [
+  "extension", "status_change", "info_change", "reentry",
+  "activities_permission", "workplace_change", "initial_registration", "arc_reissue",
+];
 
 const CIVIL_TO_APP: Record<string, string> = { extension: "stay_extension", status_change: "status_change" };
 
@@ -129,6 +141,7 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
   const lang = i18n.language || "en";
 
   const [civilType, setCivilTypeLocal] = useState("extension");
+  const [availableCivilTypes, setAvailableCivilTypes] = useState<string[]>(["extension"]);
   const [requirements, setRequirements] = useState<DocumentRequirement[]>([]);
   const [vaultItems, setVaultItems] = useState<DocumentVaultItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -149,6 +162,30 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
     setCivilTypeLocal(ct);
     onCivilTypeChange?.(ct);
   }, [onCivilTypeChange]);
+
+  // ★ Phase 3-C: Fetch available civil_types for this visa
+  useEffect(() => {
+    async function fetchCivilTypes() {
+      if (!visaType) return;
+      const { data } = await supabase
+        .from("document_requirements")
+        .select("civil_type")
+        .eq("visa_type", visaType);
+      if (data) {
+        const unique = [...new Set(data.map(d => d.civil_type))];
+        // Sort by defined order
+        const sorted = CIVIL_TYPE_ORDER.filter(ct => unique.includes(ct));
+        if (sorted.length > 0) {
+          setAvailableCivilTypes(sorted);
+          // If current civilType is not available for this visa, switch to first
+          if (!sorted.includes(civilType)) {
+            setCivilType(sorted[0]);
+          }
+        }
+      }
+    }
+    fetchCivilTypes();
+  }, [visaType]); // intentionally not depending on civilType to avoid loop
 
   useEffect(() => {
     async function fetchDocs() {
@@ -336,12 +373,17 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
         </div>
       )}
 
-      {/* Civil Type Toggle */}
-      <div className="flex gap-2 mb-3">
-        {CIVIL_TYPE_OPTIONS.map(opt => (
-          <button key={opt.value} onClick={() => setCivilType(opt.value)} className="flex-1 py-2 rounded-2xl text-[13px] leading-[18px] transition-all active:scale-[0.98]"
-            style={{ fontWeight: civilType === opt.value ? 600 : 400, backgroundColor: civilType === opt.value ? "var(--color-action-primary)" : "var(--color-surface-secondary)", color: civilType === opt.value ? "var(--color-text-on-color)" : "var(--color-text-secondary)" }}>
-            {t(opt.labelKey)}
+      {/* ★ Phase 3-C: Dynamic Civil Type Toggle (DB-driven) */}
+      <div className={`flex gap-1.5 mb-3 ${availableCivilTypes.length > 3 ? "flex-wrap" : ""}`}>
+        {availableCivilTypes.map(ct => (
+          <button key={ct} onClick={() => setCivilType(ct)}
+            className={`py-2 rounded-2xl text-[12px] leading-[16px] transition-all active:scale-[0.98] ${availableCivilTypes.length <= 3 ? "flex-1" : "px-3"}`}
+            style={{
+              fontWeight: civilType === ct ? 600 : 400,
+              backgroundColor: civilType === ct ? "var(--color-action-primary)" : "var(--color-surface-secondary)",
+              color: civilType === ct ? "var(--color-text-on-color)" : "var(--color-text-secondary)",
+            }}>
+            {t(CIVIL_TYPE_LABELS[ct] ?? ct)}
           </button>
         ))}
       </div>

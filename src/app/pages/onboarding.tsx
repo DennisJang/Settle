@@ -48,7 +48,7 @@ async function parseARCImage(file: File): Promise<Partial<ARCData>> {
 }
 
 // ═══════════════════════════════════════
-// CONSTANTS — 동결
+// CONSTANTS — ★ D-10 추가
 // ═══════════════════════════════════════
 
 const NATIONALITIES = [
@@ -59,7 +59,8 @@ const NATIONALITIES = [
 
 const VISA_TYPES = [
   "E-9", "E-7", "E-7-4", "E-6", "E-2",
-  "D-2", "D-4", "F-2", "F-4", "F-5", "F-6",
+  "D-2", "D-4", "D-10",
+  "F-2", "F-4", "F-5", "F-6",
   "H-2", "C-4", "Other",
 ];
 
