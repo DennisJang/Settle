@@ -181,7 +181,7 @@ export function Visa() {
         style={{
           backgroundColor: "var(--color-surface-primary)",
           borderBottom: "1px solid var(--color-border-default)",
-        }}
+        }}  
       >
         <div className="flex items-center justify-between px-4 py-4">
           <h1
