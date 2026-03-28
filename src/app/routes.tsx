@@ -11,7 +11,7 @@
  * #31 탭 최대 4~5개
  */
 
-import { createBrowserRouter, Navigate } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 // === Page imports ===
 import { Landing } from "./pages/landing";
 import { AuthGuardLayout } from "./components/AuthGuardLayout";
