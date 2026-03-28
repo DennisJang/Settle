@@ -187,6 +187,7 @@ export function Visa() {
               visaType={visaTracker?.visa_type ?? userProfile?.visa_type ?? null}
               isPremium={isPremium}
               userProfile={userProfile as Record<string, unknown> | null}
+              userId={user?.id}     
               onUpgrade={() => navigate("/paywall")}
             />
 

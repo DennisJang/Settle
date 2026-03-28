@@ -6,15 +6,16 @@
  * 2. Supabase Storage 업로드 (user_id/fileName)
  * 3. document_vault 테이블에 레코드 INSERT
  *
- * Free: 3개 제한 / Premium: 무제한
+ * Free: 3개 / Premium: 무제한
+ *
+ * 프로젝트 경로: src/app/components/visa/documentVault.ts
  *
  * Dennis 규칙:
- * #1  원본 파일 먼저 확인 — 추측 금지
  * #36 .maybeSingle() 사용
  * #40 "유저가 자기 데이터를 자기 양식에 채우는 것"
  */
 
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../../../lib/supabase";
 import { compressImage } from "./compressImage";
 import type { CompressedImage } from "./compressImage";
 
@@ -49,23 +50,16 @@ const FREE_LIMIT = 3;
 
 // ─── Functions ───
 
-/**
- * 현재 vault 아이템 수 조회 (Free 제한 체크용)
- */
 export async function getVaultCount(userId: string): Promise<number> {
   const { count, error } = await supabase
     .from("document_vault")
     .select("*", { count: "exact", head: true })
     .eq("user_id", userId)
     .eq("is_latest", true);
-
   if (error) return 0;
   return count ?? 0;
 }
 
-/**
- * 유저의 vault 아이템 목록 조회
- */
 export async function getVaultItems(userId: string): Promise<VaultItem[]> {
   const { data, error } = await supabase
     .from("document_vault")
@@ -73,18 +67,12 @@ export async function getVaultItems(userId: string): Promise<VaultItem[]> {
     .eq("user_id", userId)
     .eq("is_latest", true)
     .order("uploaded_at", { ascending: false });
-
   if (error || !data) return [];
   return data as VaultItem[];
 }
 
 /**
  * 서류 업로드 메인 플로우
- *
- * @param file      유저가 선택한 원본 파일
- * @param documentCode  서류 코드 (e.g. "passport", "employment_cert")
- * @param userId    인증된 유저 ID
- * @param isPremium Premium 여부
  */
 export async function uploadDocument(
   file: File,
@@ -92,46 +80,32 @@ export async function uploadDocument(
   userId: string,
   isPremium: boolean
 ): Promise<VaultUploadResult> {
-  // 1. Free 제한 체크
+  // 1. Free 제한
   if (!isPremium) {
-    const currentCount = await getVaultCount(userId);
-    if (currentCount >= FREE_LIMIT) {
-      return {
-        success: false,
-        error: `Free plan allows ${FREE_LIMIT} documents. Upgrade to Premium for unlimited.`,
-      };
+    const count = await getVaultCount(userId);
+    if (count >= FREE_LIMIT) {
+      return { success: false, error: `Free: ${FREE_LIMIT} documents max. Upgrade to Premium.` };
     }
   }
 
-  // 2. 이미지 압축
+  // 2. 압축
   let compressed: CompressedImage;
   try {
     compressed = await compressImage(file, documentCode);
   } catch (err) {
-    return {
-      success: false,
-      error: `Image compression failed: ${err instanceof Error ? err.message : "Unknown error"}`,
-    };
+    return { success: false, error: `Compression failed: ${err instanceof Error ? err.message : "Unknown"}` };
   }
 
-  // 3. Storage 업로드 (경로: user_id/fileName)
+  // 3. Storage 업로드
   const storagePath = `${userId}/${compressed.fileName}`;
-
-  const { error: uploadError } = await supabase.storage
+  const { error: uploadErr } = await supabase.storage
     .from(BUCKET)
-    .upload(storagePath, compressed.blob, {
-      contentType: compressed.mimeType,
-      upsert: false,
-    });
-
-  if (uploadError) {
-    return {
-      success: false,
-      error: `Storage upload failed: ${uploadError.message}`,
-    };
+    .upload(storagePath, compressed.blob, { contentType: compressed.mimeType, upsert: false });
+  if (uploadErr) {
+    return { success: false, error: `Upload failed: ${uploadErr.message}` };
   }
 
-  // 4. 기존 동일 document_code의 is_latest를 false로
+  // 4. 기존 is_latest 해제
   await supabase
     .from("document_vault")
     .update({ is_latest: false })
@@ -139,8 +113,8 @@ export async function uploadDocument(
     .eq("document_code", documentCode)
     .eq("is_latest", true);
 
-  // 5. document_vault 테이블에 레코드 INSERT
-  const { data: inserted, error: insertError } = await supabase
+  // 5. INSERT
+  const { data: inserted, error: insertErr } = await supabase
     .from("document_vault")
     .insert({
       user_id: userId,
@@ -155,50 +129,30 @@ export async function uploadDocument(
       is_latest: true,
     })
     .select("id")
-    .maybeSingle(); // 규칙 #36
+    .maybeSingle();
 
-  if (insertError || !inserted) {
-    // Storage에 올라간 파일 롤백
+  if (insertErr || !inserted) {
     await supabase.storage.from(BUCKET).remove([storagePath]);
-    return {
-      success: false,
-      error: `Database insert failed: ${insertError?.message ?? "No data returned"}`,
-    };
+    return { success: false, error: `DB insert failed: ${insertErr?.message ?? "No data"}` };
   }
 
-  return {
-    success: true,
-    vaultId: inserted.id,
-    storagePath,
-  };
+  return { success: true, vaultId: inserted.id, storagePath };
 }
 
-/**
- * vault 아이템 삭제
- */
-export async function deleteVaultItem(
-  vaultId: string,
-  userId: string
-): Promise<boolean> {
-  // 1. 레코드 조회
-  const { data: item, error: fetchError } = await supabase
+export async function deleteVaultItem(vaultId: string, userId: string): Promise<boolean> {
+  const { data: item } = await supabase
     .from("document_vault")
     .select("storage_path")
     .eq("id", vaultId)
     .eq("user_id", userId)
     .maybeSingle();
+  if (!item) return false;
 
-  if (fetchError || !item) return false;
-
-  // 2. Storage 삭제
   await supabase.storage.from(BUCKET).remove([item.storage_path]);
-
-  // 3. 테이블 레코드 삭제
-  const { error: deleteError } = await supabase
+  const { error } = await supabase
     .from("document_vault")
     .delete()
     .eq("id", vaultId)
     .eq("user_id", userId);
-
-  return !deleteError;
+  return !error;
 }
