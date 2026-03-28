@@ -175,7 +175,6 @@ export function Visa() {
       className="min-h-screen pb-32"
       style={{ backgroundColor: "var(--color-surface-secondary)" }}
     >
-        <p style={{ background: "red", color: "white", padding: 20, fontSize: 24 }}>ACCORDION TEST</p>
       {/* Header */}
       <header
         className="sticky top-0 z-10"
