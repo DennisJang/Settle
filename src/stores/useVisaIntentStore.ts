@@ -22,11 +22,16 @@
  *   - K-point 시뮬레이터 (독립)
  *   - 급여 계산기 (독립)
  *
+ * Sprint 1 변경 (Phase 4 Layer 2):
+ *   - logEvent 호출 3곳 (intent_created, readiness_changed, intent_completed)
+ *   - completeIntent() 신규 함수
+ *
  * 법적 안전: "서류 준비 도구"의 진행 상태 추적. 제출은 유저가 직접.
  */
 
 import { create } from "zustand";
 import { supabase } from "../lib/supabase";
+import { logEvent } from "../lib/eventLog";
 
 // ─── Types ───
 
@@ -93,6 +98,7 @@ interface VisaIntentStore {
   // State transitions
   markSubmitted: (officeId?: string, method?: string) => Promise<void>;
   markResult: (approved: boolean, reason?: string) => Promise<void>;
+  completeIntent: () => Promise<void>;
   deactivate: () => Promise<void>;
 
   // Computed (sync, from current intent)
@@ -167,6 +173,13 @@ export const useVisaIntentStore = create<VisaIntentStore>((set, get) => ({
 
       const intent = data as VisaIntent;
       set({ intent, loading: false });
+
+      // ★ Sprint 1: Layer 2 Event Log — intent_created
+      await logEvent(intent.id, "intent_created", {
+        visa_type: visaType,
+        civil_type: civilType,
+      });
+
       return intent;
     } catch (err) {
       set({ error: String(err), loading: false });
@@ -238,6 +251,15 @@ export const useVisaIntentStore = create<VisaIntentStore>((set, get) => ({
           : 0;
       const profileScore = (profileFilled / PROFILE_SCORE_FIELDS.length) * 30;
       const score = Math.round(docScore + profileScore);
+
+      // ★ Sprint 1: Layer 2 Event Log — readiness_changed
+      const oldScore = intent.readiness_score;
+      if (score !== oldScore) {
+        await logEvent(intent.id, "readiness_changed", {
+          old_score: oldScore,
+          new_score: score,
+        });
+      }
 
       // 6. Determine next action
       let nextAction: string | null = null;
@@ -382,6 +404,23 @@ export const useVisaIntentStore = create<VisaIntentStore>((set, get) => ({
         },
       });
     }
+  },
+
+  // ★ Sprint 1: Layer 2 Event Log — intent_completed
+  completeIntent: async () => {
+    const { intent } = get();
+    if (!intent) return;
+
+    const durationDays = Math.ceil(
+      (Date.now() - new Date(intent.created_at).getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    await logEvent(intent.id, "intent_completed", {
+      duration_days: durationDays,
+      total_documents: intent.documents_ready,
+      visa_type: intent.visa_type,
+      civil_type: intent.civil_type,
+    });
   },
 
   // ─── Deactivate (cancel) ───

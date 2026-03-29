@@ -6,6 +6,9 @@
  * - 비자별로 해당되는 civil_type만 표시
  * - 기존 ReadinessScore/업로드/PDF 로직 100% 동결
  *
+ * Sprint 1 변경 (Phase 4 Layer 2):
+ * - logEvent import + 업로드 성공 시 'document_uploaded' 이벤트 기록
+ *
  * 법적 안전: G-029 LOW (체크리스트 대조, 검증 아님)
  *
  * Dennis 규칙:
@@ -25,6 +28,7 @@ import {
 import { supabase } from "../../../lib/supabase";
 import { uploadDocument, deleteVaultItem } from "./documentVault";
 import { generateUnifiedPdf, downloadPdf } from "./generatePdf";
+import { logEvent } from "../../../lib/eventLog"; // ★ Sprint 1
 
 interface DocumentRequirement {
   id: string; visa_type: string; civil_type: string; document_code: string;
@@ -50,6 +54,7 @@ interface DocumentPrepProps {
   userProfile: Record<string, unknown> | null; userId?: string;
   onUpgrade?: () => void;
   onCivilTypeChange?: (civilType: string) => void;
+  intentId?: string | null; // ★ Sprint 1: for event logging
 }
 
 // ★ Phase 3-C: Full civil_type label mapping — shown dynamically based on DB
@@ -136,7 +141,7 @@ function getDocReadiness(
   return { status: "ready", detail: "" };
 }
 
-export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgrade, onCivilTypeChange }: DocumentPrepProps) {
+export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgrade, onCivilTypeChange, intentId }: DocumentPrepProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "en";
 
@@ -271,9 +276,17 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
     if (!file || !pendingDocCode || !userId) return;
     if (!file.type.startsWith("image/") && file.type !== "application/pdf") { setUploadError("Select image or PDF"); return; }
     setUploadingCode(pendingDocCode); setUploadError(null);
+    const originalSize = file.size; // ★ Sprint 1: capture original size before upload
     const res = await uploadDocument(file, pendingDocCode, userId, isPremium);
     if (res.success) {
       setUploadSuccess(pendingDocCode);
+
+      // ★ Sprint 1: Layer 2 Event Log — document_uploaded
+      await logEvent(intentId ?? null, "document_uploaded", {
+        document_code: pendingDocCode,
+        file_size_kb: Math.round(originalSize / 1024),
+      });
+
       const { data: vault } = await supabase.from("document_vault")
         .select("id, document_code, file_name, status, uploaded_at, expires_at").eq("is_latest", true);
       if (vault) setVaultItems(vault as DocumentVaultItem[]);

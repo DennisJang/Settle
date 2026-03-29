@@ -5,6 +5,9 @@
  * Plan C 방식: 관서를 유저가 직접 선택 (외국인등록증에 적혀 있음)
  * jurisdiction_keywords 기반 추천은 보너스.
  *
+ * Sprint 1 변경 (Phase 4 Layer 2):
+ * - logEvent import + 관서 선택 시 'guide_viewed' 이벤트 기록
+ *
  * Dennis 규칙:
  * #26 비즈니스 로직 건드리지 않음
  * #32 컬러 하드코딩 금지 → 시맨틱 토큰
@@ -20,6 +23,7 @@ import {
   Globe, Building2, CheckCircle2, Circle, Search, Navigation,
 } from "lucide-react";
 import { supabase } from "../../../lib/supabase";
+import { logEvent } from "../../../lib/eventLog"; // ★ Sprint 1
 
 // ─── Types ───
 
@@ -49,6 +53,7 @@ interface SubmissionGuideProps {
   civilType: string;
   userAddress?: string | null;
   completeness: number;
+  intentId?: string | null; // ★ Sprint 1: for event logging
 }
 
 // ─── Submission channel config per civil_type ───
@@ -71,6 +76,7 @@ export function SubmissionGuide({
   civilType,
   userAddress,
   completeness,
+  intentId,
 }: SubmissionGuideProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "en";
@@ -179,11 +185,17 @@ export function SubmissionGuide({
     setChecklist((prev) => ({ ...prev, documents: completeness >= 60 }));
   }, [completeness]);
 
+  // ★ Sprint 1: Layer 2 Event Log — guide_viewed on office select
   const handleOfficeSelect = (officeId: string) => {
     setSelectedOfficeId(officeId);
     setDropdownOpen(false);
     setSearchQuery("");
     setChecklist((prev) => ({ ...prev, office: true }));
+
+    // ★ Sprint 1: Log guide_viewed event
+    logEvent(intentId ?? null, "guide_viewed", {
+      office_id: officeId,
+    });
   };
 
   const officeName = (office: ImmigrationOffice) =>
