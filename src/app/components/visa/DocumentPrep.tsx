@@ -1,21 +1,15 @@
 /**
- * DocumentPrep.tsx — Phase 3-C (ReadinessScore 통합 + civil_type 확장)
+ * DocumentPrep.tsx — Phase 4 Sprint 3 (onUploadComplete 연결)
  *
- * 변경사항 (이번 세션):
- * - civil_type 2개(extension, status_change) → DB 기반 동적 로딩 (최대 8개)
- * - 비자별로 해당되는 civil_type만 표시
- * - 기존 ReadinessScore/업로드/PDF 로직 100% 동결
+ * Sprint 3 변경사항:
+ * - onUploadComplete prop 추가 → 업로드 성공 후 부모에 알림
+ * - visa.tsx에서 refreshScore() 호출로 연결
+ * - 이것이 Layer 2/3/4/5 전체를 잇는 마지막 연결
  *
- * Sprint 1 변경 (Phase 4 Layer 2):
+ * Sprint 1 변경 (유지):
  * - logEvent import + 업로드 성공 시 'document_uploaded' 이벤트 기록
  *
  * 법적 안전: G-029 LOW (체크리스트 대조, 검증 아님)
- *
- * Dennis 규칙:
- * #26 기존 비즈니스 로직 건드리지 않음
- * #32 컬러 하드코딩 금지 → 시맨틱 토큰
- * #34 i18n
- * #39 "검증" 표현 금지 → "체크리스트"
  */
 
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
@@ -28,7 +22,7 @@ import {
 import { supabase } from "../../../lib/supabase";
 import { uploadDocument, deleteVaultItem } from "./documentVault";
 import { generateUnifiedPdf, downloadPdf } from "./generatePdf";
-import { logEvent } from "../../../lib/eventLog"; // ★ Sprint 1
+import { logEvent } from "../../../lib/eventLog";
 
 interface DocumentRequirement {
   id: string; visa_type: string; civil_type: string; document_code: string;
@@ -54,10 +48,10 @@ interface DocumentPrepProps {
   userProfile: Record<string, unknown> | null; userId?: string;
   onUpgrade?: () => void;
   onCivilTypeChange?: (civilType: string) => void;
-  intentId?: string | null; // ★ Sprint 1: for event logging
+  intentId?: string | null;
+  onUploadComplete?: () => void; // ★ Sprint 3: trigger refreshScore in parent
 }
 
-// ★ Phase 3-C: Full civil_type label mapping — shown dynamically based on DB
 const CIVIL_TYPE_LABELS: Record<string, string> = {
   extension: "visa:doc_prep.civil_extension",
   status_change: "visa:doc_prep.civil_status_change",
@@ -69,7 +63,6 @@ const CIVIL_TYPE_LABELS: Record<string, string> = {
   arc_reissue: "visa:doc_prep.civil_arc_reissue",
 };
 
-// Display order for civil_type chips
 const CIVIL_TYPE_ORDER = [
   "extension", "status_change", "info_change", "reentry",
   "activities_permission", "workplace_change", "initial_registration", "arc_reissue",
@@ -83,7 +76,6 @@ const AUTO_FILL_FIELDS = [
   "address_home","home_phone","current_workplace","current_biz_reg_no",
 ] as const;
 
-// Profile fields for readiness score (통합신청서 핵심 5개)
 const PROFILE_SCORE_FIELDS = [
   "full_name", "foreign_reg_no", "passport_no", "address_korea", "date_of_birth",
 ] as const;
@@ -96,7 +88,6 @@ function locAgency(item: DocumentRequirement, lang: string): string {
   return (lang==="ko" && item.issuing_agency_ko) ? item.issuing_agency_ko : item.issuing_agency_en || item.issuing_agency_ko || "";
 }
 
-// --- Readiness status for each document ---
 type DocReadiness = "ready" | "expiring" | "expired" | "missing";
 
 function getDocReadiness(
@@ -121,7 +112,6 @@ function getDocReadiness(
 
   if (!vault) return { status: "missing", detail: "" };
 
-  // Check expires_at from vault
   if (vault.expires_at) {
     const expiry = new Date(vault.expires_at);
     const daysLeft = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -129,7 +119,6 @@ function getDocReadiness(
     if (daysLeft <= 30) return { status: "expiring", detail: String(daysLeft) };
   }
 
-  // Check validity_days from requirement
   if (req.validity_days && vault.uploaded_at) {
     const uploadDate = new Date(vault.uploaded_at);
     const validUntil = new Date(uploadDate.getTime() + req.validity_days * 24 * 60 * 60 * 1000);
@@ -141,7 +130,7 @@ function getDocReadiness(
   return { status: "ready", detail: "" };
 }
 
-export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgrade, onCivilTypeChange, intentId }: DocumentPrepProps) {
+export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgrade, onCivilTypeChange, intentId, onUploadComplete }: DocumentPrepProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language || "en";
 
@@ -162,13 +151,11 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
   const [pdfError, setPdfError] = useState<string|null>(null);
   const [pdfSuccess, setPdfSuccess] = useState(false);
 
-  // ★ Sprint 3: civilType 변경 시 부모에도 알림
   const setCivilType = useCallback((ct: string) => {
     setCivilTypeLocal(ct);
     onCivilTypeChange?.(ct);
   }, [onCivilTypeChange]);
 
-  // ★ Phase 3-C: Fetch available civil_types for this visa
   useEffect(() => {
     async function fetchCivilTypes() {
       if (!visaType) return;
@@ -178,11 +165,9 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
         .eq("visa_type", visaType);
       if (data) {
         const unique = [...new Set(data.map(d => d.civil_type))];
-        // Sort by defined order
         const sorted = CIVIL_TYPE_ORDER.filter(ct => unique.includes(ct));
         if (sorted.length > 0) {
           setAvailableCivilTypes(sorted);
-          // If current civilType is not available for this visa, switch to first
           if (!sorted.includes(civilType)) {
             setCivilType(sorted[0]);
           }
@@ -190,7 +175,7 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
       }
     }
     fetchCivilTypes();
-  }, [visaType]); // intentionally not depending on civilType to avoid loop
+  }, [visaType]);
 
   useEffect(() => {
     async function fetchDocs() {
@@ -207,7 +192,6 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
     fetchDocs();
   }, [visaType, civilType]);
 
-  // ★ Phase 3-C: Readiness Score 계산
   const { readinessScore, issueCount, totalCost, profileFilled, profileTotal, readyCount, requiredCount } = useMemo(() => {
     const req = requirements.filter(r => r.is_required);
     const vc = new Map(vaultItems.map(v => [v.document_code, v]));
@@ -242,19 +226,16 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
     };
   }, [requirements, vaultItems, userProfile]);
 
-  // Score color
   const scoreColor = readinessScore >= 80
     ? "var(--color-action-success)"
     : readinessScore >= 50
       ? "var(--color-action-primary)"
       : "var(--color-action-warning)";
 
-  // SVG ring values
   const ringR = 30;
   const ringC = 2 * Math.PI * ringR;
   const ringOffset = ringC - (readinessScore / 100) * ringC;
 
-  // --- Legacy completeness (for PDF CTA compatibility) ---
   const completeness = useMemo(() => {
     const req = requirements.filter(r => r.is_required);
     if (!req.length) return 0;
@@ -276,7 +257,7 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
     if (!file || !pendingDocCode || !userId) return;
     if (!file.type.startsWith("image/") && file.type !== "application/pdf") { setUploadError("Select image or PDF"); return; }
     setUploadingCode(pendingDocCode); setUploadError(null);
-    const originalSize = file.size; // ★ Sprint 1: capture original size before upload
+    const originalSize = file.size;
     const res = await uploadDocument(file, pendingDocCode, userId, isPremium);
     if (res.success) {
       setUploadSuccess(pendingDocCode);
@@ -286,6 +267,9 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
         document_code: pendingDocCode,
         file_size_kb: Math.round(originalSize / 1024),
       });
+
+      // ★ Sprint 3: trigger refreshScore in parent → Layer 2/3/4/5 연결
+      onUploadComplete?.();
 
       const { data: vault } = await supabase.from("document_vault")
         .select("id, document_code, file_name, status, uploaded_at, expires_at").eq("is_latest", true);
@@ -300,7 +284,11 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
     if (!userId) return;
     const vi = vaultItems.find(v => v.document_code === code);
     if (!vi) return;
-    if (await deleteVaultItem(vi.id, userId)) setVaultItems(prev => prev.filter(v => v.id !== vi.id));
+    if (await deleteVaultItem(vi.id, userId)) {
+      setVaultItems(prev => prev.filter(v => v.id !== vi.id));
+      // ★ Sprint 3: 삭제 후에도 refreshScore
+      onUploadComplete?.();
+    }
   };
 
   const handleGeneratePdf = useCallback(async () => {
@@ -321,11 +309,9 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
     <div>
       <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf" capture="environment" onChange={handleFileChange} className="hidden" />
 
-      {/* ★ Phase 3-C: Readiness Score Header */}
       {!loading && requirements.length > 0 && (
         <div className="mb-4">
           <div className="flex items-center gap-4 mb-3">
-            {/* Score Ring */}
             <div className="relative flex-shrink-0" style={{ width: 72, height: 72 }}>
               <svg width="72" height="72" viewBox="0 0 72 72">
                 <circle cx="36" cy="36" r={ringR} fill="none" stroke="var(--color-surface-secondary)" strokeWidth="5" />
@@ -341,7 +327,6 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
               </div>
             </div>
 
-            {/* Progress Bars */}
             <div className="flex-1">
               <div className="flex justify-between mb-1">
                 <span className="text-[11px]" style={{ color: "var(--color-text-secondary)" }}>
@@ -374,7 +359,6 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
             </div>
           </div>
 
-          {/* Issue Banner */}
           {issueCount > 0 && (
             <div className="rounded-2xl px-3 py-2 flex items-center gap-2" style={{ backgroundColor: "rgba(255,149,0,0.08)" }}>
               <AlertTriangle size={14} style={{ color: "var(--color-action-warning)" }} />
@@ -386,7 +370,6 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
         </div>
       )}
 
-      {/* ★ Phase 3-C: Dynamic Civil Type Toggle (DB-driven) */}
       <div className={`flex gap-1.5 mb-3 ${availableCivilTypes.length > 3 ? "flex-wrap" : ""}`}>
         {availableCivilTypes.map(ct => (
           <button key={ct} onClick={() => setCivilType(ct)}
@@ -401,7 +384,6 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
         ))}
       </div>
 
-      {/* Error banners */}
       {(uploadError || pdfError) && (
         <div className="mb-3 px-3 py-2 rounded-2xl flex items-center gap-2" style={{ backgroundColor: "rgba(255,59,48,0.1)" }}>
           <AlertTriangle size={16} style={{ color: "var(--color-action-error)" }} />
@@ -415,7 +397,6 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
         </div>
       )}
 
-      {/* Document List */}
       {loading ? (
         <div className="flex items-center justify-center py-8"><Loader2 size={24} className="animate-spin" style={{ color: "var(--color-text-secondary)" }} /></div>
       ) : requirements.length === 0 ? (
@@ -434,13 +415,11 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
             const justUp = uploadSuccess === req.document_code;
             const canUp = !isAuto && !isFee && !isLocked;
 
-            // ★ Phase 3-C: Readiness status for row styling
             const readiness = getDocReadiness(req, vi, userProfile);
             const rowBg = readiness.status === "expiring" ? "rgba(255,149,0,0.06)"
               : readiness.status === "expired" || readiness.status === "missing" ? (isLocked ? "transparent" : "rgba(255,59,48,0.04)")
               : isExp ? "var(--color-surface-secondary)" : "transparent";
 
-            // Status icon based on readiness
             const StatusIcon = () => {
               if (isLocked) return <Lock size={16} style={{ color: "var(--color-text-tertiary)" }} />;
               if (justUp) return <Check size={16} style={{ color: "var(--color-action-success)" }} />;
@@ -450,7 +429,6 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
               return <Circle size={16} style={{ color: "var(--color-text-tertiary)" }} />;
             };
 
-            // Subtitle based on readiness
             const subtitle = () => {
               if (isLocked) return "";
               if (readiness.status === "expired") return t("visa:readiness.expired", { defaultValue: "Expired — reissue needed" });
@@ -517,7 +495,6 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
         </div>
       )}
 
-      {/* ★ Phase 3-C: Cost + Processing summary */}
       {!loading && requirements.length > 0 && (
         <div className="rounded-xl p-2.5 mt-3 flex justify-between" style={{ backgroundColor: "var(--color-surface-secondary)" }}>
           <span className="text-[11px] flex items-center gap-1" style={{ color: "var(--color-text-secondary)" }}>
@@ -529,7 +506,6 @@ export function DocumentPrep({ visaType, isPremium, userProfile, userId, onUpgra
         </div>
       )}
 
-      {/* PDF CTA */}
       {!loading && requirements.length > 0 && (
         <div className="mt-3">
           {isPremium ? (
