@@ -1,18 +1,15 @@
 /**
- * visa.tsx — Phase 4 Sprint 3 (Notification + 계층 간 연결 완성)
+ * visa.tsx — Phase 4 Sprint 3 + PIPA Consent
  *
  * Sprint 3 변경사항:
  * - DocumentPrep onUploadComplete → refreshScore() 연결 (계층 간 마지막 연결)
  * - VisaIntent 상태 전이 시 Sonner 토스트 알림 (Layer 4)
  * - 기존 모든 비즈니스 로직 100% 동결
  *
- * 이 연결이 완성하는 흐름:
- *   업로드 → document_uploaded 이벤트 (L2)
- *          → refreshScore() (L3)
- *          → readiness_changed 이벤트 (L2)
- *          → ReadinessBar 업데이트 (L5)
- *          → score 100 → CelebrationModal (L5+L4)
- *          → 상태 전이 토스트 (L4)
+ * PIPA Consent 추가:
+ * - auto-create intent 전에 event_consent 확인
+ * - null이면 EventConsentSheet 표시
+ * - 동의/거부 후 useDashboardStore.userProfile 즉시 동기화
  */
 
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
@@ -59,7 +56,7 @@ export function Visa() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
-  const { visaTracker, userProfile, loading, hydrate, toggleChecklistItem } =
+  const { visaTracker, userProfile, loading, hydrate, toggleChecklistItem, updateProfileField } =
     useDashboardStore();
 
   const {
@@ -84,14 +81,16 @@ export function Visa() {
   const [civilType, setCivilType] = useState("extension");
   const [openSection, setOpenSection] = useState<string | null>(null);
 
-  // ★ Sprint 2: Celebration modal
+  // ★ Sprint 2: Celebration modal + Consent
   const [showCelebration, setShowCelebration] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
   const prevScoreRef = useRef<number | null>(null);
-  
 
   // ★ Sprint 3: 상태 전이 토스트 감지용
   const prevStatusRef = useRef<string | null>(null);
+
+  // ★ Consent: pending civil type
+  const pendingCivilTypeRef = useRef<string | null>(null);
 
   const handleToggle = (id: string) => {
     setOpenSection((prev) => (prev === id ? null : id));
@@ -108,18 +107,18 @@ export function Visa() {
   }, [user?.id, visaTracker, hydrate, hydrateIntent]);
 
   // Auto-create intent — 동의 미확인 시 동의 시트 먼저
-useEffect(() => {
-  if (!user?.id || !userProfile?.visa_type) return;
-  if (intent !== null) return;
-  if (intentLoading) return;
-  
-  // PIPA: 동의 미확인 시 동의 시트 표시
-  if (userProfile?.event_consent === null || userProfile?.event_consent === undefined) {
-    setShowConsent(true);
-    return;
-  }
-  
-  createIntent(user.id, userProfile.visa_type as string, "extension");
+  useEffect(() => {
+    if (!user?.id || !userProfile?.visa_type) return;
+    if (intent !== null) return;
+    if (intentLoading) return;
+
+    // PIPA: 동의 미확인 시 동의 시트 표시
+    if (userProfile.event_consent === null || userProfile.event_consent === undefined) {
+      setShowConsent(true);
+      return;
+    }
+
+    createIntent(user.id, userProfile.visa_type as string, "extension");
   }, [user?.id, userProfile?.visa_type, userProfile?.event_consent, intent, intentLoading, createIntent]);
 
   // ★ Sprint 2: Celebration trigger
@@ -180,50 +179,51 @@ useEffect(() => {
   }, [user?.id, setIntentCivilType]);
 
   // Mission select
-  const pendingCivilTypeRef = useRef<string | null>(null);
+  const handleMissionSelect = useCallback((ct: string) => {
+    if (!user?.id || !userProfile?.visa_type) return;
 
-const handleMissionSelect = useCallback((ct: string) => {
-  if (!user?.id || !userProfile?.visa_type) return;
+    // PIPA: 동의 미확인 시 동의 시트 먼저 표시
+    if (userProfile.event_consent === null || userProfile.event_consent === undefined) {
+      pendingCivilTypeRef.current = ct;
+      setShowConsent(true);
+      return;
+    }
 
-  // PIPA: 동의 미확인 시 동의 시트 먼저 표시
-  if (userProfile?.event_consent === null || userProfile?.event_consent === undefined) {
-    pendingCivilTypeRef.current = ct;
-    setShowConsent(true);
-    return;
-  }
-
-  setCivilType(ct);
-  createIntent(user.id, userProfile.visa_type as string, ct);
-  setOpenSection("doc-prep");
-}, [user?.id, userProfile, createIntent]);
-
-const handleConsentAccept = useCallback(async () => {
-  await setEventConsent(true);
-  setShowConsent(false);
-
-  // 동의 후 원래 의도한 mission 실행
-  const ct = pendingCivilTypeRef.current ?? "extension";
-  if (user?.id && userProfile?.visa_type) {
     setCivilType(ct);
     createIntent(user.id, userProfile.visa_type as string, ct);
     setOpenSection("doc-prep");
-  }
-  pendingCivilTypeRef.current = null;
-}, [user?.id, userProfile?.visa_type, createIntent]);
+  }, [user?.id, userProfile, createIntent]);
 
-const handleConsentDecline = useCallback(async () => {
-  await setEventConsent(false);
-  setShowConsent(false);
+  // ★ 핵심 수정: 동의 후 dashboardStore.userProfile도 즉시 동기화
+  const handleConsentAccept = useCallback(async () => {
+    await setEventConsent(true);
+    // dashboardStore의 userProfile도 즉시 갱신 → useEffect 재트리거 방지
+    await updateProfileField({ event_consent: true } as Partial<import("../../types").UserProfile>);
+    setShowConsent(false);
 
-  // 거부해도 앱은 정상 작동 (PIPA 제16조 제3항)
-  const ct = pendingCivilTypeRef.current ?? "extension";
-  if (user?.id && userProfile?.visa_type) {
-    setCivilType(ct);
-    createIntent(user.id, userProfile.visa_type as string, ct);
-    setOpenSection("doc-prep");
-  }
-  pendingCivilTypeRef.current = null;
-}, [user?.id, userProfile?.visa_type, createIntent]);
+    const ct = pendingCivilTypeRef.current ?? "extension";
+    if (user?.id && userProfile?.visa_type) {
+      setCivilType(ct);
+      createIntent(user.id, userProfile.visa_type as string, ct);
+      setOpenSection("doc-prep");
+    }
+    pendingCivilTypeRef.current = null;
+  }, [user?.id, userProfile?.visa_type, createIntent, updateProfileField]);
+
+  const handleConsentDecline = useCallback(async () => {
+    await setEventConsent(false);
+    // dashboardStore의 userProfile도 즉시 갱신
+    await updateProfileField({ event_consent: false } as Partial<import("../../types").UserProfile>);
+    setShowConsent(false);
+
+    const ct = pendingCivilTypeRef.current ?? "extension";
+    if (user?.id && userProfile?.visa_type) {
+      setCivilType(ct);
+      createIntent(user.id, userProfile.visa_type as string, ct);
+      setOpenSection("doc-prep");
+    }
+    pendingCivilTypeRef.current = null;
+  }, [user?.id, userProfile?.visa_type, createIntent, updateProfileField]);
 
   const handleScoreClick = useCallback(() => {
     setOpenSection("kpoint");
@@ -441,7 +441,7 @@ const handleConsentDecline = useCallback(async () => {
           <KiipProgress currentStage={kiipStage} />
         </AccordionCard>
 
-        {/* 4. Document Prep — ★ Sprint 3: onUploadComplete 연결 */}
+        {/* 4. Document Prep */}
         <AccordionCard
           id="doc-prep"
           title={t("visa:doc_prep.title", { defaultValue: "Document Prep" })}
@@ -545,6 +545,8 @@ const handleConsentDecline = useCallback(async () => {
         onClose={() => setShowCelebration(false)}
         onViewGuide={handleViewGuide}
       />
+
+      {/* Event Consent Sheet */}
       <EventConsentSheet
         isOpen={showConsent}
         onAccept={handleConsentAccept}
