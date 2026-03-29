@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { Logo } from "../components/logo";
-import { FileText, Send, Building, GraduationCap } from "lucide-react";
+import { FileText, Send, Building, GraduationCap, CheckCircle2, ArrowRight } from "lucide-react";
 import { useAuthStore } from "../../stores/useAuthStore";
+import { supabase } from "../../lib/supabase";
 
 export function Landing() {
   const { t } = useTranslation();
@@ -25,6 +26,11 @@ export function Landing() {
   const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
   const [fullName, setFullName] = useState("");
   const [resetSent, setResetSent] = useState(false);
+
+  // ★ Waitlist state
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistStatus, setWaitlistStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [waitlistError, setWaitlistError] = useState("");
 
   useEffect(() => {
     if (initialized && session) {
@@ -58,6 +64,35 @@ export function Landing() {
       }
     } catch {
       // error는 store에서 관리됨
+    }
+  };
+
+  // ★ Waitlist submit
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!waitlistEmail.trim()) return;
+
+    setWaitlistStatus("loading");
+    setWaitlistError("");
+
+    try {
+      const { error: insertError } = await supabase
+        .from("waitlist")
+        .insert({ email: waitlistEmail.trim().toLowerCase() });
+
+      if (insertError) {
+        if (insertError.code === "23505") {
+          // 이미 등록된 이메일
+          setWaitlistStatus("success");
+        } else {
+          throw insertError;
+        }
+      } else {
+        setWaitlistStatus("success");
+      }
+    } catch (err) {
+      setWaitlistStatus("error");
+      setWaitlistError(err instanceof Error ? err.message : "Something went wrong");
     }
   };
 
@@ -178,7 +213,7 @@ export function Landing() {
         </motion.div>
       </div>
 
-      {/* Login Form */}
+      {/* ★ Waitlist + Login — 애니메이션 후 표시 */}
       {showLogin && (
         <motion.div
           className="w-full max-w-md"
@@ -186,6 +221,100 @@ export function Landing() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
+          {/* ★ Waitlist Section — 로그인 폼 위에 */}
+          {waitlistStatus !== "success" ? (
+            <div
+              className="rounded-3xl p-6 mb-4 shadow-lg"
+              style={{ backgroundColor: "var(--color-surface-primary)" }}
+            >
+              <h2
+                className="text-[20px] leading-[25px] mb-2"
+                style={{ fontWeight: 600, color: "var(--color-text-primary)" }}
+              >
+                {t("landing:waitlist_title", { defaultValue: "Get early access" })}
+              </h2>
+              <p
+                className="text-[15px] leading-[20px] mb-4"
+                style={{ color: "var(--color-text-secondary)" }}
+              >
+                {t("landing:waitlist_desc", { defaultValue: "Visa documents in 3 minutes, not 3 hours. Join 2.72M foreign residents making Korea easier." })}
+              </p>
+
+              <form onSubmit={handleWaitlistSubmit} className="flex gap-2">
+                <input
+                  type="email"
+                  value={waitlistEmail}
+                  onChange={(e) => setWaitlistEmail(e.target.value)}
+                  placeholder={t("landing:placeholder_email")}
+                  className="flex-1 rounded-2xl px-4 py-3 outline-none focus:ring-2 transition-all text-[15px]"
+                  style={{ backgroundColor: "var(--color-surface-secondary)" }}
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={waitlistStatus === "loading"}
+                  className="rounded-2xl px-5 py-3 active:scale-[0.98] transition-transform disabled:opacity-50 flex items-center gap-2"
+                  style={{
+                    fontWeight: 600,
+                    fontSize: "15px",
+                    backgroundColor: "var(--color-action-primary)",
+                    color: "var(--color-text-on-color)",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {waitlistStatus === "loading" ? "..." : (
+                    <>
+                      {t("landing:waitlist_cta", { defaultValue: "Join" })}
+                      <ArrowRight size={16} />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              {waitlistStatus === "error" && (
+                <p className="text-[13px] mt-2" style={{ color: "var(--color-action-error)" }}>
+                  {waitlistError}
+                </p>
+              )}
+            </div>
+          ) : (
+            <motion.div
+              className="rounded-3xl p-6 mb-4 shadow-lg text-center"
+              style={{ backgroundColor: "var(--color-surface-primary)" }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <CheckCircle2
+                size={40}
+                className="mx-auto mb-3"
+                style={{ color: "var(--color-action-success)" }}
+              />
+              <h2
+                className="text-[20px] leading-[25px] mb-1"
+                style={{ fontWeight: 600, color: "var(--color-text-primary)" }}
+              >
+                {t("landing:waitlist_success_title", { defaultValue: "You're on the list!" })}
+              </h2>
+              <p
+                className="text-[15px] leading-[20px]"
+                style={{ color: "var(--color-text-secondary)" }}
+              >
+                {t("landing:waitlist_success_desc", { defaultValue: "We'll notify you when early access opens." })}
+              </p>
+            </motion.div>
+          )}
+
+          {/* ★ "Already have an account?" 구분선 */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 h-px" style={{ backgroundColor: "var(--color-border-default)" }} />
+            <span className="text-[13px]" style={{ color: "var(--color-text-tertiary)" }}>
+              {t("landing:waitlist_divider", { defaultValue: "Already have an account?" })}
+            </span>
+            <div className="flex-1 h-px" style={{ backgroundColor: "var(--color-border-default)" }} />
+          </div>
+
+          {/* 기존 로그인 폼 — 100% 동결 */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div
               className="rounded-3xl p-6 shadow-lg space-y-4"
@@ -307,7 +436,6 @@ export function Landing() {
                   color: "var(--color-text-primary)",
                 }}
               >
-                {/* Google logo — 외부 브랜드 색상이므로 토큰 대상 아님 */}
                 <svg width="20" height="20" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
