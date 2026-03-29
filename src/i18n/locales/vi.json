@@ -1,12 +1,12 @@
 {
   "common": {
     "consent": {
-      "title": "Thông báo thu thập dữ liệu",
-      "description": "Settle thu thập dữ liệu sử dụng (tiến độ chuẩn bị hồ sơ, lượt xem hướng dẫn) để cải thiện dịch vụ. Không thu thập thông tin cá nhân (tên, số đăng ký).",
-      "detail": "Thu thập: tiến độ chuẩn bị, lượt xem hướng dẫn, thời gian hoàn thành. Không thu thập: tên, số đăng ký, thông tin liên hệ.",
-      "checkbox": "Tôi đồng ý thu thập dữ liệu sử dụng",
-      "accept": "Đồng ý",
-      "decline": "Từ chối",
+      "title": "Cùng cải thiện cuộc sống tại Hàn Quốc",
+      "description": "Dữ liệu sử dụng giúp xây dựng chính sách tốt hơn cho cư dân nước ngoài. Chúng tôi chỉ theo dõi tiến độ chuẩn bị và lượt xem hướng dẫn — không bao giờ thu thập tên, số ID hay thông tin liên hệ.",
+      "detail": "Thu thập: tiến độ chuẩn bị hồ sơ, lượt xem hướng dẫn, thời gian hoàn thành. Dữ liệu này giúp xác định khó khăn chung của 2,72 triệu cư dân nước ngoài. Không thu thập: tên, số đăng ký, thông tin liên hệ.",
+      "checkbox": "Tôi đồng ý đóng góp dữ liệu sử dụng",
+      "accept": "Đóng góp",
+      "decline": "Để sau",
       "update": "Bạn có thể thay đổi bất cứ lúc nào trong MY > Cài đặt"
     },
     "tab_home": "Home",

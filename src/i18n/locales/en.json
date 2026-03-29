@@ -1,14 +1,14 @@
 {
   "common": {
     "consent": {
-        "title": "Data collection notice",
-        "description": "Settle collects usage data (document preparation progress, submission guide views) to improve the service. No personal information (name, registration number) is collected.",
-        "detail": "Collected: preparation progress, guide views, completion time. Not collected: name, registration number, contact info.",
-        "checkbox": "I agree to usage data collection",
-        "accept": "Accept",
-        "decline": "Decline",
-        "update": "You can change this anytime in MY > Settings"
-      },
+      "title": "Help improve life in Korea",
+      "description": "Your usage data helps build better policies for foreign residents. We track preparation progress and guide views — never your name, ID, or contact info.",
+      "detail": "Collected: document preparation progress, guide views, completion time. This data helps identify common barriers for 2.72M foreign residents. Not collected: name, registration number, contact info.",
+      "checkbox": "I agree to contribute my usage data",
+      "accept": "Contribute",
+      "decline": "Not now",
+      "update": "You can change this anytime in MY > Settings"
+    },
     "tab_home": "Home",
     "tab_visa": "Visa",
     "tab_remit": "Remit",
