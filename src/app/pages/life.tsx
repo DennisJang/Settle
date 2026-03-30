@@ -138,7 +138,7 @@ function getExclusionReason(quote: ProviderQuote, bestQuote: ProviderQuote, t: (
 // COMPONENT
 // ═══════════════════════════════════════
 
-export function Remit() {
+export function Life() {
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const { userProfile } = useDashboardStore();

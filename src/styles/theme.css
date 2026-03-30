@@ -1,17 +1,16 @@
-/**
- * theme.css — Phase 0-B (Complete Semantic Token System)
- *
- * DESIGN_SYSTEM.md 섹션 1~10 기반.
- * 모든 컴포넌트는 이 토큰을 참조해야 함.
- * 하드코딩 색상(#007AFF 등) 직접 사용 절대 금지 — Dennis 규칙 #32
- *
- * 구조:
- *   1. Color Tokens (Light / Dark)
- *   2. Liquid Glass Utility
- *   3. Common Animations
- *   4. Common State Patterns (Loading / Error / Empty)
- *   5. Accessibility Overrides
- */
+/* ============================================
+   Settle Design System v2.0 — Theme Tokens
+   Stripe 미학 기반. 이 파일은 절대 삭제 금지.
+
+   구조:
+     1. Color Tokens (Light / Dark)
+     2. Shadow Tokens
+     3. Gradient Tokens (장식용)
+     4. Animation / Easing / Radius
+     5. Common Animations
+     6. Common State Patterns
+     7. Accessibility Overrides
+   ============================================ */
 
 /* ========================================================================
    1. COLOR TOKENS
@@ -19,135 +18,211 @@
 
 :root {
   /* === Action === */
-  --color-action-primary: #007AFF;
-  --color-action-primary-hover: #0051D5;
-  --color-action-success: #34C759;
-  --color-action-success-hover: #30A14E;
-  --color-action-warning: #FF9500;
-  --color-action-warning-hover: #FF6B00;
-  --color-action-error: #FF3B30;
-  --color-action-error-hover: #D70015;
+  --color-action-primary: #635BFF;
+  --color-action-primary-hover: #5349E0;
+  --color-action-primary-subtle: rgba(99, 91, 255, 0.08);
+  --color-action-success: #10B981;
+  --color-action-warning: #F59E0B;
+  --color-action-error: #EF4444;
 
   /* === Text === */
-  --color-text-primary: #1D1D1F;
-  --color-text-secondary: #86868B;
-  --color-text-tertiary: #C7C7CC;
+  --color-text-primary: #1A1D26;
+  --color-text-secondary: #6B7294;
+  --color-text-tertiary: #A3ACCD;
   --color-text-on-color: #FFFFFF;
 
   /* === Surface === */
   --color-surface-primary: #FFFFFF;
-  --color-surface-secondary: #F5F5F7;
-  --color-surface-tertiary: #E8E8ED;
-  --color-surface-glass: rgba(255, 255, 255, 0.80);
+  --color-surface-secondary: #F6F8FA;
   --color-surface-elevated: #FFFFFF;
 
   /* === Border === */
-  --color-border-default: rgba(0, 0, 0, 0.05);
-  --color-border-strong: rgba(0, 0, 0, 0.10);
+  --color-border-default: #E3E8EF;
+  --color-border-strong: #CFD5E2;
+  --color-border-focus: #635BFF;
 
   /* === Overlay === */
-  --color-overlay: rgba(0, 0, 0, 0.50);
+  --color-overlay: rgba(0, 0, 0, 0.30);
 
-  /* === State / Indicator === */
-  --color-inactive: #E5E5EA;
+  /* === Status Background (뱃지/배너용) === */
+  --color-bg-success: #D1FAE5;
+  --color-bg-warning: #FEF3C7;
+  --color-bg-error: #FEE2E2;
+  --color-bg-info: #EEF2FF;
+
+  /* === Status Text (뱃지/배너용) === */
+  --color-text-success: #065F46;
+  --color-text-warning: #92400E;
+  --color-text-error: #991B1B;
+  --color-text-info: #3730A3;
+
+  /* === Legacy compat (기존 컴포넌트가 참조할 수 있는 별칭) === */
+  --color-inactive: #E3E8EF;
 }
 
-/* === Dark Mode === */
+/* === Dark Mode (예비) === */
 .dark {
-  --color-action-primary: #0A84FF;
-  --color-action-primary-hover: #409CFF;
-  --color-action-success: #30D158;
-  --color-action-success-hover: #28A745;
-  --color-action-warning: #FF9F0A;
-  --color-action-warning-hover: #FF8C00;
-  --color-action-error: #FF453A;
-  --color-action-error-hover: #D63030;
+  --color-action-primary: #7C75FF;
+  --color-action-primary-hover: #9B95FF;
+  --color-action-primary-subtle: rgba(124, 117, 255, 0.12);
+  --color-action-success: #34D399;
+  --color-action-warning: #FBBF24;
+  --color-action-error: #F87171;
 
-  --color-text-primary: #F5F5F7;
-  --color-text-secondary: #98989D;
-  --color-text-tertiary: #48484A;
+  --color-text-primary: #E8ECF4;
+  --color-text-secondary: #8C99AD;
+  --color-text-tertiary: #5A6478;
   --color-text-on-color: #FFFFFF;
 
-  --color-surface-primary: #1C1C1E;
-  --color-surface-secondary: #2C2C2E;
-  --color-surface-tertiary: #3A3A3C;
-  --color-surface-glass: rgba(44, 44, 46, 0.75);
-  --color-surface-elevated: #2C2C2E;
+  --color-surface-primary: #1A1D26;
+  --color-surface-secondary: #22252E;
+  --color-surface-elevated: #2B3039;
 
-  --color-border-default: rgba(255, 255, 255, 0.08);
-  --color-border-strong: rgba(255, 255, 255, 0.12);
+  --color-border-default: #2B3039;
+  --color-border-strong: #3A4050;
+  --color-border-focus: #7C75FF;
 
-  --color-overlay: rgba(0, 0, 0, 0.65);
+  --color-overlay: rgba(0, 0, 0, 0.60);
 
-  --color-inactive: #48484A;
+  --color-inactive: #3A4050;
 }
 
-
 /* ========================================================================
-   2. LIQUID GLASS UTILITY
+   2. SHADOW TOKENS
    ======================================================================== */
 
-.glass-surface {
-  background: var(--color-surface-glass);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-top: 1px solid var(--color-border-strong);
+:root {
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.10), 0 1px 4px rgba(0, 0, 0, 0.06);
+  --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+  --shadow-focus: 0 0 0 3px rgba(99, 91, 255, 0.10);
+  --shadow-focus-error: 0 0 0 3px rgba(239, 68, 68, 0.10);
 }
 
-
 /* ========================================================================
-   3. COMMON ANIMATIONS
+   3. GRADIENT TOKENS (장식용 전용)
    ======================================================================== */
 
-@keyframes slideUp {
+:root {
+  --gradient-stripe-mesh: linear-gradient(135deg, #635BFF 0%, #9B8CFF 30%, #FF7EB3 60%, #80E9FF 100%);
+  --gradient-stripe-subtle: linear-gradient(135deg, rgba(99,91,255,0.06) 0%, rgba(155,140,255,0.04) 50%, rgba(255,126,179,0.03) 100%);
+  --gradient-stripe-horizontal: linear-gradient(90deg, #635BFF 0%, #80E9FF 100%);
+}
+
+/* ========================================================================
+   4. ANIMATION / EASING / RADIUS
+   ======================================================================== */
+
+:root {
+  --ease-stripe: cubic-bezier(0.25, 1, 0.5, 1);
+  --radius-card: 12px;
+  --radius-button: 8px;
+  --radius-input: 8px;
+  --radius-badge: 6px;
+  --radius-sheet: 16px;
+  --radius-progress: 4px;
+}
+
+/* ========================================================================
+   5. COMMON ANIMATIONS
+   ======================================================================== */
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-enter {
+  animation: fadeSlideUp 0.3s var(--ease-stripe);
+}
+
+@keyframes sheetEnter {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
 }
-
-.animate-slide-up {
-  animation: slideUp 400ms cubic-bezier(0.32, 0.72, 0, 1);
+.animate-sheet {
+  animation: sheetEnter 0.4s var(--ease-stripe);
 }
 
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-
 .animate-fade-in {
   animation: fadeIn 300ms ease-out;
 }
 
+@keyframes shimmer {
+  from { background-position: -400px 0; }
+  to { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg,
+    var(--color-border-default) 0%,
+    var(--color-surface-secondary) 50%,
+    var(--color-border-default) 100%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: var(--radius-input);
+}
+
+.btn-press:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease-out;
+}
+
+@keyframes accordion-open {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-accordion-open {
+  animation: accordion-open 250ms var(--ease-stripe) forwards;
+}
+
+/* Stagger children (리스트 순차 등장) */
+.stagger-child:nth-child(1) { animation-delay: 0ms; }
+.stagger-child:nth-child(2) { animation-delay: 50ms; }
+.stagger-child:nth-child(3) { animation-delay: 100ms; }
+.stagger-child:nth-child(4) { animation-delay: 150ms; }
+.stagger-child:nth-child(5) { animation-delay: 200ms; }
+.stagger-child:nth-child(6) { animation-delay: 250ms; }
+
+/* Legacy alias (기존 코드 호환) */
+.animate-slide-up {
+  animation: sheetEnter 400ms var(--ease-stripe);
+}
 
 /* ========================================================================
-   4. COMMON STATE PATTERNS (DESIGN_SYSTEM.md 섹션 8)
+   6. COMMON STATE PATTERNS
    ======================================================================== */
 
 /* --- Skeleton Loading (목록용) --- */
 .skeleton-card {
   background: var(--color-surface-primary);
-  border-radius: 24px;
+  border-radius: var(--radius-card);
   padding: 24px;
 }
 
 .skeleton-line {
   background: var(--color-surface-secondary);
-  border-radius: 8px;
+  border-radius: var(--radius-input);
   height: 16px;
 }
 
 .skeleton-line-short {
   background: var(--color-surface-secondary);
-  border-radius: 8px;
+  border-radius: var(--radius-input);
   height: 12px;
   width: 60%;
 }
 
 /* --- Error Banner (인라인 에러) --- */
 .error-banner {
-  background: color-mix(in srgb, var(--color-action-error) 10%, transparent);
-  border-radius: 16px;
+  background: var(--color-bg-error);
+  border: 1px solid var(--color-action-error);
+  border-radius: var(--radius-card);
   padding: 16px;
-  color: var(--color-action-error);
+  color: var(--color-text-error);
 }
 
 /* --- Empty State Container --- */
@@ -179,30 +254,13 @@
   margin-bottom: 24px;
 }
 
-
 /* ========================================================================
-   5. ACCESSIBILITY OVERRIDES
+   7. ACCESSIBILITY OVERRIDES
    ======================================================================== */
 
-@media (prefers-reduced-transparency: reduce) {
-  .glass-surface {
-    background: var(--color-surface-elevated);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .animate-slide-up,
-  .animate-fade-in {
-    animation: none;
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
-}
-
-@keyframes accordion-open {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.animate-accordion-open {
-  animation: accordion-open 250ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
 }

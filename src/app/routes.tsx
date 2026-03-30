@@ -1,12 +1,8 @@
 /**
- * routes.tsx — Code-split version (891KB → target 500KB)
+ * routes.tsx — Design System v2.0 (Remit → Life)
  *
- * 전략:
- * - Landing: 정적 (첫 화면, 빨라야 함)
- * - AuthGuardLayout: 정적 (모든 보호 라우트의 wrapper)
- * - Home: 정적 (탭 전환 속도)
- * - Visa, Remit, Profile: lazy (탭 전환 시 로드, 체감 지연 거의 없음)
- * - Paywall, PaywallSuccess, Onboarding, Privacy, Terms: lazy (비핵심 페이지)
+ * 변경: remit → life 경로 전환. /remit → /life 리다이렉트 추가.
+ * 기존 code-split 전략 유지.
  *
  * Dennis 규칙 준수:
  * #2  window.location.href 금지 → Navigate 컴포넌트 사용
@@ -25,7 +21,7 @@ import { Home } from "./pages/home";
 
 // === Lazy imports (별도 청크) ===
 const Visa = lazy(() => import("./pages/visa").then(m => ({ default: m.Visa })));
-const Remit = lazy(() => import("./pages/remit").then(m => ({ default: m.Remit })));
+const Life = lazy(() => import("./pages/life").then(m => ({ default: m.Life })));
 const Profile = lazy(() => import("./pages/profile").then(m => ({ default: m.Profile })));
 const Paywall = lazy(() => import("./pages/paywall").then(m => ({ default: m.Paywall })));
 const PaywallSuccess = lazy(() => import("./pages/PaywallSuccess").then(m => ({ default: m.PaywallSuccess })));
@@ -33,7 +29,7 @@ const Onboarding = lazy(() => import("./pages/onboarding").then(m => ({ default:
 const Privacy = lazy(() => import("./pages/privacy").then(m => ({ default: m.Privacy })));
 const Terms = lazy(() => import("./pages/terms").then(m => ({ default: m.Terms })));
 
-// === Suspense fallback (AuthGuardLayout 스피너와 동일 패턴) ===
+// === Suspense fallback ===
 function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-screen"
@@ -59,7 +55,6 @@ export const router = createBrowserRouter([
     path: "/",
     Component: Landing,
   },
-
   // === Protected routes (Auth Guard) ===
   {
     path: "/",
@@ -68,7 +63,7 @@ export const router = createBrowserRouter([
       // --- 4 Tab routes ---
       { path: "home", Component: Home },
       { path: "visa", element: <S><Visa /></S> },
-      { path: "remit", element: <S><Remit /></S> },
+      { path: "life", element: <S><Life /></S> },
       { path: "profile", element: <S><Profile /></S> },
 
       // --- Non-tab routes ---
@@ -78,7 +73,8 @@ export const router = createBrowserRouter([
       { path: "privacy", element: <S><Privacy /></S> },
       { path: "terms", element: <S><Terms /></S> },
 
-      // --- 삭제된 탭 리다이렉트 ---
+      // --- 삭제/변경된 탭 리다이렉트 ---
+      { path: "remit", element: <Navigate to="/life" replace /> },
       { path: "housing", element: <Navigate to="/home" replace /> },
       { path: "education", element: <Navigate to="/home" replace /> },
 
