@@ -92,11 +92,54 @@
    ======================================================================== */
 
 :root {
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
-  --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.10), 0 1px 4px rgba(0, 0, 0, 0.06);
-  --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
-  --shadow-focus: 0 0 0 3px rgba(99, 91, 255, 0.10);
-  --shadow-focus-error: 0 0 0 3px rgba(239, 68, 68, 0.10);
+  /* 3층 색상 매칭 그림자 (검은색 대신 Indigo 기반) */
+  --shadow-card:
+    0 1px 2px hsl(243deg 100% 30% / 0.12),
+    0 4px 8px hsl(243deg 100% 30% / 0.08),
+    0 12px 24px hsl(243deg 100% 30% / 0.06);
+
+  /* 카드 호버: 깊이감 증가 + 떠오르는 느낌 */
+  --shadow-card-hover:
+    0 2px 4px hsl(243deg 100% 30% / 0.16),
+    0 8px 16px hsl(243deg 100% 30% / 0.12),
+    0 24px 48px hsl(243deg 100% 30% / 0.10);
+
+  /* 떠있는 요소 (모달, 시트) */
+  --shadow-elevated:
+    0 2px 4px hsl(243deg 100% 30% / 0.12),
+    0 8px 16px hsl(243deg 100% 30% / 0.10),
+    0 24px 48px hsl(243deg 100% 30% / 0.08);
+
+  /* 포커스 링 */
+  --shadow-focus: 0 0 0 3px rgba(99, 91, 255, 0.15);
+  --shadow-focus-error: 0 0 0 3px rgba(239, 68, 68, 0.15);
+
+  /* 3D 물성: inset 하이라이트 (상단 빛 반사) */
+  --shadow-card-3d:
+    0 1px 2px hsl(243deg 100% 30% / 0.12),
+    0 4px 8px hsl(243deg 100% 30% / 0.08),
+    0 12px 24px hsl(243deg 100% 30% / 0.06),
+    inset 0 1px 2px rgba(255, 255, 255, 0.6);
+
+  /* 버튼 3D: 기본 상태 */
+  --shadow-btn:
+    0 2px 4px hsl(243deg 100% 30% / 0.16),
+    0 8px 16px hsl(243deg 100% 30% / 0.12);
+
+  /* 버튼 3D: 호버 (떠오름) */
+  --shadow-btn-hover:
+    0 4px 8px hsl(243deg 100% 30% / 0.20),
+    0 16px 32px hsl(243deg 100% 30% / 0.16);
+
+  /* 버튼 3D: 눌림 */
+  --shadow-btn-active:
+    0 1px 2px hsl(243deg 100% 30% / 0.08),
+    0 4px 8px hsl(243deg 100% 30% / 0.04);
+
+  /* 인풋 3D: 움푹 파인 느낌 */
+  --shadow-input-inset:
+    inset 0 1px 2px rgba(0, 0, 0, 0.04),
+    inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 /* ========================================================================
@@ -166,6 +209,51 @@
   border-radius: var(--radius-input);
 }
 
+/* 3D 버튼 — Z축 press/hover 효과 */
+.btn-3d {
+  box-shadow: var(--shadow-btn);
+  transform: translateY(0);
+  transition:
+    transform 0.15s var(--ease-stripe),
+    box-shadow 0.15s var(--ease-stripe);
+}
+.btn-3d:hover {
+  box-shadow: var(--shadow-btn-hover);
+  transform: translateY(-2px);
+}
+.btn-3d:active {
+  box-shadow: var(--shadow-btn-active);
+  transform: translateY(2px);
+}
+
+/* 3D 카드 — inset 하이라이트 + hover 떠오름 */
+.card-3d {
+  box-shadow: var(--shadow-card-3d);
+  transform: translateY(0);
+  transition:
+    transform 0.3s var(--ease-stripe),
+    box-shadow 0.3s var(--ease-stripe);
+}
+.card-3d:hover {
+  box-shadow:
+    0 2px 4px hsl(243deg 100% 30% / 0.16),
+    0 8px 16px hsl(243deg 100% 30% / 0.12),
+    0 24px 48px hsl(243deg 100% 30% / 0.10),
+    inset 0 1px 2px rgba(255, 255, 255, 0.6);
+  transform: translateY(-4px);
+}
+
+/* 3D 인풋 — 움푹 파인 느낌 */
+.input-3d {
+  box-shadow: var(--shadow-input-inset);
+}
+.input-3d:focus {
+  box-shadow:
+    var(--shadow-input-inset),
+    var(--shadow-focus);
+}
+
+/* Legacy: 기존 btn-press 호환 유지 */
 .btn-press:active {
   transform: scale(0.98);
   transition: transform 0.1s ease-out;
