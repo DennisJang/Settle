@@ -316,7 +316,7 @@ export function Onboarding() {
       {/* Illustration area — top 45% */}
       <div
         style={{
-          height: 240,
+          height: 340,
           background: STEP_GRADIENTS[step],
           position: "relative",
           overflow: "hidden",
