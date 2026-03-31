@@ -13,6 +13,7 @@ import {
   Step4Illustration,
   Step5Illustration,
 } from "../components/OnboardingIllustrations";
+import { DateScrollPicker } from "../components/DateScrollPicker";
 
 // ═══════════════════════════════════════
 // ARC OCR — preserved
@@ -476,27 +477,14 @@ export function Onboarding() {
                   />
                 </div>
 
-                {/* Visa expiry */}
+                {/* Visa expiry — iOS-style scroll picker */}
                 <div>
                   <label style={{ fontSize: 13, fontWeight: 500, color: "#6B7294", display: "block", marginBottom: 6 }}>
                     {t("onboarding:label_visa_expiry", { defaultValue: "비자 만료일" })}
                   </label>
-                  <input
-                    type="date"
+                  <DateScrollPicker
                     value={visaExpiry}
-                    onChange={(e) => setVisaExpiry(e.target.value)}
-                    style={{
-                      width: "100%",
-                      height: 44,
-                      borderRadius: 12,
-                      background: "#F3F3F5",
-                      border: "none",
-                      padding: "0 14px",
-                      fontSize: 16,
-                      outline: "none",
-                      fontFamily: "Inter, sans-serif",
-                      color: "#1A1D26",
-                    }}
+                    onChange={(date) => setVisaExpiry(date)}
                   />
                 </div>
 
