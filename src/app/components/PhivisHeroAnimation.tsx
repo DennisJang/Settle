@@ -1,11 +1,6 @@
 import { motion, useAnimation } from "motion/react";
 import { useEffect } from "react";
 
-/**
- * PhivisHeroAnimation
- * Landing page exclusive — 4 portal layers merge → text fade-in → loop.
- * Requires: pnpm add motion
- */
 export function PhivisHeroAnimation() {
   const controls = useAnimation();
   const textControls = useAnimation();
@@ -13,37 +8,16 @@ export function PhivisHeroAnimation() {
   useEffect(() => {
     const animate = async () => {
       while (true) {
-        // Phase 1: Idle floating (2s)
-        await controls.start({
-          transition: { duration: 2, ease: "easeInOut" },
-        });
+        await controls.start("idle");
+        await controls.start("aligned");
+        await controls.start("merged");
+        await controls.start("final");
 
-        // Phase 2: Alignment (2s)
-        await controls.start("aligned", {
-          transition: { duration: 2, ease: "easeInOut" },
-        });
-
-        // Phase 3: Move through portal (2s)
-        await controls.start("merged", {
-          transition: { duration: 2, ease: [0.4, 0, 0.2, 1] },
-        });
-
-        // Phase 4: Hold final state (0.5s)
-        await controls.start("final", {
-          transition: { duration: 0.5, ease: "easeOut" },
-        });
-
-        // Fade in text
-        textControls.start({ opacity: 1, transition: { duration: 1 } });
-
-        // Hold
+        textControls.start({ opacity: 1 });
         await new Promise((resolve) => setTimeout(resolve, 1500));
 
-        // Fade out text and reset
-        await textControls.start({ opacity: 0, transition: { duration: 0.8 } });
-        await controls.start("reset", {
-          transition: { duration: 0.8, ease: "easeInOut" },
-        });
+        await textControls.start({ opacity: 0 });
+        await controls.start("reset");
       }
     };
 
@@ -58,6 +32,7 @@ export function PhivisHeroAnimation() {
       opacity: 0.4 + custom * 0.15,
       scale: 0.95 - custom * 0.05,
       y: Math.sin(custom * 2) * 3,
+      transition: { duration: 2, ease: "easeInOut" as const },
     }),
     aligned: {
       z: 0,
@@ -66,6 +41,7 @@ export function PhivisHeroAnimation() {
       opacity: 0.7,
       scale: 1,
       y: 0,
+      transition: { duration: 2, ease: "easeInOut" as const },
     },
     merged: {
       z: -80,
@@ -74,6 +50,7 @@ export function PhivisHeroAnimation() {
       opacity: 0.3,
       scale: 0.85,
       y: 0,
+      transition: { duration: 2, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
     },
     final: {
       z: 0,
@@ -82,6 +59,7 @@ export function PhivisHeroAnimation() {
       opacity: 1,
       scale: 1,
       y: 0,
+      transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
     },
     reset: (custom: number) => ({
       z: custom * 40,
@@ -90,6 +68,7 @@ export function PhivisHeroAnimation() {
       opacity: 0.4 + custom * 0.15,
       scale: 0.95 - custom * 0.05,
       y: Math.sin(custom * 2) * 3,
+      transition: { duration: 0.8, ease: "easeInOut" as const },
     }),
   };
 
@@ -102,9 +81,7 @@ export function PhivisHeroAnimation() {
 
   return (
     <div className="flex items-center justify-center" style={{ gap: 64 }}>
-      {/* 3D Portal Animation */}
       <div className="relative" style={{ perspective: "800px" }}>
-        {/* Ambient glow */}
         <div
           className="absolute inset-0"
           style={{
@@ -113,7 +90,6 @@ export function PhivisHeroAnimation() {
             filter: "blur(24px)",
           }}
         />
-        {/* Ground shadow */}
         <div
           className="absolute -bottom-6 left-1/2 -translate-x-1/2"
           style={{
@@ -124,7 +100,6 @@ export function PhivisHeroAnimation() {
           }}
         />
 
-        {/* Layer container */}
         <div
           style={{
             width: 140,
@@ -156,8 +131,11 @@ export function PhivisHeroAnimation() {
         </div>
       </div>
 
-      {/* Typography */}
-      <motion.div initial={{ opacity: 0 }} animate={textControls}>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={textControls}
+        transition={{ duration: 1 }}
+      >
         <h1
           style={{
             color: "var(--color-text-primary, #1a1a2e)",
@@ -204,42 +182,29 @@ function PortalLayer({
         `,
       }}
     >
-      {/* Top-left highlight */}
       <div
         style={{
           position: "absolute",
-          top: 6,
-          left: 6,
-          right: "40%",
-          bottom: "40%",
+          top: 6, left: 6, right: "40%", bottom: "40%",
           borderRadius: "28px 26px 40px 26px",
           background: `linear-gradient(135deg, rgba(255,255,255,${isFinal ? "0.25" : "0.18"}) 0%, transparent 60%)`,
         }}
       />
-      {/* Pink/orange accent */}
       <div
         style={{
           position: "absolute",
-          bottom: 8,
-          right: 8,
-          width: 50,
-          height: 50,
+          bottom: 8, right: 8, width: 50, height: 50,
           borderRadius: 16,
           background: `radial-gradient(circle at center, rgba(251,146,60,${isFinal ? "0.2" : "0.12"}) 0%, rgba(236,72,153,${isFinal ? "0.15" : "0.08"}) 50%, transparent 70%)`,
           filter: "blur(6px)",
         }}
       />
-      {/* Hollow center */}
       <div
         style={{
-          width: 60,
-          height: 60,
+          width: 60, height: 60,
           borderRadius: 16,
           background: "#f8f8fa",
-          boxShadow: `
-            inset 0 2px 6px ${highlight},
-            inset 0 -1px 3px rgba(59,130,246,0.1)
-          `,
+          boxShadow: `inset 0 2px 6px ${highlight}, inset 0 -1px 3px rgba(59,130,246,0.1)`,
         }}
       />
     </div>

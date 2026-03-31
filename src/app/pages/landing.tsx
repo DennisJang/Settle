@@ -2,35 +2,27 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
-import { Logo } from "../components/logo";
-import { FileText, Send, Building, GraduationCap, CheckCircle2, ArrowRight } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { useAuthStore } from "../../stores/useAuthStore";
 import { supabase } from "../../lib/supabase";
+import { Logo } from "../components/logo";
+import { FloatingBubbles } from "../components/FloatingBubbles";
+import { WavePlaceholderInput } from "../components/WavePlaceholderInput";
 
 export function Landing() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const {
-    session,
-    initialized,
-    loading,
-    error,
-    signInWithEmail,
-    signInWithGoogle,
-    clearError,
-  } = useAuthStore();
+  const { session, initialized, loading, signInWithGoogle } = useAuthStore();
 
-  const [showLogin, setShowLogin] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
-  const [fullName, setFullName] = useState("");
-  const [resetSent, setResetSent] = useState(false);
-
-  // ★ Waitlist state
+  // Waitlist state
   const [waitlistEmail, setWaitlistEmail] = useState("");
-  const [waitlistStatus, setWaitlistStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [waitlistStatus, setWaitlistStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
   const [waitlistError, setWaitlistError] = useState("");
+
+  // Hero animation → content reveal
+  const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
     if (initialized && session) {
@@ -38,36 +30,13 @@ export function Landing() {
     }
   }, [initialized, session, navigate]);
 
+  // Show content after hero animation completes
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowLogin(true);
-    }, 3000);
+    const timer = setTimeout(() => setShowContent(true), 2800);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    clearError();
-
-    try {
-      if (mode === "signin") {
-        await signInWithEmail(email, password);
-        navigate("/home");
-      } else if (mode === "signup") {
-        const { signUpWithEmail } = useAuthStore.getState();
-        await signUpWithEmail(email, password, fullName);
-        navigate("/home");
-      } else if (mode === "reset") {
-        const { resetPassword } = useAuthStore.getState();
-        await resetPassword(email);
-        setResetSent(true);
-      }
-    } catch {
-      // error는 store에서 관리됨
-    }
-  };
-
-  // ★ Waitlist submit
+  // Waitlist submit (business logic preserved)
   const handleWaitlistSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!waitlistEmail.trim()) return;
@@ -82,7 +51,6 @@ export function Landing() {
 
       if (insertError) {
         if (insertError.code === "23505") {
-          // 이미 등록된 이메일
           setWaitlistStatus("success");
         } else {
           throw insertError;
@@ -92,409 +60,307 @@ export function Landing() {
       }
     } catch (err) {
       setWaitlistStatus("error");
-      setWaitlistError(err instanceof Error ? err.message : "Something went wrong");
+      setWaitlistError(
+        err instanceof Error ? err.message : "Something went wrong"
+      );
     }
   };
 
-  const switchMode = (newMode: "signin" | "signup" | "reset") => {
-    setMode(newMode);
-    clearError();
-    setResetSent(false);
-  };
-
-  const features = [
-    {
-      icon: FileText,
-      color: "var(--color-action-primary)",
-      label: "Visa",
-      position: { initial: { x: -100, y: -100 }, animate: { x: 0, y: 0 } },
-    },
-    {
-      icon: Send,
-      color: "var(--color-action-success)",
-      label: "Remit",
-      position: { initial: { x: 100, y: -100 }, animate: { x: 0, y: 0 } },
-    },
-    {
-      icon: Building,
-      color: "var(--color-action-primary)",
-      label: "Housing",
-      position: { initial: { x: -100, y: 100 }, animate: { x: 0, y: 0 } },
-    },
-    {
-      icon: GraduationCap,
-      color: "var(--color-action-success)",
-      label: "Education",
-      position: { initial: { x: 100, y: 100 }, animate: { x: 0, y: 0 } },
-    },
-  ];
-
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden"
+      className="min-h-screen flex flex-col items-center overflow-hidden"
       style={{
-        background: "linear-gradient(to bottom, var(--color-surface-primary), var(--color-surface-secondary))",
+        background: "#F8F8FA",
+        fontFamily: "Inter, sans-serif",
       }}
     >
-      {/* Animated Feature Icons */}
-      <div className="relative w-full max-w-md h-96 mb-8">
-        {features.map((feature, index) => {
-          const Icon = feature.icon;
-          return (
-            <motion.div
-              key={index}
-              className="absolute inset-0 flex items-center justify-center"
-              initial={feature.position.initial}
-              animate={{
-                x: [
-                  feature.position.initial.x,
-                  feature.position.initial.x * 0.5,
-                  0,
-                ],
-                y: [
-                  feature.position.initial.y,
-                  feature.position.initial.y * 0.5,
-                  0,
-                ],
-                scale: [0, 1.2, 1, 0.3, 0],
-                opacity: [0, 1, 1, 0.5, 0],
-              }}
-              transition={{
-                duration: 2.5,
-                times: [0, 0.3, 0.6, 0.85, 1],
-                ease: [0.34, 1.56, 0.64, 1],
-                delay: index * 0.15,
-              }}
-            >
-              <div
-                className="w-20 h-20 rounded-3xl flex items-center justify-center shadow-lg"
-                style={{ backgroundColor: feature.color }}
-              >
-                <Icon
-                  size={40}
-                  strokeWidth={2}
-                  style={{ color: "var(--color-text-on-color)" }}
-                />
-              </div>
-            </motion.div>
-          );
-        })}
+      <div className="w-full" style={{ maxWidth: 375 }}>
+        {/* Safe area top */}
+        <div style={{ height: 48 }} />
 
-        <motion.div
-          className="absolute inset-0 flex flex-col items-center justify-center"
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            delay: 2,
-            duration: 0.8,
-            ease: [0.34, 1.56, 0.64, 1],
-          }}
+        {/* ===== HERO SECTION ===== */}
+        <div
+          className="relative flex flex-col items-center"
+          style={{ paddingTop: 20, paddingBottom: 20 }}
         >
-          <Logo size="large" />
-          <motion.div
-            className="text-center mt-6 space-y-3"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.5, duration: 0.6 }}
+          {/* Bubble + Logo area */}
+          <div
+            className="relative"
+            style={{ width: "100%", height: 220, overflow: "hidden" }}
           >
-            <h1
-              className="text-4xl tracking-tight"
-              style={{ fontWeight: 600 }}
-            >
-              Settle
-            </h1>
-            <p
-              className="text-lg max-w-xs"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
-              {t('landing:tagline')}
-            </p>
-          </motion.div>
-        </motion.div>
-      </div>
-
-      {/* ★ Waitlist + Login — 애니메이션 후 표시 */}
-      {showLogin && (
-        <motion.div
-          className="w-full max-w-md"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-          {/* ★ Waitlist Section — 로그인 폼 위에 */}
-          {waitlistStatus !== "success" ? (
-            <div
-              className="rounded-3xl p-6 mb-4 shadow-lg"
-              style={{ backgroundColor: "var(--color-surface-primary)" }}
-            >
-              <h2
-                className="text-[20px] leading-[25px] mb-2"
-                style={{ fontWeight: 600, color: "var(--color-text-primary)" }}
-              >
-                {t("landing:waitlist_title", { defaultValue: "Get early access" })}
-              </h2>
-              <p
-                className="text-[15px] leading-[20px] mb-4"
-                style={{ color: "var(--color-text-secondary)" }}
-              >
-                {t("landing:waitlist_desc", { defaultValue: "Visa documents in 3 minutes, not 3 hours. Join 2.72M foreign residents making Korea easier." })}
-              </p>
-
-              <form onSubmit={handleWaitlistSubmit} className="flex gap-2">
-                <input
-                  type="email"
-                  value={waitlistEmail}
-                  onChange={(e) => setWaitlistEmail(e.target.value)}
-                  placeholder={t("landing:placeholder_email")}
-                  className="flex-1 rounded-2xl px-4 py-3 outline-none focus:ring-2 transition-all text-[15px]"
-                  style={{ backgroundColor: "var(--color-surface-secondary)" }}
-                  required
-                />
-                <button
-                  type="submit"
-                  disabled={waitlistStatus === "loading"}
-                  className="rounded-2xl px-5 py-3 active:scale-[0.98] transition-transform disabled:opacity-50 flex items-center gap-2"
-                  style={{
-                    fontWeight: 600,
-                    fontSize: "15px",
-                    backgroundColor: "var(--color-action-primary)",
-                    color: "var(--color-text-on-color)",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {waitlistStatus === "loading" ? "..." : (
-                    <>
-                      {t("landing:waitlist_cta", { defaultValue: "Join" })}
-                      <ArrowRight size={16} />
-                    </>
-                  )}
-                </button>
-              </form>
-
-              {waitlistStatus === "error" && (
-                <p className="text-[13px] mt-2" style={{ color: "var(--color-action-error)" }}>
-                  {waitlistError}
-                </p>
-              )}
-            </div>
-          ) : (
-            <motion.div
-              className="rounded-3xl p-6 mb-4 shadow-lg text-center"
-              style={{ backgroundColor: "var(--color-surface-primary)" }}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CheckCircle2
-                size={40}
-                className="mx-auto mb-3"
-                style={{ color: "var(--color-action-success)" }}
+            <FloatingBubbles />
+            <div className="absolute inset-0 flex items-center justify-center">
+              {/* Soft purple glow */}
+              <div
+                className="absolute"
+                style={{
+                  width: 180,
+                  height: 180,
+                  background:
+                    "radial-gradient(circle, rgba(99,91,255,0.08) 0%, rgba(59,130,246,0.03) 50%, transparent 70%)",
+                  filter: "blur(24px)",
+                }}
               />
-              <h2
-                className="text-[20px] leading-[25px] mb-1"
-                style={{ fontWeight: 600, color: "var(--color-text-primary)" }}
-              >
-                {t("landing:waitlist_success_title", { defaultValue: "You're on the list!" })}
-              </h2>
-              <p
-                className="text-[15px] leading-[20px]"
-                style={{ color: "var(--color-text-secondary)" }}
-              >
-                {t("landing:waitlist_success_desc", { defaultValue: "We'll notify you when early access opens." })}
-              </p>
-            </motion.div>
-          )}
-
-          {/* ★ "Already have an account?" 구분선 */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex-1 h-px" style={{ backgroundColor: "var(--color-border-default)" }} />
-            <span className="text-[13px]" style={{ color: "var(--color-text-tertiary)" }}>
-              {t("landing:waitlist_divider", { defaultValue: "Already have an account?" })}
-            </span>
-            <div className="flex-1 h-px" style={{ backgroundColor: "var(--color-border-default)" }} />
+              <Logo size="large" />
+            </div>
           </div>
 
-          {/* 기존 로그인 폼 — 100% 동결 */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div
-              className="rounded-3xl p-6 shadow-lg space-y-4"
-              style={{ backgroundColor: "var(--color-surface-primary)" }}
-            >
-              {error && (
-                <div
-                  className="text-sm px-4 py-3 rounded-2xl"
-                  style={{
-                    backgroundColor: "color-mix(in srgb, var(--color-action-error) 10%, transparent)",
-                    color: "var(--color-action-error)",
-                  }}
-                >
-                  {error}
-                </div>
-              )}
+          {/* Wordmark */}
+          <h1
+            style={{
+              fontSize: 28,
+              fontWeight: 500,
+              letterSpacing: "0.12em",
+              color: "var(--color-text-primary, #1A1D26)",
+              margin: "14px 0 0",
+              lineHeight: 1.2,
+            }}
+          >
+            Phivis
+          </h1>
 
-              {resetSent && (
-                <div
-                  className="text-sm px-4 py-3 rounded-2xl"
-                  style={{
-                    backgroundColor: "color-mix(in srgb, var(--color-action-success) 10%, transparent)",
-                    color: "var(--color-action-success)",
-                  }}
-                >
-                  {t('landing:reset_sent')}
-                </div>
-              )}
+          {/* Tagline */}
+          <p
+            style={{
+              fontSize: 14,
+              fontWeight: 400,
+              color: "var(--color-text-secondary, #6B7294)",
+              margin: "6px 0 0",
+            }}
+          >
+            Visa is not complicated.
+          </p>
+        </div>
 
-              {mode === "signup" && (
-                <div>
-                  <label
-                    className="block text-sm mb-2"
-                    style={{ fontWeight: 600 }}
+        {/* ===== CONTENT (after hero animation) ===== */}
+        {showContent && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
+            {/* ===== WAITLIST SECTION ===== */}
+            <div style={{ padding: "0 28px", marginTop: 8 }}>
+              {waitlistStatus !== "success" ? (
+                <>
+                  <div style={{ textAlign: "center", marginBottom: 10 }}>
+                    <p
+                      style={{
+                        fontSize: 15,
+                        fontWeight: 600,
+                        color: "var(--color-text-primary, #1A1D26)",
+                        margin: 0,
+                      }}
+                    >
+                      {t("landing:waitlist_title", {
+                        defaultValue: "Get early access",
+                      })}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 400,
+                        color: "var(--color-text-secondary, #6B7294)",
+                        margin: "3px 0 0",
+                      }}
+                    >
+                      {t("landing:waitlist_desc_short", {
+                        defaultValue: "3 minutes, not 3 hours.",
+                      })}
+                    </p>
+                  </div>
+
+                  <form
+                    onSubmit={handleWaitlistSubmit}
+                    className="flex gap-2"
                   >
-                    {t('landing:label_fullname')}
-                  </label>
-                  <input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder={t('landing:placeholder_name')}
-                    className="w-full rounded-2xl px-4 py-3 outline-none focus:ring-2 transition-all"
-                    style={{ backgroundColor: "var(--color-surface-secondary)" }}
-                    required
-                  />
-                </div>
-              )}
+                    <WavePlaceholderInput
+                      value={waitlistEmail}
+                      onChange={(e) => setWaitlistEmail(e.target.value)}
+                    />
+                    <motion.button
+                      type="submit"
+                      disabled={waitlistStatus === "loading"}
+                      whileTap={{ scale: 0.96 }}
+                      style={{
+                        height: 40,
+                        borderRadius: 20,
+                        background:
+                          "var(--color-action-primary, #635BFF)",
+                        color: "var(--color-text-on-color, #fff)",
+                        border: "none",
+                        padding: "0 16px",
+                        fontSize: 14,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4,
+                        fontFamily: "Inter, sans-serif",
+                        whiteSpace: "nowrap",
+                        boxShadow: "0 2px 6px rgba(99,91,255,0.15)",
+                        flexShrink: 0,
+                        opacity: waitlistStatus === "loading" ? 0.6 : 1,
+                      }}
+                    >
+                      {waitlistStatus === "loading" ? (
+                        "..."
+                      ) : (
+                        <>
+                          {t("landing:waitlist_cta", {
+                            defaultValue: "Join",
+                          })}{" "}
+                          <ArrowRight size={14} strokeWidth={2.5} />
+                        </>
+                      )}
+                    </motion.button>
+                  </form>
 
-              <div>
-                <label
-                  className="block text-sm mb-2"
-                  style={{ fontWeight: 600 }}
+                  {waitlistStatus === "error" && (
+                    <p
+                      style={{
+                        fontSize: 12,
+                        color: "var(--color-action-error, #EF4444)",
+                        textAlign: "center",
+                        marginTop: 8,
+                      }}
+                    >
+                      {waitlistError}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <motion.div
+                  className="flex flex-col items-center"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                  style={{ padding: "8px 0" }}
                 >
-                  {t('landing:label_email')}
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={t('landing:placeholder_email')}
-                  className="w-full rounded-2xl px-4 py-3 outline-none focus:ring-2 transition-all"
-                  style={{ backgroundColor: "var(--color-surface-secondary)" }}
-                  required
-                />
-              </div>
-
-              {mode !== "reset" && (
-                <div>
-                  <label
-                    className="block text-sm mb-2"
-                    style={{ fontWeight: 600 }}
-                  >
-                    {t('landing:label_password')}
-                  </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={t('landing:placeholder_password')}
-                    className="w-full rounded-2xl px-4 py-3 outline-none focus:ring-2 transition-all"
-                    style={{ backgroundColor: "var(--color-surface-secondary)" }}
-                    required
-                    minLength={6}
+                  <CheckCircle2
+                    size={32}
+                    style={{
+                      color: "var(--color-action-success, #10B981)",
+                      marginBottom: 8,
+                    }}
                   />
-                </div>
+                  <p
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 600,
+                      color: "var(--color-text-primary, #1A1D26)",
+                      margin: 0,
+                    }}
+                  >
+                    {t("landing:waitlist_success_title", {
+                      defaultValue: "You're on the list!",
+                    })}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: 13,
+                      color: "var(--color-text-secondary, #6B7294)",
+                      margin: "4px 0 0",
+                    }}
+                  >
+                    {t("landing:waitlist_success_desc", {
+                      defaultValue:
+                        "We'll notify you when early access opens.",
+                    })}
+                  </p>
+                </motion.div>
               )}
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-3xl py-4 shadow-lg active:scale-98 transition-transform disabled:opacity-50"
-              style={{
-                fontWeight: 600,
-                background: "linear-gradient(to bottom right, var(--color-action-primary), var(--color-action-primary-hover))",
-                color: "var(--color-text-on-color)",
-              }}
+            {/* ===== SOFT DIVIDER ===== */}
+            <div
+              className="flex justify-center"
+              style={{ marginTop: 32, marginBottom: 24 }}
             >
-              {loading
-                ? "..."
-                : mode === "signin"
-                  ? t('landing:btn_signin')
-                  : mode === "signup"
-                    ? t('landing:btn_signup')
-                    : t('landing:btn_reset')}
-            </button>
+              <div
+                style={{
+                  width: "60%",
+                  height: 1,
+                  background: "var(--color-border-default, #E8E8EE)",
+                }}
+              />
+            </div>
 
-            {mode !== "reset" && (
-              <button
+            {/* ===== GOOGLE SIGN-IN (only auth method) ===== */}
+            <div style={{ padding: "0 28px" }}>
+              <motion.button
                 type="button"
                 onClick={signInWithGoogle}
                 disabled={loading}
-                className="w-full border rounded-3xl py-4 shadow-sm active:scale-98 transition-transform disabled:opacity-50 flex items-center justify-center gap-3"
+                whileTap={{
+                  scale: 0.98,
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.02)",
+                }}
+                className="flex items-center justify-center gap-2"
                 style={{
-                  fontWeight: 600,
-                  backgroundColor: "var(--color-surface-primary)",
-                  borderColor: "var(--color-border-strong)",
-                  color: "var(--color-text-primary)",
+                  height: 48,
+                  borderRadius: 20,
+                  background: "var(--color-surface-primary, #FFFFFF)",
+                  color: "var(--color-text-primary, #1A1D26)",
+                  border:
+                    "1px solid var(--color-border-strong, #E2E4EC)",
+                  fontSize: 16,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontFamily: "Inter, sans-serif",
+                  width: "100%",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                  opacity: loading ? 0.6 : 1,
                 }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path
+                    d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z"
+                    fill="#4285F4"
+                  />
+                  <path
+                    d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z"
+                    fill="#34A853"
+                  />
+                  <path
+                    d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z"
+                    fill="#FBBC05"
+                  />
+                  <path
+                    d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z"
+                    fill="#EA4335"
+                  />
                 </svg>
-                {t('landing:btn_google')}
-              </button>
-            )}
-
-            <div className="flex items-center justify-between text-sm">
-              {mode === "signin" && (
-                <>
-                  <button
-                    type="button"
-                    style={{ fontWeight: 600, color: "var(--color-action-primary)" }}
-                    onClick={() => switchMode("reset")}
-                  >
-                    {t('landing:link_forgot')}
-                  </button>
-                  <button
-                    type="button"
-                    style={{ fontWeight: 600, color: "var(--color-action-primary)" }}
-                    onClick={() => switchMode("signup")}
-                  >
-                    {t('landing:link_create')}
-                  </button>
-                </>
-              )}
-              {mode === "signup" && (
-                <button
-                  type="button"
-                  className="mx-auto"
-                  style={{ fontWeight: 600, color: "var(--color-action-primary)" }}
-                  onClick={() => switchMode("signin")}
-                >
-                  {t('landing:link_back_signin')}
-                </button>
-              )}
-              {mode === "reset" && (
-                <button
-                  type="button"
-                  className="mx-auto"
-                  style={{ fontWeight: 600, color: "var(--color-action-primary)" }}
-                  onClick={() => switchMode("signin")}
-                >
-                  {t('landing:link_back_signin_short')}
-                </button>
-              )}
+                {loading
+                  ? "..."
+                  : t("landing:btn_google", {
+                      defaultValue: "Google로 계속하기",
+                    })}
+              </motion.button>
             </div>
 
-            <div className="text-center">
-              <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
-                {t('landing:terms')}
-              </p>
-            </div>
-          </form>
-        </motion.div>
-      )}
+            {/* ===== FINE PRINT ===== */}
+            <p
+              style={{
+                fontSize: 11,
+                fontWeight: 400,
+                color: "var(--color-text-tertiary, #A3ACCD)",
+                textAlign: "center",
+                margin: "16px 28px 0",
+                lineHeight: 1.5,
+              }}
+            >
+              {t("landing:terms_short", {
+                defaultValue:
+                  "계속하면 이용약관 및 개인정보처리방침에 동의하게 됩니다",
+              })}
+            </p>
+
+            {/* Bottom safe area */}
+            <div style={{ height: 34 }} />
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 }
