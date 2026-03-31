@@ -520,7 +520,7 @@ export function Onboarding() {
                         <div
                           style={{
                             height: "100%",
-                            width: `${Math.max(0, Math.min(100, (dDayCount / 365) * 100))}%`,
+                            width: `${Math.max(0, Math.min(100, (dDayCount / 1825) * 100))}%`,
                             borderRadius: 2,
                             background:
                               dDayCount <= 30
@@ -528,9 +528,13 @@ export function Onboarding() {
                                 : dDayCount <= 90
                                   ? "#F59E0B"
                                   : "#635BFF",
-                            transition: "width 0.5s ease",
+                            transition: "width 0.5s cubic-bezier(0.25, 1, 0.5, 1)",
                           }}
                         />
+                      </div>
+                      <div className="flex justify-between" style={{ marginTop: 4 }}>
+                        <span style={{ fontSize: 10, color: "#A3ACCD", fontFamily: "Inter, sans-serif" }}>0</span>
+                        <span style={{ fontSize: 10, color: "#A3ACCD", fontFamily: "Inter, sans-serif" }}>5년</span>
                       </div>
                     </div>
                   </motion.div>

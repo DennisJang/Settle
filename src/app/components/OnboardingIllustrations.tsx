@@ -55,38 +55,28 @@ export function Step2Illustration() {
       {/* Map surface */}
       <div style={{ position: "absolute", width: 160, height: 80, bottom: "calc(50% - 65px)", background: "linear-gradient(135deg, rgba(147,197,253,0.4) 0%, rgba(191,219,254,0.2) 100%)", borderRadius: 8, transform: "perspective(300px) rotateX(50deg)", boxShadow: "0 8px 24px rgba(59,130,246,0.08)" }} />
 
-      {/* Globe — ENTIRE globe rotates */}
+      {/* Globe — ENTIRE sphere rotates, highlight counter-rotates to stay fixed */}
       <motion.div animate={float(0, 5)} style={{ position: "relative", zIndex: 2 }}>
-        <div style={{ width: 100, height: 100, borderRadius: 50, perspective: "200px", position: "relative" }}>
-          {/* Rotating sphere body */}
-          <div style={{
-            width: 100, height: 100, borderRadius: 50,
-            background: "radial-gradient(circle at 35% 35%, #93c5fd 0%, #3b82f6 40%, #2563eb 70%, #1d4ed8 100%)",
-            boxShadow: "inset -10px -6px 20px rgba(0,0,0,0.15), inset 6px 6px 16px rgba(255,255,255,0.25), 0 10px 28px rgba(59,130,246,0.22)",
-            position: "relative", overflow: "hidden",
-            animation: "globeRotate 25s linear infinite",
-            transformStyle: "preserve-3d",
-          }}>
-            {/* Continents — detailed shapes, higher contrast green */}
-            {/* Asia (Korea, Japan, China region) */}
-            <div style={{ position: "absolute", top: 16, left: 48, width: 30, height: 34, borderRadius: "10px 14px 8px 12px", background: "rgba(34,197,94,0.55)", boxShadow: "inset 0 1px 3px rgba(255,255,255,0.2), 0 1px 2px rgba(0,0,0,0.05)" }} />
-            {/* India / SE Asia */}
-            <div style={{ position: "absolute", top: 36, left: 38, width: 16, height: 24, borderRadius: "4px 8px 12px 6px", background: "rgba(34,197,94,0.5)" }} />
-            {/* SE Asia islands */}
-            <div style={{ position: "absolute", top: 52, left: 56, width: 18, height: 10, borderRadius: 4, background: "rgba(34,197,94,0.45)" }} />
-            <div style={{ position: "absolute", top: 56, left: 66, width: 8, height: 6, borderRadius: 3, background: "rgba(34,197,94,0.4)" }} />
-            {/* Europe + Africa */}
-            <div style={{ position: "absolute", top: 14, left: 18, width: 14, height: 20, borderRadius: "6px 8px 4px 6px", background: "rgba(34,197,94,0.5)", boxShadow: "inset 0 1px 2px rgba(255,255,255,0.15)" }} />
-            <div style={{ position: "absolute", top: 30, left: 16, width: 16, height: 30, borderRadius: "6px 10px 12px 8px", background: "rgba(34,197,94,0.45)" }} />
-            {/* Americas */}
-            <div style={{ position: "absolute", top: 10, left: -10, width: 18, height: 22, borderRadius: "8px 6px 4px 10px", background: "rgba(34,197,94,0.4)" }} />
-            <div style={{ position: "absolute", top: 28, left: -14, width: 14, height: 30, borderRadius: "6px 8px 10px 6px", background: "rgba(34,197,94,0.38)" }} />
-            {/* Australia */}
-            <div style={{ position: "absolute", top: 62, left: 64, width: 18, height: 14, borderRadius: "8px 6px 10px 4px", background: "rgba(34,197,94,0.4)" }} />
-          </div>
+        <div style={{
+          width: 100, height: 100, borderRadius: 50,
+          position: "relative", overflow: "hidden",
+          animation: "globeRotate 25s linear infinite",
+          background: "radial-gradient(circle at 35% 35%, #93c5fd 0%, #3b82f6 40%, #2563eb 70%, #1d4ed8 100%)",
+          boxShadow: "inset -10px -6px 20px rgba(0,0,0,0.15), inset 6px 6px 16px rgba(255,255,255,0.25), 0 10px 28px rgba(59,130,246,0.22)",
+        }}>
+          {/* Continents — rotate WITH globe */}
+          <div style={{ position: "absolute", top: 16, left: 48, width: 30, height: 34, borderRadius: "10px 14px 8px 12px", background: "rgba(34,197,94,0.55)", boxShadow: "inset 0 1px 3px rgba(255,255,255,0.2), 0 1px 2px rgba(0,0,0,0.05)" }} />
+          <div style={{ position: "absolute", top: 36, left: 38, width: 16, height: 24, borderRadius: "4px 8px 12px 6px", background: "rgba(34,197,94,0.5)" }} />
+          <div style={{ position: "absolute", top: 52, left: 56, width: 18, height: 10, borderRadius: 4, background: "rgba(34,197,94,0.45)" }} />
+          <div style={{ position: "absolute", top: 56, left: 66, width: 8, height: 6, borderRadius: 3, background: "rgba(34,197,94,0.4)" }} />
+          <div style={{ position: "absolute", top: 14, left: 18, width: 14, height: 20, borderRadius: "6px 8px 4px 6px", background: "rgba(34,197,94,0.5)", boxShadow: "inset 0 1px 2px rgba(255,255,255,0.15)" }} />
+          <div style={{ position: "absolute", top: 30, left: 16, width: 16, height: 30, borderRadius: "6px 10px 12px 8px", background: "rgba(34,197,94,0.45)" }} />
+          <div style={{ position: "absolute", top: 10, left: -10, width: 18, height: 22, borderRadius: "8px 6px 4px 10px", background: "rgba(34,197,94,0.4)" }} />
+          <div style={{ position: "absolute", top: 28, left: -14, width: 14, height: 30, borderRadius: "6px 8px 10px 6px", background: "rgba(34,197,94,0.38)" }} />
+          <div style={{ position: "absolute", top: 62, left: 64, width: 18, height: 14, borderRadius: "8px 6px 10px 4px", background: "rgba(34,197,94,0.4)" }} />
 
-          {/* Specular highlight — stays fixed (not rotating) */}
-          <div style={{ position: "absolute", top: 8, left: 14, width: 34, height: 34, borderRadius: 17, background: "radial-gradient(circle, rgba(255,255,255,0.45) 0%, transparent 70%)", pointerEvents: "none", zIndex: 2 }} />
+          {/* Specular highlight — counter-rotates to stay visually fixed */}
+          <div style={{ position: "absolute", top: 8, left: 14, width: 34, height: 34, borderRadius: 17, background: "radial-gradient(circle, rgba(255,255,255,0.45) 0%, transparent 70%)", animation: "globeRotate 25s linear infinite reverse" }} />
         </div>
 
         {/* Red pins */}
@@ -178,18 +168,18 @@ export function Step3Illustration() {
       {/* ── Phone with notifications (right) ── */}
       <motion.div animate={float(0.5, 3.8)}>
         <div style={{
-          width: 90, height: 130, borderRadius: 16,
+          width: 110, height: 160, borderRadius: 18,
           background: "linear-gradient(180deg, #f8f8fa 0%, #fff 100%)",
           border: "2px solid rgba(99,91,255,0.12)",
-          boxShadow: "0 8px 24px rgba(99,102,241,0.12), inset 0 1px 1px rgba(255,255,255,0.8)",
-          padding: "10px 6px 6px",
-          display: "flex", flexDirection: "column", gap: 5,
+          boxShadow: "0 10px 28px rgba(99,102,241,0.14), inset 0 1px 1px rgba(255,255,255,0.8)",
+          padding: "12px 8px 8px",
+          display: "flex", flexDirection: "column", gap: 6,
           overflow: "hidden", position: "relative",
         }}>
           {/* Status bar */}
-          <div className="flex justify-between items-center" style={{ padding: "0 2px", marginBottom: 2 }}>
-            <div style={{ width: 16, height: 2, borderRadius: 1, background: "rgba(0,0,0,0.15)" }} />
-            <div style={{ width: 6, height: 6, borderRadius: 3, background: "rgba(0,0,0,0.08)" }} />
+          <div className="flex justify-between items-center" style={{ padding: "0 3px", marginBottom: 3 }}>
+            <div style={{ width: 20, height: 2, borderRadius: 1, background: "rgba(0,0,0,0.15)" }} />
+            <div style={{ width: 7, height: 7, borderRadius: 4, background: "rgba(0,0,0,0.08)" }} />
           </div>
 
           {/* 3 notification cards — sequential animation */}
@@ -202,18 +192,18 @@ export function Step3Illustration() {
               key={i}
               style={{
                 background: notif.color,
-                borderRadius: 8,
-                padding: "6px 7px",
+                borderRadius: 10,
+                padding: "7px 9px",
                 animation: `notifSlide 6s ease-in-out ${notif.delay}s infinite`,
               }}
             >
               {/* App icon + name */}
-              <div className="flex items-center gap-1" style={{ marginBottom: 2 }}>
-                <div style={{ width: 10, height: 10, borderRadius: 3, background: "linear-gradient(135deg, #8b5cf6, #3b82f6)" }} />
-                <span style={{ fontSize: 6, fontWeight: 600, color: "#6B7294", fontFamily: "Inter, sans-serif" }}>Phivis</span>
+              <div className="flex items-center gap-1.5" style={{ marginBottom: 3 }}>
+                <div style={{ width: 12, height: 12, borderRadius: 4, background: "linear-gradient(135deg, #8b5cf6, #3b82f6)" }} />
+                <span style={{ fontSize: 7, fontWeight: 600, color: "#6B7294", fontFamily: "Inter, sans-serif" }}>Phivis</span>
               </div>
               {/* Message */}
-              <p style={{ fontSize: 7, fontWeight: 500, color: "#1A1D26", margin: 0, lineHeight: 1.3, fontFamily: "Inter, sans-serif" }}>
+              <p style={{ fontSize: 8.5, fontWeight: 500, color: "#1A1D26", margin: 0, lineHeight: 1.35, fontFamily: "Inter, sans-serif" }}>
                 {notif.text}
               </p>
             </div>
