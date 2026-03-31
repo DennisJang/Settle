@@ -107,17 +107,17 @@ export function Step4Illustration() {
       while (true) {
         // ═══ PHASE 1: Scroll + "Simple is Best" ═══
         scroll.set({ opacity: 1 });
-        sib.set({ opacity: 0, scale: 0.9 });
+        sib.set({ opacity: 0, scale: 0.7 });
         w1kr.set({ opacity: 0 }); w1tr.set({ opacity: 0 });
         w2kr.set({ opacity: 0 }); w2tr.set({ opacity: 0 });
         w3kr.set({ opacity: 0 }); w3tr.set({ opacity: 0 });
         midPhrase.set({ opacity: 0 }); appUI.set({ opacity: 0 }); endPhrase.set({ opacity: 0 });
 
-        // Show scroll for 2.5s
-        await new Promise(r => setTimeout(r, 2500));
+        // Show scroll for 2s (fast, overwhelming)
+        await new Promise(r => setTimeout(r, 2000));
 
-        // "Simple is Best" appears over scroll
-        await sib.start({ opacity: 1, scale: 1, transition: { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] } });
+        // "Simple is Best" — big overshoot entrance
+        await sib.start({ opacity: 1, scale: [0.7, 1.06, 1.0], transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } });
         await new Promise(r => setTimeout(r, 1200));
 
         // Fade both out
@@ -131,44 +131,44 @@ export function Step4Illustration() {
         // ═══ PHASE 2: Translation — one word at a time ═══
 
         // Word 1: 체류자격변경 → Status Change
-        await w1kr.start({ opacity: 1, x: 0, transition: { duration: 0.25, ease: [0.34, 1.56, 0.64, 1] } });
-        await new Promise(r => setTimeout(r, 1200));
+        await w1kr.start({ opacity: 1, x: 0, transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } });
+        await new Promise(r => setTimeout(r, 1000));
         w1tr.set({ x: 60 });
         await Promise.all([
-          w1kr.start({ opacity: 0, x: -60, transition: { duration: 0.2, ease: "easeIn" } }),
-          w1tr.start({ opacity: 1, x: 0, transition: { duration: 0.25, ease: [0.34, 1.56, 0.64, 1] } }),
+          w1kr.start({ opacity: 0, x: -60, transition: { duration: 0.15, ease: "easeIn" } }),
+          w1tr.start({ opacity: 1, x: 0, transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } }),
         ]);
-        await new Promise(r => setTimeout(r, 1000));
-        await w1tr.start({ opacity: 0, transition: { duration: 0.2 } });
+        await new Promise(r => setTimeout(r, 900));
+        await w1tr.start({ opacity: 0, transition: { duration: 0.15 } });
 
         await new Promise(r => setTimeout(r, 200));
 
         // Word 2: 출입국사실증명 → 出入境证明
-        await w2kr.start({ opacity: 1, x: 0, transition: { duration: 0.25, ease: [0.34, 1.56, 0.64, 1] } });
-        await new Promise(r => setTimeout(r, 1200));
+        await w2kr.start({ opacity: 1, x: 0, transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } });
+        await new Promise(r => setTimeout(r, 1000));
         w2tr.set({ x: 60 });
         await Promise.all([
-          w2kr.start({ opacity: 0, x: -60, transition: { duration: 0.2, ease: "easeIn" } }),
-          w2tr.start({ opacity: 1, x: 0, transition: { duration: 0.25, ease: [0.34, 1.56, 0.64, 1] } }),
+          w2kr.start({ opacity: 0, x: -60, transition: { duration: 0.15, ease: "easeIn" } }),
+          w2tr.start({ opacity: 1, x: 0, transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } }),
         ]);
-        await new Promise(r => setTimeout(r, 1000));
-        await w2tr.start({ opacity: 0, transition: { duration: 0.2 } });
+        await new Promise(r => setTimeout(r, 900));
+        await w2tr.start({ opacity: 0, transition: { duration: 0.15 } });
 
         await new Promise(r => setTimeout(r, 200));
 
         // Word 3: 납세사실증명 → Chứng nhận thuế
-        await w3kr.start({ opacity: 1, x: 0, transition: { duration: 0.25, ease: [0.34, 1.56, 0.64, 1] } });
-        await new Promise(r => setTimeout(r, 1200));
+        await w3kr.start({ opacity: 1, x: 0, transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } });
+        await new Promise(r => setTimeout(r, 1000));
         w3tr.set({ x: 60 });
         await Promise.all([
-          w3kr.start({ opacity: 0, x: -60, transition: { duration: 0.2, ease: "easeIn" } }),
-          w3tr.start({ opacity: 1, x: 0, transition: { duration: 0.25, ease: [0.34, 1.56, 0.64, 1] } }),
+          w3kr.start({ opacity: 0, x: -60, transition: { duration: 0.15, ease: "easeIn" } }),
+          w3tr.start({ opacity: 1, x: 0, transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } }),
         ]);
-        await new Promise(r => setTimeout(r, 1000));
-        await w3tr.start({ opacity: 0, transition: { duration: 0.2 } });
+        await new Promise(r => setTimeout(r, 900));
+        await w3tr.start({ opacity: 0, transition: { duration: 0.15 } });
 
         // "어려운 단어들도 쉽게"
-        await midPhrase.start({ opacity: 1, scale: 1, transition: { duration: 0.35, ease: [0.34, 1.56, 0.64, 1] } });
+        await midPhrase.start({ opacity: 1, scale: [0.85, 1.04, 1.0], transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } });
         await new Promise(r => setTimeout(r, 1500));
         await midPhrase.start({ opacity: 0, transition: { duration: 0.25 } });
 
@@ -179,7 +179,7 @@ export function Step4Illustration() {
         await new Promise(r => setTimeout(r, 4500));
 
         // "압도적이고 직관적인 UI"
-        await endPhrase.start({ opacity: 1, scale: 1, transition: { duration: 0.35, ease: [0.34, 1.56, 0.64, 1] } });
+        await endPhrase.start({ opacity: 1, scale: [0.85, 1.04, 1.0], transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } });
         await new Promise(r => setTimeout(r, 1500));
 
         // Fade all out and loop
@@ -195,7 +195,7 @@ export function Step4Illustration() {
   }, [phase, scroll, sib, w1kr, w1tr, w2kr, w2tr, w3kr, w3tr, midPhrase, appUI, endPhrase]);
 
   const krStyle: React.CSSProperties = {
-    fontSize: 24, fontWeight: 600, color: "#8C99AD",
+    fontSize: 24, fontWeight: 600, color: "#B0B8C8",
     fontFamily: "sans-serif", position: "absolute",
     whiteSpace: "nowrap",
   };
@@ -220,7 +220,7 @@ export function Step4Illustration() {
           <div style={{ padding:"5px 8px", borderBottom:"1px solid rgba(200,200,210,0.3)", background:"rgba(240,240,245,0.8)" }}>
             <div className="flex gap-1">{[0,1,2].map(i=><div key={i} style={{ width:5,height:5,borderRadius:3,background:"rgba(200,200,210,0.5)" }}/>)}</div>
           </div>
-          <div style={{ animation:"fastScroll4 1.8s linear infinite", padding:"4px 12px" }}>
+          <div style={{ animation:"fastScroll4 1.2s linear infinite", padding:"4px 12px" }}>
             {["체류자격변경허가신청서","여권 원본 및 사본","표준규격 사진 1매","수수료 (국내체류 6만원)","고용계약서 원본","납세사실증명원","건강진단서","출입국사실증명서","외국인등록증 앞뒷면 사본","재직증명서","사업자등록증 사본","기술자격증명서류","범죄경력증명서","토픽 성적증명서","소득금액증명원","체류자격변경허가신청서","여권 원본 및 사본","고용계약서 원본","납세사실증명원","건강진단서","출입국사실증명서","외국인등록증 앞뒷면 사본","재직증명서","사업자등록증 사본"].map((d,i)=>(
               <div key={i} style={{ fontSize:i%4===0?12:9, fontWeight:i%4===0?700:400, color:i%4===0?"#1A1D26":"#B0B4C8", fontFamily:"sans-serif", padding:"2.5px 0", whiteSpace:"nowrap", lineHeight:1.7 }}>{d}</div>
             ))}
@@ -296,7 +296,7 @@ export function Step4Illustration() {
 
       {/* "압도적이고 직관적인 UI" */}
       <motion.div animate={endPhrase} initial={{ opacity: 0, scale: 0.9 }} className="absolute inset-x-0 bottom-4 flex justify-center" style={{ zIndex: 4 }}>
-        <span style={{ fontSize: 16, fontWeight: 600, color: "#635BFF", fontFamily: "Inter, sans-serif" }}>압도적이고 직관적인 UI</span>
+        <span style={{ fontSize: 16, fontWeight: 600, color: "#635BFF", fontFamily: "Inter, sans-serif" }}>Simple is Best</span>
       </motion.div>
     </div>
   );
