@@ -1,98 +1,34 @@
 /**
- * routes.tsx — Phivis v3.0 (Phase 3 라우트 구조)
+ * scan.tsx — Scan 위젯 페이지
+ * Q-A1: Scan Anything
+ * Sprint 1에서 scan-analyze Edge Function 연결 + UI 구현 예정.
  *
- * v2 → v3 변경:
- *   - /scan, /first30, /lab 라우트 추가 (Architecture v3 반영)
- *   - 레거시 리다이렉트 유지 (remit, housing, education)
- *   - 탭바 없음. Home 위젯 → 상세 페이지 네비게이션.
- *   - code-split 전략 유지 (lazy import)
- *
- * Dennis 규칙 준수:
- * #1  원본 파일 먼저 확인 — 추측 생성 금지
- * #2  window.location.href 금지 → Navigate 컴포넌트 사용
- * #7  홈탭 라우트: pathname === "/home" 정확 매칭
- * #19 TossPaywall successUrl → /paywall/success
+ * "찍으면 알아서 통역하고, 다음 할 일까지 데려다준다."
  */
 
-import { lazy, Suspense } from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
-// === Static imports (초기 번들) ===
-import { Landing } from "./pages/landing";
-import { AuthGuardLayout } from "./components/AuthGuardLayout";
-import { Home } from "./pages/home";
+export function Scan() {
+  const { t } = useTranslation("scan");
 
-// === Lazy imports (별도 청크) ===
-const Visa = lazy(() => import("./pages/visa").then(m => ({ default: m.Visa })));
-const Life = lazy(() => import("./pages/life").then(m => ({ default: m.Life })));
-const Profile = lazy(() => import("./pages/profile").then(m => ({ default: m.Profile })));
-const Paywall = lazy(() => import("./pages/paywall").then(m => ({ default: m.Paywall })));
-const PaywallSuccess = lazy(() => import("./pages/PaywallSuccess").then(m => ({ default: m.PaywallSuccess })));
-const Onboarding = lazy(() => import("./pages/onboarding").then(m => ({ default: m.Onboarding })));
-const Privacy = lazy(() => import("./pages/privacy").then(m => ({ default: m.Privacy })));
-const Terms = lazy(() => import("./pages/terms").then(m => ({ default: m.Terms })));
-
-// === Phase 3 신규 페이지 (Sprint 1~2에서 구현) ===
-const Scan = lazy(() => import("./pages/scan").then(m => ({ default: m.Scan })));
-const First30 = lazy(() => import("./pages/first30").then(m => ({ default: m.First30 })));
-const Lab = lazy(() => import("./pages/lab").then(m => ({ default: m.Lab })));
-
-// === Suspense fallback ===
-function PageLoader() {
   return (
-    <div className="flex items-center justify-center min-h-screen"
-      style={{ backgroundColor: "var(--color-surface-page)" }}>
-      <div className="w-6 h-6 border-2 rounded-full animate-spin"
-        style={{
-          borderColor: "var(--color-border-default)",
-          borderTopColor: "var(--color-action-primary)",
-        }}
-      />
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{
+        backgroundColor: "var(--color-surface-page)",
+        padding: "var(--space-md)",
+      }}
+    >
+      <div
+        className="text-center"
+        style={{ color: "var(--color-text-secondary)" }}
+      >
+        <p style={{ fontSize: "15px" }}>
+          {t("placeholder", "Scan Anything — Coming Soon")}
+        </p>
+      </div>
     </div>
   );
 }
 
-// === Lazy wrapper ===
-function S({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
-}
-
-export const router = createBrowserRouter([
-  // === Public route (Auth) ===
-  {
-    path: "/",
-    Component: Landing,
-  },
-  // === Protected routes (Auth Guard) ===
-  {
-    path: "/",
-    Component: AuthGuardLayout,
-    children: [
-      // --- 메인 페이지 ---
-      { path: "home", Component: Home },
-      { path: "visa", element: <S><Visa /></S> },
-      { path: "life", element: <S><Life /></S> },
-      { path: "profile", element: <S><Profile /></S> },
-
-      // --- Phase 3 신규 ---
-      { path: "scan", element: <S><Scan /></S> },
-      { path: "first30", element: <S><First30 /></S> },
-      { path: "lab", element: <S><Lab /></S> },
-
-      // --- 결제/유틸 ---
-      { path: "paywall", element: <S><Paywall /></S> },
-      { path: "paywall/success", element: <S><PaywallSuccess /></S> },
-      { path: "onboarding", element: <S><Onboarding /></S> },
-      { path: "privacy", element: <S><Privacy /></S> },
-      { path: "terms", element: <S><Terms /></S> },
-
-      // --- 레거시 리다이렉트 ---
-      { path: "remit", element: <Navigate to="/life" replace /> },
-      { path: "housing", element: <Navigate to="/home" replace /> },
-      { path: "education", element: <Navigate to="/home" replace /> },
-
-      // --- Catch-all ---
-      { path: "*", element: <Navigate to="/home" replace /> },
-    ],
-  },
-]);
+export default Scan;
