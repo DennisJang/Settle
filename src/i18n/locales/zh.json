@@ -35,6 +35,44 @@
       "documentUploaded": "文件已上传"
     }
   },
+  "scan": {
+    "title": "扫描",
+    "subtitle": "上传任何韩语文件并获得解释",
+    "upload": {
+      "title": "上传文件",
+      "formats": "PDF, JPG, PNG, WebP · 最大10MB",
+      "cameraComingSoon": "相机扫描即将推出"
+    },
+    "progress": {
+      "validating": "正在检查文件...",
+      "uploading": "正在读取文件...",
+      "analyzing": "正在翻译您的文件..."
+    },
+    "category": {
+      "payslip": "工资单",
+      "health_insurance": "健康保险通知",
+      "government": "政府通知",
+      "lease": "租赁合同",
+      "visa_document": "签证文件",
+      "hwp": "HWP文件",
+      "general": "文件"
+    },
+    "result": {
+      "deadlines": "截止日期",
+      "scanAgain": "再次扫描",
+      "viewDetails": "查看详情"
+    },
+    "error": {
+      "unsupportedType": "不支持此文件类型。请使用PDF、JPG、PNG或WebP。",
+      "fileTooLarge": "文件太大。最大大小为10MB。",
+      "noFile": "未选择文件。",
+      "notAuthenticated": "请登录后使用扫描功能。",
+      "analysisFailed": "无法分析此文件。请重试。",
+      "networkError": "连接错误。请检查网络连接后重试。",
+      "goBack": "返回",
+      "retry": "重试"
+    }
+  },
   "home": {
     "greeting": "你好，{{name}}！",
     "subtitle": "这是你的今日概况",

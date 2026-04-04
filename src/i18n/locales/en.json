@@ -27,14 +27,52 @@
     "disclaimer_visa_score": "For reference only. No legal effect."
   },
   "notification": {
-  "toast": {
-    "collecting": "Collecting documents",
-    "ready": "Documents ready! Check the submission guide",
-    "submitted": "Submitted!",
-    "completed": "Application complete 🎉",
-    "documentUploaded": "Document uploaded"
-  }
-},
+    "toast": {
+      "collecting": "Collecting documents",
+      "ready": "Documents ready! Check the submission guide",
+      "submitted": "Submitted!",
+      "completed": "Application complete 🎉",
+      "documentUploaded": "Document uploaded"
+    }
+  },
+  "scan": {
+    "title": "Scan",
+    "subtitle": "Upload any Korean document and get it explained",
+    "upload": {
+      "title": "Upload a document",
+      "formats": "PDF, JPG, PNG, WebP · Max 10MB",
+      "cameraComingSoon": "Camera scan coming soon"
+    },
+    "progress": {
+      "validating": "Checking file...",
+      "uploading": "Reading document...",
+      "analyzing": "Interpreting your document..."
+    },
+    "category": {
+      "payslip": "Pay stub",
+      "health_insurance": "Health insurance notice",
+      "government": "Government notice",
+      "lease": "Lease agreement",
+      "visa_document": "Visa document",
+      "hwp": "HWP file",
+      "general": "Document"
+    },
+    "result": {
+      "deadlines": "Deadlines",
+      "scanAgain": "Scan again",
+      "viewDetails": "View details"
+    },
+    "error": {
+      "unsupportedType": "This file type is not supported. Please use PDF, JPG, PNG, or WebP.",
+      "fileTooLarge": "File is too large. Maximum size is 10MB.",
+      "noFile": "No file selected.",
+      "notAuthenticated": "Please sign in to use Scan.",
+      "analysisFailed": "Could not analyze this document. Please try again.",
+      "networkError": "Connection error. Please check your internet and try again.",
+      "goBack": "Go back",
+      "retry": "Try again"
+    }
+  },
   "home": {
     "greeting": "Hello, {{name}}!",
     "subtitle": "Here's your overview",
@@ -271,7 +309,7 @@
       "title": "Submission Guide"
     },
     "doc_guide_title": "AI Document Guide"
-      },
+  },
   "remit": {
     "title": "Remit",
     "show_more_providers": "More providers ({{count}})",

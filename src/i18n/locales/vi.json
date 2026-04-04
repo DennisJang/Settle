@@ -31,14 +31,52 @@
     "premium_feature_lawyer": "Ưu tiên kết nối chuyên gia"
   },
   "notification": {
-  "toast": {
-    "collecting": "Đang thu thập tài liệu",
-    "ready": "Hồ sơ đã sẵn sàng! Xem hướng dẫn nộp",
-    "submitted": "Đã nộp!",
-    "completed": "Hoàn tất đơn 🎉",
-    "documentUploaded": "Tài liệu đã được tải lên"
-  }
-},
+    "toast": {
+      "collecting": "Đang thu thập tài liệu",
+      "ready": "Hồ sơ đã sẵn sàng! Xem hướng dẫn nộp",
+      "submitted": "Đã nộp!",
+      "completed": "Hoàn tất đơn 🎉",
+      "documentUploaded": "Tài liệu đã được tải lên"
+    }
+  },
+  "scan": {
+    "title": "Quét",
+    "subtitle": "Tải lên bất kỳ tài liệu tiếng Hàn nào để được giải thích",
+    "upload": {
+      "title": "Tải lên tài liệu",
+      "formats": "PDF, JPG, PNG, WebP · Tối đa 10MB",
+      "cameraComingSoon": "Quét bằng camera sắp ra mắt"
+    },
+    "progress": {
+      "validating": "Đang kiểm tra tệp...",
+      "uploading": "Đang đọc tài liệu...",
+      "analyzing": "Đang phiên dịch tài liệu..."
+    },
+    "category": {
+      "payslip": "Phiếu lương",
+      "health_insurance": "Thông báo bảo hiểm y tế",
+      "government": "Thông báo chính phủ",
+      "lease": "Hợp đồng thuê nhà",
+      "visa_document": "Tài liệu visa",
+      "hwp": "Tệp HWP",
+      "general": "Tài liệu"
+    },
+    "result": {
+      "deadlines": "Thời hạn",
+      "scanAgain": "Quét lại",
+      "viewDetails": "Xem chi tiết"
+    },
+    "error": {
+      "unsupportedType": "Loại tệp không được hỗ trợ. Vui lòng sử dụng PDF, JPG, PNG hoặc WebP.",
+      "fileTooLarge": "Tệp quá lớn. Kích thước tối đa là 10MB.",
+      "noFile": "Chưa chọn tệp nào.",
+      "notAuthenticated": "Vui lòng đăng nhập để sử dụng Quét.",
+      "analysisFailed": "Không thể phân tích tài liệu. Vui lòng thử lại.",
+      "networkError": "Lỗi kết nối. Vui lòng kiểm tra internet và thử lại.",
+      "goBack": "Quay lại",
+      "retry": "Thử lại"
+    }
+  },
   "home": {
     "greeting": "Xin chào, {{name}}!",
     "subtitle": "Đây là tổng quan của bạn",
