@@ -23,7 +23,7 @@ import { AuthGuardLayout } from "./components/AuthGuardLayout";
 import { Home } from "./pages/home";
 
 // === Lazy imports (별도 청크) ===
-const Visa = lazy(() => import("./pages/visa").then(m => ({ default: m.Visa })));
+const Documents = lazy(() => import("./pages/documents").then(m => ({ default: m.Documents })));
 const Life = lazy(() => import("./pages/life").then(m => ({ default: m.Life })));
 const Profile = lazy(() => import("./pages/profile").then(m => ({ default: m.Profile })));
 const Paywall = lazy(() => import("./pages/paywall").then(m => ({ default: m.Paywall })));
@@ -34,8 +34,8 @@ const Terms = lazy(() => import("./pages/terms").then(m => ({ default: m.Terms }
 
 // === Phase 3 신규 페이지 (Sprint 1~2에서 구현) ===
 const Scan = lazy(() => import("./pages/scan"));
-const First30 = lazy(() => import("./pages/first30").then(m => ({ default: m.First30 })));
-const Lab = lazy(() => import("./pages/lab").then(m => ({ default: m.Lab })));
+const First30 = lazy(() => import("./pages/first30"));
+const Lab = lazy(() => import("./pages/lab"));
 
 // === Suspense fallback ===
 function PageLoader() {
@@ -70,7 +70,8 @@ export const router = createBrowserRouter([
     children: [
       // --- 메인 페이지 ---
       { path: "home", Component: Home },
-      { path: "visa", element: <S><Visa /></S> },
+      { path: "documents", element: <S><Documents /></S> },
+      { path: "visa", element: <Navigate to="/documents" replace /> },
       { path: "life", element: <S><Life /></S> },
       { path: "profile", element: <S><Profile /></S> },
 

@@ -7,7 +7,7 @@
  * 사용 예:
  *   <SkeletonCard rows={3} />
  *   <ErrorBanner message={error} onRetry={refetch} />
- *   <EmptyState icon={Inbox} title="No activity yet" description="..." ctaLabel="Check visa" onCta={() => navigate('/visa')} />
+ *   <EmptyState icon={Inbox} title="No activity yet" description="..." ctaLabel="Check visa" onCta={() => navigate('/documents')} />
  *   <CenterSpinner />
  */
 
