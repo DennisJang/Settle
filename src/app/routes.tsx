@@ -1,11 +1,10 @@
 /**
- * routes.tsx — Phivis v3.0 (Phase 3 라우트 구조)
+ * routes.tsx — Phivis v3.1 (Phase B: Finance 위젯 리네임)
  *
- * v2 → v3 변경:
- *   - /scan, /first30, /lab 라우트 추가 (Architecture v3 반영)
- *   - 레거시 리다이렉트 유지 (remit, housing, education)
- *   - 탭바 없음. Home 위젯 → 상세 페이지 네비게이션.
- *   - code-split 전략 유지 (lazy import)
+ * v3.0 → v3.1 변경:
+ *   - Life → Finance 리네임 (/life → /finance)
+ *   - /life 레거시 리다이렉트 추가
+ *   - /remit → /finance로 변경
  *
  * Dennis 규칙 준수:
  * #1  원본 파일 먼저 확인 — 추측 생성 금지
@@ -24,7 +23,7 @@ import { Home } from "./pages/home";
 
 // === Lazy imports (별도 청크) ===
 const Documents = lazy(() => import("./pages/documents").then(m => ({ default: m.Documents })));
-const Life = lazy(() => import("./pages/life").then(m => ({ default: m.Life })));
+const Finance = lazy(() => import("./pages/finance").then(m => ({ default: m.Finance })));
 const Profile = lazy(() => import("./pages/profile").then(m => ({ default: m.Profile })));
 const Paywall = lazy(() => import("./pages/paywall").then(m => ({ default: m.Paywall })));
 const PaywallSuccess = lazy(() => import("./pages/PaywallSuccess").then(m => ({ default: m.PaywallSuccess })));
@@ -72,7 +71,7 @@ export const router = createBrowserRouter([
       { path: "home", Component: Home },
       { path: "documents", element: <S><Documents /></S> },
       { path: "visa", element: <Navigate to="/documents" replace /> },
-      { path: "life", element: <S><Life /></S> },
+      { path: "finance", element: <S><Finance /></S> },
       { path: "profile", element: <S><Profile /></S> },
 
       // --- Phase 3 신규 ---
@@ -88,7 +87,8 @@ export const router = createBrowserRouter([
       { path: "terms", element: <S><Terms /></S> },
 
       // --- 레거시 리다이렉트 ---
-      { path: "remit", element: <Navigate to="/life" replace /> },
+      { path: "life", element: <Navigate to="/finance" replace /> },
+      { path: "remit", element: <Navigate to="/finance" replace /> },
       { path: "housing", element: <Navigate to="/home" replace /> },
       { path: "education", element: <Navigate to="/home" replace /> },
 
