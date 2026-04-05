@@ -1,385 +1,419 @@
 /**
- * home.tsx — 레퍼런스 디자인 1:1 재현
+ * home.tsx — 7위젯 카드 대시보드
  *
- * 6개 카드 격자:
- *   Row 1: [30 mins + Book a Call (wide)] [Avatar (small)]
- *   Row 2: [9:41 AM gradient + message (tall)] [Happy Files + folder (tall)]
- *   Row 3: [+ icon (small)] [MORNING X'IES message (wide)]
+ * Phase C 골격: 기능 바인딩 우선, Phase F에서 디자인 패스
+ * 레퍼런스: 둥근 카드 격자 (Pinterest/위젯형)
+ *
+ * 구조:
+ *   Header: 인사말 + 프로필 아바타
+ *   Score Ring: Phivis Score + delta + grade
+ *   D-Day Timeline: 가장 가까운 마감일 3개
+ *   Widget Cards: 6개 위젯 요약 (2열 격자)
  */
 
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
+import {
+  Scan,
+  FileText,
+  Wallet,
+  CalendarDays,
+  FlaskConical,
+  ChevronRight,
+  AlertTriangle,
+  Clock,
+  Loader2,
+} from "lucide-react";
+import { useScoreStore } from "../../stores/useScoreStore";
+import { useMyStore } from "../../stores/useMyStore";
 
+// ─── Animation ───
 const stagger = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.07 } },
+  show: { transition: { staggerChildren: 0.06 } },
 };
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
+  hidden: { opacity: 0, y: 16 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.55, ease: [0.25, 1, 0.5, 1] as [number, number, number, number] },
+    transition: { duration: 0.5, ease: [0.25, 1, 0.5, 1] as [number, number, number, number] },
   },
 };
 
-export function Home() {
+// ─── Score Ring SVG ───
+function ScoreRing({ score, grade }: { score: number; grade: string }) {
+  const max = 900;
+  const pct = Math.min(score / max, 1);
+  const r = 54;
+  const circ = 2 * Math.PI * r;
+  const offset = circ * (1 - pct * 0.75); // 270° arc
+
+  const gradeColors: Record<string, string> = {
+    excellent: "#1D9E75",
+    stable: "#378ADD",
+    moderate: "#EF9F27",
+    caution: "#D85A30",
+    risk: "#E24B4A",
+  };
+  const color = gradeColors[grade] || "#888";
+
   return (
-    <div
-      style={{
-        minHeight: "100dvh",
-        background: "#E8E6E1",
-        padding: "20px 14px 40px",
-      }}
-    >
-      <motion.div variants={stagger} initial="hidden" animate="show">
-
-        {/* ═══ Row 1: Action bar + Avatar ═══ */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 64px",
-            gap: 10,
-            marginBottom: 12,
-          }}
-        >
-          {/* ── 30 mins + Book a Call ── */}
-          <motion.div
-            variants={fadeUp}
-            whileTap={{ scale: 0.97 }}
-            className="cursor-pointer"
-            style={{
-              background: "#fff",
-              borderRadius: 28,
-              padding: "16px 16px 16px 22px",
-              boxShadow: "0 2px 16px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.03)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-              <span style={{ fontSize: 28, fontWeight: 600, color: "#1A1A18", letterSpacing: -0.5 }}>
-                30
-              </span>
-              <span style={{ fontSize: 15, fontWeight: 400, color: "#A0A098" }}>
-                mins
-              </span>
-              <svg width="12" height="18" viewBox="0 0 12 18" fill="none" style={{ marginLeft: 4, opacity: 0.35 }}>
-                <path d="M6 2L10 7H2L6 2Z" fill="#888" />
-                <path d="M6 16L10 11H2L6 16Z" fill="#888" />
-              </svg>
-            </div>
-
-            <div
-              style={{
-                background: "linear-gradient(135deg, #FEB47B 0%, #F7A09C 25%, #C084FC 50%, #818CF8 75%, #635BFF 100%)",
-                borderRadius: 22,
-                padding: "12px 24px",
-                position: "relative",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 60%)",
-                  borderRadius: 22,
-                }}
-              />
-              <span style={{ fontSize: 16, fontWeight: 600, color: "#fff", position: "relative", letterSpacing: -0.2 }}>
-                Book a Call
-              </span>
-            </div>
-          </motion.div>
-
-          {/* ── Avatar ── */}
-          <motion.div
-            variants={fadeUp}
-            style={{
-              background: "#fff",
-              borderRadius: 22,
-              width: 64,
-              height: 64,
-              boxShadow: "0 2px 12px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.03)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <div
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #D0CFC8, #B0AFA8)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                overflow: "hidden",
-              }}
-            >
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="#888">
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-              </svg>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* ═══ Row 2: 9:41 AM + Happy Files ═══ */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 10,
-            marginBottom: 12,
-          }}
-        >
-          {/* ── 9:41 AM — gradient + morning message ── */}
-          <motion.div
-            variants={fadeUp}
-            whileTap={{ scale: 0.97 }}
-            className="cursor-pointer"
-            style={{
-              background: "#fff",
-              borderRadius: 28,
-              overflow: "visible",
-              boxShadow: "0 2px 16px rgba(0,0,0,0.05), 0 0 0 0.5px rgba(0,0,0,0.03)",
-              display: "flex",
-              flexDirection: "column",
-              position: "relative",
-            }}
-          >
-            {/* Gradient background */}
-            <div
-              style={{
-                background: "linear-gradient(160deg, #FEB47B 0%, #F7A09C 30%, #E898B8 50%, #C084FC 70%, #818CF8 90%, #635BFF 100%)",
-                borderRadius: "28px 28px 0 0",
-                padding: "20px 18px 44px",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "baseline" }}>
-                <span style={{ fontSize: 34, fontWeight: 600, color: "#fff", letterSpacing: -1 }}>
-                  9:41
-                </span>
-                <span style={{ fontSize: 14, fontWeight: 500, color: "rgba(255,255,255,0.7)", marginLeft: 4 }}>
-                  AM
-                </span>
-              </div>
-            </div>
-
-            {/* Sub-card with gradient glow border */}
-            <div
-              style={{
-                position: "relative",
-                margin: "-28px 8px 14px",
-                zIndex: 2,
-              }}
-            >
-              {/* Glow border */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: -2,
-                  borderRadius: 20,
-                  background: "linear-gradient(135deg, #635BFF 0%, #C084FC 35%, #F7A09C 65%, #FEB47B 100%)",
-                  opacity: 0.6,
-                }}
-              />
-              {/* White card */}
-              <div
-                style={{
-                  position: "relative",
-                  background: "#fff",
-                  borderRadius: 18,
-                  padding: "12px 14px",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 6 }}>
-                  <span style={{ fontSize: 13 }}>☀️</span>
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.6px", color: "#C084FC" }}>
-                    MORNING JAY
-                  </span>
-                </div>
-                <p className="m-0" style={{ fontSize: 13, fontWeight: 400, color: "#1A1A18", lineHeight: 1.5 }}>
-                  You have to start{" "}
-                  <span style={{ fontWeight: 700 }}>delegating tasks</span>
-                  , now go{" "}
-                  <span style={{ fontWeight: 700 }}>carpe diem</span>
-                  {" "}:)
-                </p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* ── Happy Files ── */}
-          <motion.div
-            variants={fadeUp}
-            whileTap={{ scale: 0.97 }}
-            className="cursor-pointer"
-            style={{
-              background: "#fff",
-              borderRadius: 28,
-              overflow: "hidden",
-              boxShadow: "0 2px 16px rgba(0,0,0,0.05), 0 0 0 0.5px rgba(0,0,0,0.03)",
-              display: "flex",
-              flexDirection: "column",
-              position: "relative",
-            }}
-          >
-            {/* Kebab dots */}
-            <div
-              style={{
-                position: "absolute",
-                top: 18,
-                right: 18,
-                display: "flex",
-                flexDirection: "column",
-                gap: 4,
-                zIndex: 2,
-              }}
-            >
-              {[0, 1, 2].map((i) => (
-                <div key={i} style={{ width: 5, height: 5, borderRadius: "50%", background: "#1A1A18" }} />
-              ))}
-            </div>
-
-            {/* Folder icon */}
-            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "28px 20px 8px" }}>
-              <div style={{ position: "relative", width: 88, height: 68 }}>
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 4,
-                    right: 4,
-                    height: 52,
-                    borderRadius: 16,
-                    background: "linear-gradient(135deg, #F7A09C 0%, #C084FC 50%, #635BFF 100%)",
-                    boxShadow: "0 6px 20px rgba(99,91,255,0.35)",
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 4,
-                    width: 38,
-                    height: 24,
-                    borderRadius: "12px 12px 0 0",
-                    background: "linear-gradient(135deg, #FEB47B 0%, #F7A09C 100%)",
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Info */}
-            <div style={{ padding: "0 18px 16px" }}>
-              <p className="m-0" style={{ fontSize: 12, fontWeight: 500, color: "#A0A098", letterSpacing: "0.3px" }}>
-                NEW
-              </p>
-              <p className="m-0" style={{ fontSize: 26, fontWeight: 700, color: "#1A1A18", letterSpacing: -0.5, marginTop: 2 }}>
-                Happy Files
-              </p>
-              {/* Stats */}
-              <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-                <StatItem emoji="🖼" value={88} />
-                <StatItem emoji="📷" value={24} />
-                <StatItem emoji="📄" value={9} />
-                <StatItem emoji="📹" value={89} />
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* ═══ Row 3: + button + MORNING X'IES ═══ */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "64px 1fr",
-            gap: 10,
-          }}
-        >
-          {/* ── + icon ── */}
-          <motion.div
-            variants={fadeUp}
-            whileTap={{ scale: 0.95 }}
-            className="cursor-pointer"
-            style={{
-              background: "#fff",
-              borderRadius: 22,
-              width: 64,
-              height: 64,
-              boxShadow: "0 2px 12px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.03)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <div style={{ position: "relative" }}>
-              <div
-                style={{
-                  position: "absolute",
-                  inset: -8,
-                  borderRadius: "50%",
-                  background: "radial-gradient(circle, rgba(192,132,252,0.2) 0%, rgba(254,180,123,0.1) 50%, transparent 70%)",
-                }}
-              />
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" strokeWidth="3" strokeLinecap="round">
-                <defs>
-                  <linearGradient id="plusG" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#C084FC" />
-                    <stop offset="50%" stopColor="#818CF8" />
-                    <stop offset="100%" stopColor="#635BFF" />
-                  </linearGradient>
-                </defs>
-                <line x1="12" y1="5" x2="12" y2="19" stroke="url(#plusG)" />
-                <line x1="5" y1="12" x2="19" y2="12" stroke="url(#plusG)" />
-              </svg>
-            </div>
-          </motion.div>
-
-          {/* ── MORNING X'IES ── */}
-          <motion.div
-            variants={fadeUp}
-            whileTap={{ scale: 0.97 }}
-            className="cursor-pointer"
-            style={{
-              background: "#fff",
-              borderRadius: 28,
-              padding: "16px 20px",
-              boxShadow: "0 2px 16px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.03)",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 6 }}>
-              <span style={{ fontSize: 13 }}>☀️</span>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.6px", color: "#A0A098" }}>
-                MORNING X'IES
-              </span>
-            </div>
-            <p className="m-0" style={{ fontSize: 15, fontWeight: 400, color: "#1A1A18", lineHeight: 1.5 }}>
-              You should{" "}
-              <span style={{ fontWeight: 700 }}>finish your portfolio</span>
-              {" "}today, what do you think?
-            </p>
-          </motion.div>
-        </div>
-
-      </motion.div>
-    </div>
+    <svg width="140" height="140" viewBox="0 0 140 140">
+      {/* Background track */}
+      <circle
+        cx="70" cy="70" r={r}
+        fill="none"
+        stroke="var(--color-border-tertiary)"
+        strokeWidth="10"
+        strokeLinecap="round"
+        strokeDasharray={`${circ * 0.75} ${circ * 0.25}`}
+        transform="rotate(135 70 70)"
+      />
+      {/* Score arc */}
+      <circle
+        cx="70" cy="70" r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth="10"
+        strokeLinecap="round"
+        strokeDasharray={`${circ * 0.75} ${circ * 0.25}`}
+        strokeDashoffset={offset}
+        transform="rotate(135 70 70)"
+        style={{ transition: "stroke-dashoffset 1s ease" }}
+      />
+    </svg>
   );
 }
 
-function StatItem({ emoji, value }: { emoji: string; value: number }) {
+// ─── Urgency Badge ───
+function UrgencyBadge({ urgency, dDay }: { urgency: string; dDay: number }) {
+  const styles: Record<string, { bg: string; color: string }> = {
+    urgent: { bg: "var(--color-background-danger)", color: "var(--color-text-danger)" },
+    warning: { bg: "var(--color-background-warning)", color: "var(--color-text-warning)" },
+    info: { bg: "var(--color-background-info)", color: "var(--color-text-info)" },
+  };
+  const s = styles[urgency] || styles.info;
+
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
-      <span style={{ fontSize: 11, opacity: 0.5 }}>{emoji}</span>
-      <span style={{ fontSize: 13, fontWeight: 500, color: "#A0A098" }}>{value}</span>
+    <span style={{
+      fontSize: 12, fontWeight: 600,
+      padding: "2px 8px", borderRadius: 6,
+      background: s.bg, color: s.color,
+    }}>
+      D-{Math.abs(dDay)}
+    </span>
+  );
+}
+
+// ─── Widget Card ───
+function WidgetCard({
+  icon: Icon,
+  titleKey,
+  value,
+  subtitle,
+  route,
+  gradient,
+}: {
+  icon: React.ElementType;
+  titleKey: string;
+  value: string | number | null;
+  subtitle?: string;
+  route: string;
+  gradient?: string;
+}) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  return (
+    <motion.div
+      variants={fadeUp}
+      whileTap={{ scale: 0.97 }}
+      onClick={() => navigate(route)}
+      style={{
+        background: "var(--color-background-primary)",
+        borderRadius: 20,
+        padding: "18px 16px",
+        cursor: "pointer",
+        border: "0.5px solid var(--color-border-tertiary)",
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+        minHeight: 110,
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{
+          width: 36, height: 36, borderRadius: 10,
+          background: gradient || "var(--color-background-secondary)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <Icon size={18} color={gradient ? "#fff" : "var(--color-text-secondary)"} />
+        </div>
+        <ChevronRight size={16} color="var(--color-text-tertiary)" />
+      </div>
+
+      <div>
+        <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginBottom: 2 }}>
+          {t(titleKey)}
+        </div>
+        {value !== null && (
+          <div style={{ fontSize: 22, fontWeight: 600, color: "var(--color-text-primary)" }}>
+            {value}
+          </div>
+        )}
+        {subtitle && (
+          <div style={{ fontSize: 12, color: "var(--color-text-tertiary)", marginTop: 2 }}>
+            {subtitle}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Main ───
+export function Home() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const {
+    score, scoreLoading, calculateScore,
+    deadlines, loadDeadlines,
+  } = useScoreStore();
+
+  const { profile, loadProfile } = useMyStore();
+
+  useEffect(() => {
+    loadProfile();
+    calculateScore();
+    loadDeadlines();
+  }, []);
+
+  // 마감일: 미완료 + 가까운 순 상위 3개
+  const activeDeadlines = deadlines
+    .filter((d) => !d.completed)
+    .sort((a, b) => a.d_day - b.d_day)
+    .slice(0, 3);
+
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return t("home:greeting_morning");
+    if (h < 18) return t("home:greeting_afternoon");
+    return t("home:greeting_evening");
+  })();
+
+  return (
+    <div style={{
+      minHeight: "100dvh",
+      background: "var(--color-background-tertiary)",
+      padding: "20px 16px 40px",
+    }}>
+      <motion.div variants={stagger} initial="hidden" animate="show">
+
+        {/* ═══ Header ═══ */}
+        <motion.div
+          variants={fadeUp}
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 20,
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 14, color: "var(--color-text-secondary)" }}>
+              {greeting}
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 600, color: "var(--color-text-primary)", marginTop: 2 }}>
+              {profile?.full_name || t("home:user_default")}
+            </div>
+          </div>
+          <div
+            onClick={() => navigate("/profile")}
+            style={{
+              width: 44, height: 44, borderRadius: "50%",
+              background: "var(--color-background-secondary)",
+              border: "0.5px solid var(--color-border-tertiary)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer",
+            }}
+          >
+            <span style={{ fontSize: 18, fontWeight: 600, color: "var(--color-text-secondary)" }}>
+              {(profile?.full_name || "U").charAt(0).toUpperCase()}
+            </span>
+          </div>
+        </motion.div>
+
+        {/* ═══ Score Card ═══ */}
+        <motion.div
+          variants={fadeUp}
+          onClick={() => navigate("/home")}
+          style={{
+            background: "var(--color-background-primary)",
+            borderRadius: 24,
+            padding: "24px 20px",
+            border: "0.5px solid var(--color-border-tertiary)",
+            marginBottom: 12,
+            display: "flex",
+            alignItems: "center",
+            gap: 20,
+          }}
+        >
+          {scoreLoading ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", justifyContent: "center", padding: 20 }}>
+              <Loader2 size={20} className="animate-spin" color="var(--color-text-tertiary)" />
+              <span style={{ fontSize: 14, color: "var(--color-text-tertiary)" }}>
+                {t("score:calculating")}
+              </span>
+            </div>
+          ) : score ? (
+            <>
+              {/* Ring */}
+              <div style={{ position: "relative", flexShrink: 0 }}>
+                <ScoreRing score={score.score} grade={score.grade} />
+                <div style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center",
+                }}>
+                  <span style={{ fontSize: 32, fontWeight: 700, color: "var(--color-text-primary)" }}>
+                    {score.score}
+                  </span>
+                  <span style={{ fontSize: 11, color: "var(--color-text-tertiary)" }}>/ 900</span>
+                </div>
+              </div>
+              {/* Info */}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 16, fontWeight: 600, color: "var(--color-text-primary)", marginBottom: 4 }}>
+                  Phivis Score
+                </div>
+                {score.delta !== null && (
+                  <div style={{
+                    fontSize: 13,
+                    color: score.delta >= 0 ? "var(--color-text-success)" : "var(--color-text-danger)",
+                    marginBottom: 8,
+                  }}>
+                    {score.delta >= 0 ? "▲" : "▼"} {Math.abs(score.delta)} {t("score:vs_last")}
+                  </div>
+                )}
+                <div style={{ fontSize: 12, color: "var(--color-text-secondary)" }}>
+                  {t(score.grade_label_key)}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div style={{ width: "100%", textAlign: "center", padding: 20, color: "var(--color-text-tertiary)", fontSize: 14 }}>
+              {t("score:no_data")}
+            </div>
+          )}
+        </motion.div>
+
+        {/* ═══ D-Day Timeline ═══ */}
+        {activeDeadlines.length > 0 && (
+          <motion.div
+            variants={fadeUp}
+            style={{
+              background: "var(--color-background-primary)",
+              borderRadius: 20,
+              padding: "16px",
+              border: "0.5px solid var(--color-border-tertiary)",
+              marginBottom: 12,
+            }}
+          >
+            <div style={{
+              fontSize: 13, fontWeight: 600,
+              color: "var(--color-text-secondary)",
+              marginBottom: 10,
+              display: "flex", alignItems: "center", gap: 6,
+            }}>
+              <Clock size={14} />
+              {t("home:upcoming_deadlines")}
+            </div>
+            {activeDeadlines.map((d, i) => (
+              <div
+                key={d.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "8px 0",
+                  borderTop: i > 0 ? "0.5px solid var(--color-border-tertiary)" : "none",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {d.urgency === "urgent" && <AlertTriangle size={14} color="var(--color-text-danger)" />}
+                  <span style={{ fontSize: 14, color: "var(--color-text-primary)" }}>
+                    {t(d.title_key, { defaultValue: d.title_key })}
+                  </span>
+                </div>
+                <UrgencyBadge urgency={d.urgency} dDay={d.d_day} />
+              </div>
+            ))}
+          </motion.div>
+        )}
+
+        {/* ═══ Widget Cards (2-column grid) ═══ */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 10,
+        }}>
+          <WidgetCard
+            icon={Scan}
+            titleKey="home:card_scan"
+            value={null}
+            subtitle={t("home:card_scan_sub")}
+            route="/scan"
+            gradient="linear-gradient(135deg, #635BFF, #818CF8)"
+          />
+          <WidgetCard
+            icon={FileText}
+            titleKey="home:card_documents"
+            value={null}
+            subtitle={t("home:card_documents_sub")}
+            route="/documents"
+            gradient="linear-gradient(135deg, #1D9E75, #5DCAA5)"
+          />
+          <WidgetCard
+            icon={Wallet}
+            titleKey="home:card_finance"
+            value={null}
+            subtitle={t("home:card_finance_sub")}
+            route="/finance"
+            gradient="linear-gradient(135deg, #D85A30, #F0997B)"
+          />
+          <WidgetCard
+            icon={CalendarDays}
+            titleKey="home:card_first30"
+            value={null}
+            subtitle={t("home:card_first30_sub")}
+            route="/first30"
+            gradient="linear-gradient(135deg, #534AB7, #AFA9EC)"
+          />
+          <WidgetCard
+            icon={FlaskConical}
+            titleKey="home:card_lab"
+            value={null}
+            subtitle={t("home:card_lab_sub")}
+            route="/lab"
+            gradient="linear-gradient(135deg, #993556, #ED93B1)"
+          />
+        </div>
+
+      </motion.div>
+
+      {/* ─── 면책 ─── */}
+      <div style={{
+        marginTop: 24, padding: "12px 16px",
+        fontSize: 11, color: "var(--color-text-tertiary)",
+        textAlign: "center", lineHeight: 1.5,
+      }}>
+        {t("score:disclaimer")}
+      </div>
     </div>
   );
 }
