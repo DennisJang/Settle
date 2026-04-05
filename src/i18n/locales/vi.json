@@ -53,6 +53,13 @@
     "noCountCharge": "Lần quét này không tính vào giới hạn của bạn.",
     "tryAgain": "Thử lại"
     },
+    "limit": {
+    "remaining": "Còn {{count}}/{{total}} lần quét trong tháng",
+    "title": "Bạn đã dùng hết lượt quét miễn phí tháng này",
+    "description": "Nâng cấp lên Premium để quét tài liệu không giới hạn.",
+    "upgrade": "Bắt đầu Premium",
+    "goBack": "Quay lại"
+    },
     "progress": {
       "validating": "Đang kiểm tra tệp...",
       "uploading": "Đang đọc tài liệu...",

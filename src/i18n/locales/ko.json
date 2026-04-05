@@ -53,6 +53,13 @@
     "noCountCharge": "이 스캔은 횟수에 포함되지 않아요.",
     "tryAgain": "다시 시도하기"
     },
+    "limit": {
+    "remaining": "이번 달 {{count}}/{{total}}회 남음",
+    "title": "이번 달 무료 스캔을 모두 사용했어요",
+    "description": "Premium으로 업그레이드하면 무제한으로 문서를 스캔할 수 있어요.",
+    "upgrade": "Premium 시작하기",
+    "goBack": "돌아가기"
+   },
     "progress": {
       "validating": "파일 확인 중...",
       "uploading": "문서를 읽고 있어요...",

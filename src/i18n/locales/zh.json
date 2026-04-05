@@ -49,6 +49,13 @@
     "noCountCharge": "此次扫描不会计入您的次数限制。",
     "tryAgain": "重试"
     },
+    "limit": {
+    "remaining": "本月还剩 {{count}}/{{total}} 次扫描",
+    "title": "本月免费扫描次数已用完",
+    "description": "升级到Premium可以无限扫描文档。",
+    "upgrade": "开始Premium",
+    "goBack": "返回"
+    },
     "progress": {
       "validating": "正在检查文件...",
       "uploading": "正在读取文件...",

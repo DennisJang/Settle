@@ -2,21 +2,19 @@
 // ============================================
 // Scan 위젯 페이지 — Phase A 완성
 //
-// 신규: 빈 결과 상태(EmptyResult), 실패 시 횟수 무효 메시지, comparison null 방어
-// 상태 머신 기반 렌더링: idle → validating → uploading → analyzing → result → error
-// 규칙 #32: 컬러 하드코딩 금지 → 시맨틱 토큰
-// 규칙 #34: i18n 전 페이지
-// 규칙 #39: "대행" 표현 금지
-// 규칙 #42: Progressive Disclosure
-// 규칙 #44: 모션/간격/radius 토큰만
+// 신규: limitReached 상태, 잔여 횟수 표시, 빈 결과, comparison null 방어
+// 규칙 #32: 시맨틱 토큰 · #34: i18n · #39: "대행" 금지 · #42: Progressive Disclosure
 // ============================================
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
-import { Upload, FileText, Camera, AlertCircle, ChevronDown, ChevronUp, RotateCcw, ArrowRight, FileQuestion } from 'lucide-react';
+import { Upload, FileText, Camera, AlertCircle, ChevronDown, ChevronUp, RotateCcw, ArrowRight, FileQuestion, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useScanStore } from '../../stores/useScanStore';
 import type { ScanItem } from '../../stores/useScanStore';
+
+const FREE_MONTHLY_LIMIT = 5;
 
 // ─── Category config ───
 const CATEGORY_CONFIG: Record<string, { icon: string; colorClass: string }> = {
@@ -31,7 +29,12 @@ const CATEGORY_CONFIG: Record<string, { icon: string; colorClass: string }> = {
 
 export default function ScanPage() {
   const { t } = useTranslation('scan');
-  const { state } = useScanStore();
+  const { state, checkScanLimit, limitChecked } = useScanStore();
+
+  // 페이지 진입 시 횟수 + 플랜 체크
+  useEffect(() => {
+    checkScanLimit();
+  }, [checkScanLimit]);
 
   return (
     <div
@@ -58,6 +61,9 @@ export default function ScanPage() {
         {t('subtitle')}
       </motion.p>
 
+      {/* 잔여 횟수 표시 (로딩 완료 + idle 상태일 때) */}
+      {limitChecked && state === 'idle' && <ScanCountBadge />}
+
       {/* State-driven content */}
       <AnimatePresence mode="wait">
         {state === 'idle' && <ScanUpload key="upload" />}
@@ -66,8 +72,30 @@ export default function ScanPage() {
         {state === 'analyzing' && <ScanProgress key="progress" />}
         {state === 'result' && <ScanResult key="result" />}
         {state === 'error' && <ScanError key="error" />}
+        {state === 'limitReached' && <ScanLimitReached key="limit" />}
       </AnimatePresence>
     </div>
+  );
+}
+
+// ─── 잔여 횟수 배지 ───
+function ScanCountBadge() {
+  const { t } = useTranslation('scan');
+  const { scanCount, isPremium } = useScanStore();
+
+  if (isPremium) return null; // Premium은 표시 불필요
+
+  const remaining = Math.max(0, FREE_MONTHLY_LIMIT - scanCount);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="mb-[var(--space-md)] text-[13px] text-right"
+      style={{ color: 'var(--color-text-tertiary)' }}
+    >
+      {t('limit.remaining', { count: remaining, total: FREE_MONTHLY_LIMIT })}
+    </motion.div>
   );
 }
 
@@ -103,7 +131,6 @@ function ScanUpload() {
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.3, ease: [0.05, 0.7, 0.1, 1.0] }}
     >
-      {/* Drop zone */}
       <div
         className="rounded-[var(--radius-lg)] p-[var(--space-2xl)] text-center cursor-pointer transition-all"
         style={{
@@ -147,7 +174,6 @@ function ScanUpload() {
         />
       </div>
 
-      {/* Camera button — Phase E에서 활성화 */}
       <button
         className="w-full mt-[var(--space-md)] py-[14px] rounded-[var(--radius-md)] text-[16px] font-semibold flex items-center justify-center gap-[var(--space-sm)] opacity-40 cursor-not-allowed"
         style={{
@@ -163,7 +189,7 @@ function ScanUpload() {
   );
 }
 
-// ─── uploading / analyzing: 프로그레스 표시 ───
+// ─── uploading / analyzing: 프로그레스 ───
 function ScanProgress() {
   const { t } = useTranslation('scan');
   const { state, progress, filePreviewUrl, file } = useScanStore();
@@ -186,7 +212,6 @@ function ScanProgress() {
         boxShadow: 'var(--shadow-card-soft)',
       }}
     >
-      {/* File preview (이미지일 때) */}
       {filePreviewUrl && (
         <img
           src={filePreviewUrl}
@@ -195,7 +220,6 @@ function ScanProgress() {
         />
       )}
 
-      {/* PDF 아이콘 (PDF일 때) */}
       {!filePreviewUrl && file && (
         <FileText
           size={48}
@@ -204,7 +228,6 @@ function ScanProgress() {
         />
       )}
 
-      {/* Progress bar */}
       <div
         className="w-full h-[6px] rounded-[var(--radius-sm)] overflow-hidden mb-[var(--space-md)]"
         style={{ backgroundColor: 'var(--color-surface-secondary)' }}
@@ -218,7 +241,6 @@ function ScanProgress() {
         />
       </div>
 
-      {/* Status label */}
       <p
         className="text-[15px]"
         style={{ color: 'var(--color-text-secondary)' }}
@@ -236,7 +258,6 @@ function ScanResult() {
 
   if (!result) return null;
 
-  // 인식 실패 (items 0개) → 빈 상태 화면
   if (result.status === 'failed' || result.items.length === 0) {
     return <ScanEmptyResult />;
   }
@@ -251,7 +272,6 @@ function ScanResult() {
       transition={{ duration: 0.3, ease: [0.05, 0.7, 0.1, 1.0] }}
       className="space-y-[var(--space-md)]"
     >
-      {/* Category tag */}
       <div
         className={`inline-flex items-center gap-[var(--space-xs)] px-[var(--space-md)] py-[var(--space-xs)] rounded-[var(--radius-sm)] text-[13px] font-medium ${catConfig.colorClass}`}
       >
@@ -259,7 +279,6 @@ function ScanResult() {
         <span>{t(`category.${result.category}`)}</span>
       </div>
 
-      {/* Summary card */}
       <div
         className="rounded-[var(--radius-lg)] p-[var(--space-lg)]"
         style={{
@@ -280,7 +299,6 @@ function ScanResult() {
           {result.summary.subtitle}
         </p>
 
-        {/* Key numbers — null/empty 방어 */}
         {result.summary.key_numbers && result.summary.key_numbers.length > 0 && (
           <div className="flex flex-wrap gap-[var(--space-md)]">
             {result.summary.key_numbers.map((kn, i) => (
@@ -303,12 +321,10 @@ function ScanResult() {
         )}
       </div>
 
-      {/* Item cards — Progressive Disclosure */}
       {result.items.map((item, i) => (
         <ScanItemCard key={i} item={item} index={i} />
       ))}
 
-      {/* Deadlines */}
       {result.deadlines && result.deadlines.length > 0 && (
         <div
           className="rounded-[var(--radius-lg)] p-[var(--space-lg)]"
@@ -356,7 +372,6 @@ function ScanResult() {
         </div>
       )}
 
-      {/* Disclaimer */}
       <p
         className="text-[13px] text-center px-[var(--space-md)]"
         style={{ color: 'var(--color-text-tertiary)' }}
@@ -364,7 +379,6 @@ function ScanResult() {
         {result.disclaimer}
       </p>
 
-      {/* Actions */}
       <div className="flex gap-[var(--space-sm)]">
         <button
           onClick={reset}
@@ -378,7 +392,6 @@ function ScanResult() {
           {t('result.scanAgain')}
         </button>
 
-        {/* Widget CTA — Phase E에서 실제 네비게이션 연결 */}
         {result.linked_widget && (
           <button
             className="flex-1 py-[14px] rounded-[var(--radius-md)] text-[16px] font-semibold flex items-center justify-center gap-[var(--space-xs)]"
@@ -399,7 +412,7 @@ function ScanResult() {
   );
 }
 
-// ─── 빈 결과 상태 (인식 실패, 횟수 무효) ───
+// ─── 빈 결과 (인식 실패) ───
 function ScanEmptyResult() {
   const { t } = useTranslation('scan');
   const { reset } = useScanStore();
@@ -421,29 +434,24 @@ function ScanEmptyResult() {
         className="mx-auto mb-[var(--space-md)]"
         style={{ color: 'var(--color-icon-secondary)' }}
       />
-
       <h3
         className="text-[18px] font-semibold mb-[var(--space-xs)]"
         style={{ color: 'var(--color-text-primary)' }}
       >
         {t('empty.title')}
       </h3>
-
       <p
         className="text-[14px] mb-[var(--space-sm)]"
         style={{ color: 'var(--color-text-secondary)' }}
       >
         {t('empty.description')}
       </p>
-
-      {/* 횟수 무효 안내 */}
       <p
         className="text-[13px] mb-[var(--space-lg)]"
         style={{ color: 'var(--color-text-tertiary)' }}
       >
         {t('empty.noCountCharge')}
       </p>
-
       <button
         onClick={reset}
         className="w-full py-[14px] rounded-[var(--radius-md)] text-[16px] font-semibold flex items-center justify-center gap-[var(--space-xs)]"
@@ -459,7 +467,67 @@ function ScanEmptyResult() {
   );
 }
 
-// ─── Item card (접기/펼치기) ───
+// ─── 횟수 초과 (Paywall 유도) ───
+function ScanLimitReached() {
+  const { t } = useTranslation('scan');
+  const navigate = useNavigate();
+  const { reset } = useScanStore();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.3, ease: [0.05, 0.7, 0.1, 1.0] }}
+      className="rounded-[var(--radius-lg)] p-[var(--space-2xl)] text-center"
+      style={{
+        backgroundColor: 'var(--color-surface-primary)',
+        boxShadow: 'var(--shadow-card-soft)',
+      }}
+    >
+      <Lock
+        size={48}
+        className="mx-auto mb-[var(--space-md)]"
+        style={{ color: 'var(--color-icon-secondary)' }}
+      />
+      <h3
+        className="text-[18px] font-semibold mb-[var(--space-xs)]"
+        style={{ color: 'var(--color-text-primary)' }}
+      >
+        {t('limit.title')}
+      </h3>
+      <p
+        className="text-[14px] mb-[var(--space-lg)]"
+        style={{ color: 'var(--color-text-secondary)' }}
+      >
+        {t('limit.description')}
+      </p>
+
+      <button
+        onClick={() => navigate('/paywall')}
+        className="w-full py-[14px] rounded-[var(--radius-md)] text-[16px] font-semibold mb-[var(--space-sm)]"
+        style={{
+          backgroundColor: 'var(--color-action-primary)',
+          color: 'var(--color-text-on-color)',
+        }}
+      >
+        {t('limit.upgrade')}
+      </button>
+      <button
+        onClick={reset}
+        className="w-full py-[14px] rounded-[var(--radius-md)] text-[16px] font-semibold"
+        style={{
+          backgroundColor: 'var(--color-surface-secondary)',
+          color: 'var(--color-text-primary)',
+        }}
+      >
+        {t('limit.goBack')}
+      </button>
+    </motion.div>
+  );
+}
+
+// ─── Item card ───
 function ScanItemCard({ item, index }: { item: ScanItem; index: number }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -474,7 +542,6 @@ function ScanItemCard({ item, index }: { item: ScanItem; index: number }) {
         boxShadow: 'var(--shadow-card-soft)',
       }}
     >
-      {/* Header — always visible */}
       <button
         className="w-full flex items-center justify-between p-[var(--space-lg)] text-left"
         onClick={() => setExpanded(!expanded)}
@@ -510,7 +577,6 @@ function ScanItemCard({ item, index }: { item: ScanItem; index: number }) {
         )}
       </button>
 
-      {/* Detail — Progressive Disclosure */}
       <AnimatePresence>
         {expanded && (
           <motion.div
@@ -524,7 +590,6 @@ function ScanItemCard({ item, index }: { item: ScanItem; index: number }) {
               className="px-[var(--space-lg)] pb-[var(--space-lg)] pt-0 space-y-[var(--space-sm)]"
               style={{ borderTop: '1px solid var(--color-border-default)' }}
             >
-              {/* Explanation */}
               {item.explanation && (
                 <p
                   className="text-[14px] pt-[var(--space-md)]"
@@ -534,7 +599,6 @@ function ScanItemCard({ item, index }: { item: ScanItem; index: number }) {
                 </p>
               )}
 
-              {/* Comparison bar — comparison이 null이면 렌더링하지 않음 */}
               {item.comparison && item.comparison.user_value && item.comparison.reference_value && (
                 <div
                   className="flex items-center justify-between text-[13px] p-[var(--space-sm)] rounded-[var(--radius-sm)]"
@@ -549,7 +613,6 @@ function ScanItemCard({ item, index }: { item: ScanItem; index: number }) {
                 </div>
               )}
 
-              {/* Widget link — Phase E */}
               {item.action_text && (
                 <button
                   className="text-[14px] font-medium flex items-center gap-[var(--space-xs)]"
@@ -570,7 +633,7 @@ function ScanItemCard({ item, index }: { item: ScanItem; index: number }) {
   );
 }
 
-// ─── error: 에러 + 재시도 ───
+// ─── error ───
 function ScanError() {
   const { t } = useTranslation('scan');
   const { error, retry, reset } = useScanStore();
@@ -592,22 +655,18 @@ function ScanError() {
         className="mx-auto mb-[var(--space-md)]"
         style={{ color: 'var(--color-action-error)' }}
       />
-
       <p
         className="text-[15px] mb-[var(--space-sm)]"
         style={{ color: 'var(--color-text-secondary)' }}
       >
         {error?.startsWith('scan:') ? t(error.replace('scan:', '')) : error}
       </p>
-
-      {/* 에러 = 횟수 무효 안내 */}
       <p
         className="text-[13px] mb-[var(--space-lg)]"
         style={{ color: 'var(--color-text-tertiary)' }}
       >
         {t('error.noCountCharge')}
       </p>
-
       <div className="flex gap-[var(--space-sm)]">
         <button
           onClick={reset}

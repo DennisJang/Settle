@@ -49,6 +49,13 @@
     "noCountCharge": "This scan won't count toward your limit.",
     "tryAgain": "Try again"
     },
+    "limit": {
+    "remaining": "{{count}}/{{total}} scans left this month",
+    "title": "You've used all free scans this month",
+    "description": "Upgrade to Premium for unlimited document scanning.",
+    "upgrade": "Start Premium",
+    "goBack": "Go back"
+    },
     "progress": {
       "validating": "Checking file...",
       "uploading": "Reading document...",

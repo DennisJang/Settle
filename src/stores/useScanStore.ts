@@ -2,11 +2,10 @@
 // ============================================
 // Scan 위젯 상태 머신 — Phase A 완성
 //
-// States: idle → validating → uploading → analyzing → result | error
-// 신규: Supabase Storage 원본 저장 (병렬), status 필드, 실패 시 횟수 무효
-// 규칙 #1: 원본 확인 — scan-analyze EF 스펙 기반
-// 규칙 #34: i18n 키만 (하드코딩 텍스트 금지)
-// 규칙 #39: "대행" 표현 금지
+// States: idle → validating → uploading → analyzing → result | error | limitReached
+// Features: Storage 병렬 업로드, status 필드, 실패 시 횟수 무효,
+//           Free/Premium 횟수 제한 (월 5회, success만 카운트)
+// 규칙 #1: 원본 확인 기반 · #34: i18n 키만 · #39: "대행" 금지
 // ============================================
 
 import { create } from 'zustand';
@@ -20,9 +19,9 @@ export type ScanState =
   | 'uploading'
   | 'analyzing'
   | 'result'
-  | 'error';
+  | 'error'
+  | 'limitReached';
 
-// 스캔 결과 상태: 횟수 카운트는 success만
 export type ScanStatus = 'success' | 'failed' | 'error';
 
 export interface ScanKeyNumber {
@@ -73,7 +72,6 @@ export interface ScanResult {
   raw_file_url: string | null;
 }
 
-// 허용 파일 타입
 const ALLOWED_TYPES = [
   'image/jpeg',
   'image/png',
@@ -82,9 +80,8 @@ const ALLOWED_TYPES = [
 ] as const;
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
-// Storage 버킷명
 const STORAGE_BUCKET = 'scan-uploads';
+const FREE_MONTHLY_LIMIT = 5;
 
 // ─── Store ───
 
@@ -95,10 +92,16 @@ interface ScanStore {
   filePreviewUrl: string | null;
   storageUrl: string | null;
   result: ScanResult | null;
-  error: string | null; // i18n key
-  progress: number; // 0-100
+  error: string | null;
+  progress: number;
+
+  // Limit state
+  scanCount: number;
+  isPremium: boolean;
+  limitChecked: boolean;
 
   // Actions
+  checkScanLimit: () => Promise<void>;
   selectFile: (file: File) => void;
   analyze: () => Promise<void>;
   reset: () => void;
@@ -107,7 +110,6 @@ interface ScanStore {
 }
 
 export const useScanStore = create<ScanStore>((set, get) => ({
-  // Initial state
   state: 'idle',
   file: null,
   filePreviewUrl: null,
@@ -115,39 +117,82 @@ export const useScanStore = create<ScanStore>((set, get) => ({
   result: null,
   error: null,
   progress: 0,
+  scanCount: 0,
+  isPremium: false,
+  limitChecked: false,
 
-  // ── selectFile: idle → validating → uploading (or error) ──
+  // ── 횟수 + 플랜 체크 (페이지 진입 시 호출) ──
+  checkScanLimit: async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const monthStart = new Date();
+      monthStart.setDate(1);
+      monthStart.setHours(0, 0, 0, 0);
+
+      const [countResult, subResult] = await Promise.all([
+        supabase
+          .from('scan_results')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('status', 'success')
+          .gte('created_at', monthStart.toISOString()),
+        supabase
+          .from('subscriptions')
+          .select('plan, expires_at')
+          .eq('user_id', user.id)
+          .single(),
+      ]);
+
+      const scanCount = countResult.count ?? 0;
+
+      let isPremium = false;
+      if (subResult.data) {
+        const { plan, expires_at } = subResult.data;
+        isPremium = plan === 'premium' && (!expires_at || new Date(expires_at) > new Date());
+      }
+
+      set({ scanCount, isPremium, limitChecked: true });
+    } catch (err) {
+      console.error('[useScanStore] checkScanLimit error:', err);
+      set({ limitChecked: true });
+    }
+  },
+
+  // ── selectFile ──
   selectFile: (file: File) => {
-    // Clean up previous preview URL
     const prevUrl = get().filePreviewUrl;
     if (prevUrl) URL.revokeObjectURL(prevUrl);
 
     set({ state: 'validating', file, error: null, result: null, progress: 0, storageUrl: null });
 
-    // Validate type
+    // 횟수 체크 (Free 유저만)
+    const { isPremium, scanCount } = get();
+    if (!isPremium && scanCount >= FREE_MONTHLY_LIMIT) {
+      set({ state: 'limitReached' });
+      return;
+    }
+
     if (!ALLOWED_TYPES.includes(file.type as typeof ALLOWED_TYPES[number])) {
       set({ state: 'error', error: 'scan:error.unsupportedType' });
       return;
     }
 
-    // Validate size
     if (file.size > MAX_FILE_SIZE) {
       set({ state: 'error', error: 'scan:error.fileTooLarge' });
       return;
     }
 
-    // Generate preview URL for images
     const previewUrl = file.type.startsWith('image/')
       ? URL.createObjectURL(file)
       : null;
 
     set({ state: 'uploading', filePreviewUrl: previewUrl });
-
-    // Auto-trigger analyze
     get().analyze();
   },
 
-  // ── analyze: uploading → analyzing → result (or error) ──
+  // ── analyze ──
   analyze: async () => {
     const { file } = get();
     if (!file) {
@@ -156,7 +201,6 @@ export const useScanStore = create<ScanStore>((set, get) => ({
     }
 
     try {
-      // ── Auth check ──
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
         set({ state: 'error', error: 'scan:error.notAuthenticated' });
@@ -165,7 +209,6 @@ export const useScanStore = create<ScanStore>((set, get) => ({
 
       set({ state: 'uploading', progress: 10 });
 
-      // ── Phase 1: Storage 업로드 + Base64 인코딩 (병렬) ──
       const timestamp = Date.now();
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
       const storagePath = `${session.user.id}/${timestamp}_${safeName}`;
@@ -177,22 +220,18 @@ export const useScanStore = create<ScanStore>((set, get) => ({
 
       set({ progress: 40 });
 
-      // Storage 실패는 치명적이지 않음 — 분석은 계속 진행
-      // 단, URL을 기록해서 EF에 전달
       const storageUrl = storageResult.url;
       set({ storageUrl });
 
       if (storageResult.error) {
-        console.warn('[useScanStore] Storage upload failed, continuing with analysis:', storageResult.error);
+        console.warn('[useScanStore] Storage upload failed:', storageResult.error);
       }
 
-      // file_type 결정
       const fileType = file.type === 'application/pdf' ? 'pdf'
         : file.type === 'image/png' ? 'png'
         : file.type === 'image/webp' ? 'webp'
-        : 'image'; // jpeg default
+        : 'image';
 
-      // ── Phase 2: API 호출 ──
       set({ state: 'analyzing', progress: 50 });
 
       const response = await fetch(
@@ -207,7 +246,7 @@ export const useScanStore = create<ScanStore>((set, get) => ({
           body: JSON.stringify({
             image_base64: base64,
             file_type: fileType,
-            file_url: storageUrl, // Storage URL 전달 → EF가 raw_file_url에 저장
+            file_url: storageUrl,
           }),
         }
       );
@@ -215,6 +254,12 @@ export const useScanStore = create<ScanStore>((set, get) => ({
       set({ progress: 80 });
 
       const data = await response.json();
+
+      // EF가 횟수 초과로 403 반환
+      if (response.status === 403 && data.error === 'scan_limit_reached') {
+        set({ state: 'limitReached', progress: 0 });
+        return;
+      }
 
       if (!response.ok) {
         const errorMsg = data.error || 'scan:error.analysisFailed';
@@ -227,11 +272,8 @@ export const useScanStore = create<ScanStore>((set, get) => ({
         return;
       }
 
-      // ── Phase 3: 결과 판정 ──
       const items = data.items ?? [];
       const hasContent = items.length > 0;
-
-      // items가 0개면 = 인식 실패 → status='failed', 횟수 무효
       const status: ScanStatus = hasContent ? 'success' : 'failed';
 
       set({
@@ -253,7 +295,12 @@ export const useScanStore = create<ScanStore>((set, get) => ({
         },
       });
 
-      // 실패 시 DB의 status도 업데이트
+      // 성공 시 로컬 카운트 +1
+      if (status === 'success') {
+        set((s) => ({ scanCount: s.scanCount + 1 }));
+      }
+
+      // 실패 시 DB status 업데이트
       if (status === 'failed' && data.scan_id) {
         await supabase
           .from('scan_results')
@@ -262,19 +309,13 @@ export const useScanStore = create<ScanStore>((set, get) => ({
       }
     } catch (err) {
       console.error('[useScanStore] analyze error:', err);
-      set({
-        state: 'error',
-        error: 'scan:error.networkError',
-        progress: 0,
-      });
+      set({ state: 'error', error: 'scan:error.networkError', progress: 0 });
     }
   },
 
-  // ── reset: any → idle ──
   reset: () => {
     const prevUrl = get().filePreviewUrl;
     if (prevUrl) URL.revokeObjectURL(prevUrl);
-
     set({
       state: 'idle',
       file: null,
@@ -286,12 +327,10 @@ export const useScanStore = create<ScanStore>((set, get) => ({
     });
   },
 
-  // ── retry: error → idle ──
   retry: () => {
     set({ state: 'idle', error: null, progress: 0 });
   },
 
-  // ── clearError ──
   clearError: () => {
     set({ error: null });
   },
@@ -316,10 +355,6 @@ function fileToBase64(file: File): Promise<string> {
   });
 }
 
-/**
- * Supabase Storage에 파일 업로드
- * 실패해도 분석은 계속 — 에러를 삼키고 null URL 반환
- */
 async function uploadToStorage(
   file: File,
   path: string
@@ -336,7 +371,6 @@ async function uploadToStorage(
       return { url: null, error: error.message };
     }
 
-    // public URL 생성
     const { data: urlData } = supabase.storage
       .from(STORAGE_BUCKET)
       .getPublicUrl(data.path);
