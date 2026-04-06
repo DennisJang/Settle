@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ComponentType } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "motion/react";
@@ -33,14 +33,26 @@ const springs = {
 };
 
 type TabType = "scan" | "visa";
+type OptionId = "scan_unlimited" | "scan_pack" | "visa_season";
+
+// 공통 옵션 타입
+interface PlanOption {
+  id: OptionId;
+  amount: number;
+  periodKey: string;
+  featureKeys: string[];
+  recommended: boolean;
+  purchaseType: PurchaseType;
+  billingType: "one_time" | "recurring";
+}
 
 // 3층 요금 데이터
-const TAB_CONFIG = {
+const TAB_CONFIG: Record<TabType, { icon: ComponentType<{ size?: number }>; options: PlanOption[] }> = {
   scan: {
     icon: Camera,
     options: [
       {
-        id: "scan_unlimited" as const,
+        id: "scan_unlimited",
         amount: 1900,
         periodKey: "paywall:scan_unlimited_period",
         featureKeys: [
@@ -51,11 +63,11 @@ const TAB_CONFIG = {
           "paywall:scan_f5",
         ],
         recommended: true,
-        purchaseType: "scan_unlimited" as PurchaseType,
-        billingType: "recurring" as const,
+        purchaseType: "scan_unlimited",
+        billingType: "recurring",
       },
       {
-        id: "scan_pack" as const,
+        id: "scan_pack",
         amount: 1900,
         periodKey: "paywall:scan_pack_period",
         featureKeys: [
@@ -64,8 +76,8 @@ const TAB_CONFIG = {
           "paywall:pack_f3",
         ],
         recommended: false,
-        purchaseType: "scan_pack" as PurchaseType,
-        billingType: "one_time" as const,
+        purchaseType: "scan_pack",
+        billingType: "one_time",
       },
     ],
   },
@@ -73,7 +85,7 @@ const TAB_CONFIG = {
     icon: FileText,
     options: [
       {
-        id: "visa_season" as const,
+        id: "visa_season",
         amount: 4900,
         periodKey: "paywall:visa_season_period",
         featureKeys: [
@@ -84,8 +96,8 @@ const TAB_CONFIG = {
           "paywall:visa_f5",
         ],
         recommended: true,
-        purchaseType: "visa_season" as PurchaseType,
-        billingType: "one_time" as const,
+        purchaseType: "visa_season",
+        billingType: "one_time",
       },
     ],
   },
@@ -101,7 +113,7 @@ export function Paywall() {
   const purchaseVisaSeason = usePaymentStore((s) => s.purchaseVisaSeason);
 
   const [activeTab, setActiveTab] = useState<TabType>("scan");
-  const [selectedOption, setSelectedOption] = useState(
+  const [selectedOption, setSelectedOption] = useState<OptionId>(
     TAB_CONFIG.scan.options[0].id
   );
   const [loading, setLoading] = useState(false);
@@ -573,7 +585,7 @@ export function Paywall() {
 // PlanCard — Progressive Disclosure
 // ============================================
 interface PlanCardProps {
-  option: (typeof TAB_CONFIG)["scan"]["options"][number];
+  option: PlanOption;
   isSelected: boolean;
   onSelect: () => void;
   t: (key: string) => string;
