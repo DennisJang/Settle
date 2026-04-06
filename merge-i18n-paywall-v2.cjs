@@ -1,4 +1,4 @@
- // merge-i18n-paywall-v2.cjs
+// merge-i18n-paywall-v2.cjs
 // 실행: node merge-i18n-paywall-v2.cjs (프로젝트 루트에서)
 // 4개 언어 JSON에 paywall v2 키를 병합합니다.
 
@@ -53,6 +53,24 @@ const data = {
       toss_badge: "결제 처리: Toss Payments · 안전한 PG 결제",
       error_generic: "결제 중 오류가 발생했습니다. 다시 시도해주세요.",
       error_no_key: "결제 설정 오류입니다. 잠시 후 다시 시도해주세요.",
+
+      // PaywallSuccess
+      success_processing_title: "결제 처리 중...",
+      success_processing_desc: "잠시만 기다려주세요.",
+      success_done_title: "결제 완료!",
+      success_done_desc: "이제 Phivis의 모든 기능을 사용할 수 있습니다.",
+      success_scan_pack_title: "Scan 5회 팩 구매 완료!",
+      success_scan_pack_desc: "5회 크레딧이 추가되었습니다. 소진까지 유효합니다.",
+      success_scan_unlimited_title: "Scan 무제한 구독 시작!",
+      success_scan_unlimited_desc: "이제 Scan Anything을 무제한으로 사용할 수 있습니다.",
+      success_visa_season_title: "비자 시즌 패스 구매 완료!",
+      success_visa_season_desc: "90일간 비자 준비의 모든 기능이 해금됩니다.",
+      success_error_title: "결제 오류",
+      success_error_auth: "결제 인증에 실패했습니다.",
+      success_error_invalid: "결제 정보가 유효하지 않습니다.",
+      success_error_activate: "결제 활성화에 실패했습니다. 다시 시도해주세요.",
+      success_retry: "다시 시도",
+      success_go_home: "홈으로",
     },
   },
   en: {
@@ -100,6 +118,24 @@ const data = {
       toss_badge: "Powered by Toss Payments · Secure payment",
       error_generic: "Payment error. Please try again.",
       error_no_key: "Payment configuration error. Please try again later.",
+
+      // PaywallSuccess
+      success_processing_title: "Processing payment...",
+      success_processing_desc: "Please wait a moment.",
+      success_done_title: "Payment complete!",
+      success_done_desc: "You now have access to all Phivis features.",
+      success_scan_pack_title: "Scan 5-Pack purchased!",
+      success_scan_pack_desc: "5 credits have been added. They never expire.",
+      success_scan_unlimited_title: "Scan Unlimited started!",
+      success_scan_unlimited_desc: "You can now use Scan Anything without limits.",
+      success_visa_season_title: "Visa Season Pass purchased!",
+      success_visa_season_desc: "All visa prep features are unlocked for 90 days.",
+      success_error_title: "Payment Error",
+      success_error_auth: "Payment authentication failed.",
+      success_error_invalid: "Payment information is invalid.",
+      success_error_activate: "Failed to activate payment. Please try again.",
+      success_retry: "Try again",
+      success_go_home: "Go home",
     },
   },
   vi: {
@@ -147,6 +183,24 @@ const data = {
       toss_badge: "Thanh toán bởi Toss Payments",
       error_generic: "Lỗi thanh toán. Vui lòng thử lại.",
       error_no_key: "Lỗi cấu hình. Vui lòng thử lại sau.",
+
+      // PaywallSuccess
+      success_processing_title: "Đang xử lý thanh toán...",
+      success_processing_desc: "Vui lòng đợi.",
+      success_done_title: "Thanh toán hoàn tất!",
+      success_done_desc: "Bạn đã có quyền truy cập tất cả tính năng Phivis.",
+      success_scan_pack_title: "Đã mua gói 5 lần Scan!",
+      success_scan_pack_desc: "5 lần đã được thêm. Không hết hạn.",
+      success_scan_unlimited_title: "Scan không giới hạn bắt đầu!",
+      success_scan_unlimited_desc: "Bạn có thể sử dụng Scan Anything không giới hạn.",
+      success_visa_season_title: "Đã mua Thẻ mùa Visa!",
+      success_visa_season_desc: "Tất cả tính năng chuẩn bị visa được mở trong 90 ngày.",
+      success_error_title: "Lỗi thanh toán",
+      success_error_auth: "Xác thực thanh toán thất bại.",
+      success_error_invalid: "Thông tin thanh toán không hợp lệ.",
+      success_error_activate: "Không thể kích hoạt. Vui lòng thử lại.",
+      success_retry: "Thử lại",
+      success_go_home: "Về trang chủ",
     },
   },
   zh: {
@@ -194,6 +248,24 @@ const data = {
       toss_badge: "由Toss Payments处理支付",
       error_generic: "支付出错，请重试。",
       error_no_key: "支付配置错误，请稍后重试。",
+
+      // PaywallSuccess
+      success_processing_title: "正在处理支付...",
+      success_processing_desc: "请稍候。",
+      success_done_title: "支付完成！",
+      success_done_desc: "您现在可以使用Phivis的所有功能。",
+      success_scan_pack_title: "Scan 5次包购买完成！",
+      success_scan_pack_desc: "已添加5次积分，永不过期。",
+      success_scan_unlimited_title: "Scan无限订阅开始！",
+      success_scan_unlimited_desc: "您现在可以无限使用Scan Anything。",
+      success_visa_season_title: "签证季卡购买完成！",
+      success_visa_season_desc: "90天内所有签证准备功能已解锁。",
+      success_error_title: "支付错误",
+      success_error_auth: "支付认证失败。",
+      success_error_invalid: "支付信息无效。",
+      success_error_activate: "激活失败，请重试。",
+      success_retry: "重试",
+      success_go_home: "返回首页",
     },
   },
 };

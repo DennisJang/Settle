@@ -156,16 +156,18 @@ export function Paywall() {
     try {
       const tossPayments = await loadTossPayments(TOSS_CLIENT_KEY);
       const origin = window.location.origin;
+      const customerKey = crypto.randomUUID();
 
       if (selected.billingType === "one_time") {
         // --- 일회성 결제 (scan_pack, visa_season) ---
-        const payment = tossPayments.payment({
-          customerKey: crypto.randomUUID(),
-        });
+        const payment = tossPayments.payment({ customerKey });
 
         await payment.requestPayment({
           method: "CARD",
-          amount: { value: selected.amount, currency: "KRW" },
+          amount: {
+            currency: "KRW",
+            value: selected.amount,
+          },
           orderId: `phivis_${selected.id}_${Date.now()}`,
           orderName: t(`paywall:order_${selected.id}`),
           successUrl: `${origin}/paywall/success?plan=${selected.id}&type=one_time`,
@@ -173,9 +175,7 @@ export function Paywall() {
         });
       } else {
         // --- 구독 결제 (scan_unlimited) ---
-        const payment = tossPayments.payment({
-          customerKey: crypto.randomUUID(),
-        });
+        const payment = tossPayments.payment({ customerKey });
 
         await payment.requestBillingAuth({
           method: "CARD",
