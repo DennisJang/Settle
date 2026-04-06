@@ -479,10 +479,28 @@ function ScanProgress() {
   const { t } = useTranslation('scan');
   const { state, progress, filePreviewUrl, file } = useScanStore();
 
+  // progress를 부드럽게 애니메이션 (spring count)
+  const progressMv = useMotionValue(0);
+  const progressDisplay = useTransform(progressMv, (v) => `${Math.round(v)}%`);
+
+  useEffect(() => {
+    const controls = animate(progressMv, progress, {
+      type: 'spring' as const,
+      ...springs.count,
+    });
+    return controls.stop;
+  }, [progress, progressMv]);
+
   const statusLabel =
     state === 'validating' ? t('progress.validating') :
     state === 'uploading'  ? t('progress.uploading') :
     state === 'analyzing'  ? t('progress.analyzing') :
+    '';
+
+  const statusEmoji =
+    state === 'validating' ? '🔍' :
+    state === 'uploading'  ? '📤' :
+    state === 'analyzing'  ? '🧠' :
     '';
 
   return (
@@ -491,8 +509,9 @@ function ScanProgress() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
       transition={{ type: 'spring' as const, ...springs.expand }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}
     >
-      {/* 프리뷰 + 스캔 라인 */}
+      {/* 문서 프리뷰 카드 + 스캔 라인 */}
       <div
         style={{
           borderRadius: 'var(--radius-xl)',
@@ -525,10 +544,7 @@ function ScanProgress() {
               }}
             />
           ) : (
-            <FileText
-              size={48}
-              color="var(--color-icon-secondary)"
-            />
+            <FileText size={48} color="var(--color-icon-secondary)" />
           )}
 
           {/* 스캔 라인 오버레이 (analyzing 상태에서만) */}
@@ -537,7 +553,7 @@ function ScanProgress() {
 
         {/* 프로그레스 정보 */}
         <div style={{ padding: 'var(--space-lg)' }}>
-          {/* 프로그레스 바 */}
+          {/* 프로그레스 바 — 0에서 시작, 천천히 올라감 */}
           <div
             style={{
               width: '100%',
@@ -554,13 +570,16 @@ function ScanProgress() {
                 borderRadius: 'var(--radius-full)',
                 background: 'linear-gradient(90deg, var(--color-action-primary), #818CF8)',
               }}
-              initial={{ width: 0 }}
+              initial={{ width: '0%' }}
               animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
+              transition={{
+                duration: 1.2,
+                ease: [0.25, 1, 0.5, 1],
+              }}
             />
           </div>
 
-          {/* 상태 라벨 */}
+          {/* 상태 라벨 + % */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <p
               className="text-[14px] font-medium"
@@ -568,15 +587,94 @@ function ScanProgress() {
             >
               {statusLabel}
             </p>
-            <span
+            <motion.span
               className="text-[13px] font-semibold"
               style={{ color: 'var(--color-action-primary)' }}
             >
-              {progress}%
-            </span>
+              {progressDisplay}
+            </motion.span>
           </div>
         </div>
       </div>
+
+      {/* 캐릭터 분석 표시 (analyzing 상태) */}
+      {state === 'analyzing' && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring' as const, ...springs.expand, delay: 0.2 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-md)',
+            padding: 'var(--space-md) var(--space-lg)',
+            borderRadius: 'var(--radius-xl)',
+            backgroundColor: 'var(--color-action-primary-subtle)',
+            border: '1px solid var(--color-border-subtle)',
+          }}
+        >
+          {/* Phivis 캐릭터 — float 애니메이션 */}
+          {/* 
+            캐릭터 이미지가 /public/images/phivis-mascot.png 에 있으면:
+            <motion.img src="/images/phivis-mascot.png" ... />
+            
+            없으면 아래 아이콘 폴백 사용:
+          */}
+          <motion.div
+            animate={{
+              y: [0, -4, 0],
+              rotate: [0, 2, -2, 0],
+            }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 'var(--radius-lg)',
+              background: 'linear-gradient(135deg, var(--color-action-primary), #818CF8)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              boxShadow: '0 4px 12px rgba(99, 91, 255, 0.3)',
+            }}
+          >
+            {/* 캐릭터 얼굴 — 간단한 SVG (Phivis 마스코트 대체) */}
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              {/* 눈 */}
+              <circle cx="10" cy="12" r="2.5" fill="white" />
+              <circle cx="18" cy="12" r="2.5" fill="white" />
+              {/* 미소 */}
+              <path
+                d="M9 18 Q14 22 19 18"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                fill="none"
+              />
+            </svg>
+          </motion.div>
+
+          {/* 분석 중 텍스트 (점 애니메이션) */}
+          <div style={{ flex: 1 }}>
+            <p
+              className="text-[14px] font-semibold"
+              style={{ color: 'var(--color-action-primary)' }}
+            >
+              {t('progress.analyzing_character', { defaultValue: '문서를 분석하고 있어요' })}
+            </p>
+            <p
+              className="text-[12px]"
+              style={{ color: 'var(--color-text-secondary)', marginTop: 2 }}
+            >
+              {t('progress.analyzing_detail', { defaultValue: '항목별로 해석하고 비교하는 중...' })}
+            </p>
+          </div>
+        </motion.div>
+      )}
     </motion.div>
   );
 }
