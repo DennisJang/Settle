@@ -459,7 +459,11 @@
     "success_scan_unlimited_title": "Scan无限订阅开始！",
     "success_scan_unlimited_desc": "您现在可以无限使用Scan Anything。",
     "success_visa_season_title": "签证季卡购买完成！",
-    "success_visa_season_desc": "90天内所有签证准备功能已解锁。"
+    "success_visa_season_desc": "90天内所有签证准备功能已解锁。",
+    "intro_title": "从签证到生活，\nPhivis与您同行",
+    "intro_desc": "文件准备、工资解读、汇款比较。一个应用解决在韩国生活的所有复杂问题。",
+    "intro_cta": "查看计划",
+    "intro_skip": "以后再说"
   },
   "profile": {
     "title": "我的资料",

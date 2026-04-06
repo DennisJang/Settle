@@ -1,10 +1,9 @@
 /**
- * routes.tsx — Phivis v3.1 (Phase B: Finance 위젯 리네임)
+ * routes.tsx — Phivis v3.2 (PaywallIntro 추가)
  *
- * v3.0 → v3.1 변경:
- *   - Life → Finance 리네임 (/life → /finance)
- *   - /life 레거시 리다이렉트 추가
- *   - /remit → /finance로 변경
+ * v3.1 → v3.2 변경:
+ *   - PaywallIntro lazy import 추가
+ *   - /upgrade 라우트 추가 (구독 유도 스플래시)
  *
  * Dennis 규칙 준수:
  * #1  원본 파일 먼저 확인 — 추측 생성 금지
@@ -21,12 +20,14 @@ import { Landing } from "./pages/landing";
 import { AuthGuardLayout } from "./components/AuthGuardLayout";
 import { Home } from "./pages/home";
 
+
 // === Lazy imports (별도 청크) ===
 const Documents = lazy(() => import("./pages/documents").then(m => ({ default: m.Documents })));
 const Finance = lazy(() => import("./pages/finance").then(m => ({ default: m.Finance })));
 const Profile = lazy(() => import("./pages/profile").then(m => ({ default: m.Profile })));
 const Paywall = lazy(() => import("./pages/paywall").then(m => ({ default: m.Paywall })));
 const PaywallSuccess = lazy(() => import("./pages/PaywallSuccess").then(m => ({ default: m.PaywallSuccess })));
+const PaywallIntro = lazy(() => import("./pages/PaywallIntro").then(m => ({ default: m.PaywallIntro })));
 const Onboarding = lazy(() => import("./pages/onboarding").then(m => ({ default: m.Onboarding })));
 const Privacy = lazy(() => import("./pages/privacy").then(m => ({ default: m.Privacy })));
 const Terms = lazy(() => import("./pages/terms").then(m => ({ default: m.Terms })));
@@ -82,6 +83,7 @@ export const router = createBrowserRouter([
       // --- 결제/유틸 ---
       { path: "paywall", element: <S><Paywall /></S> },
       { path: "paywall/success", element: <S><PaywallSuccess /></S> },
+      { path: "upgrade", element: <S><PaywallIntro /></S> },
       { path: "onboarding", element: <S><Onboarding /></S> },
       { path: "privacy", element: <S><Privacy /></S> },
       { path: "terms", element: <S><Terms /></S> },

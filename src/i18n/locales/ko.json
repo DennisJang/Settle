@@ -463,7 +463,11 @@
     "success_scan_unlimited_title": "Scan 무제한 구독 시작!",
     "success_scan_unlimited_desc": "이제 Scan Anything을 무제한으로 사용할 수 있습니다.",
     "success_visa_season_title": "비자 시즌 패스 구매 완료!",
-    "success_visa_season_desc": "90일간 비자 준비의 모든 기능이 해금됩니다."
+    "success_visa_season_desc": "90일간 비자 준비의 모든 기능이 해금됩니다.",
+    "intro_title": "비자부터 생활까지,\nPhivis가 함께합니다",
+    "intro_desc": "서류 준비, 급여 해독, 송금 비교까지. 한국 생활의 모든 복잡함을 하나의 앱으로 해결하세요.",
+    "intro_cta": "플랜 살펴보기",
+    "intro_skip": "나중에 할게요"
   },
   "profile": {
     "title": "내 프로필",

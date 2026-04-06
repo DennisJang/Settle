@@ -459,7 +459,11 @@
     "success_scan_unlimited_title": "Scan Unlimited started!",
     "success_scan_unlimited_desc": "You can now use Scan Anything without limits.",
     "success_visa_season_title": "Visa Season Pass purchased!",
-    "success_visa_season_desc": "All visa prep features are unlocked for 90 days."
+    "success_visa_season_desc": "All visa prep features are unlocked for 90 days.",
+    "intro_title": "From visas to daily life,\nPhivis is with you",
+    "intro_desc": "Document prep, payslip analysis, remittance comparison. Simplify all the complexity of life in Korea with one app.",
+    "intro_cta": "Explore plans",
+    "intro_skip": "Maybe later"
   },
   "profile": {
     "title": "My Profile",

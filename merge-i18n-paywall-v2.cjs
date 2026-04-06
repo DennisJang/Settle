@@ -71,6 +71,12 @@ const data = {
       success_error_activate: "결제 활성화에 실패했습니다. 다시 시도해주세요.",
       success_retry: "다시 시도",
       success_go_home: "홈으로",
+
+      // PaywallIntro
+      intro_title: "비자부터 생활까지,\nPhivis가 함께합니다",
+      intro_desc: "서류 준비, 급여 해독, 송금 비교까지. 한국 생활의 모든 복잡함을 하나의 앱으로 해결하세요.",
+      intro_cta: "플랜 살펴보기",
+      intro_skip: "나중에 할게요",
     },
   },
   en: {
@@ -136,6 +142,12 @@ const data = {
       success_error_activate: "Failed to activate payment. Please try again.",
       success_retry: "Try again",
       success_go_home: "Go home",
+
+      // PaywallIntro
+      intro_title: "From visas to daily life,\nPhivis is with you",
+      intro_desc: "Document prep, payslip analysis, remittance comparison. Simplify all the complexity of life in Korea with one app.",
+      intro_cta: "Explore plans",
+      intro_skip: "Maybe later",
     },
   },
   vi: {
@@ -201,6 +213,12 @@ const data = {
       success_error_activate: "Không thể kích hoạt. Vui lòng thử lại.",
       success_retry: "Thử lại",
       success_go_home: "Về trang chủ",
+
+      // PaywallIntro
+      intro_title: "Từ visa đến cuộc sống,\nPhivis đồng hành cùng bạn",
+      intro_desc: "Chuẩn bị hồ sơ, phân tích lương, so sánh chuyển tiền. Đơn giản hóa mọi phức tạp khi sống tại Hàn Quốc.",
+      intro_cta: "Xem các gói",
+      intro_skip: "Để sau",
     },
   },
   zh: {
@@ -266,6 +284,12 @@ const data = {
       success_error_activate: "激活失败，请重试。",
       success_retry: "重试",
       success_go_home: "返回首页",
+
+      // PaywallIntro
+      intro_title: "从签证到生活，\nPhivis与您同行",
+      intro_desc: "文件准备、工资解读、汇款比较。一个应用解决在韩国生活的所有复杂问题。",
+      intro_cta: "查看计划",
+      intro_skip: "以后再说",
     },
   },
 };

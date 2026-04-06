@@ -463,7 +463,11 @@
     "success_scan_unlimited_title": "Scan không giới hạn bắt đầu!",
     "success_scan_unlimited_desc": "Bạn có thể sử dụng Scan Anything không giới hạn.",
     "success_visa_season_title": "Đã mua Thẻ mùa Visa!",
-    "success_visa_season_desc": "Tất cả tính năng chuẩn bị visa được mở trong 90 ngày."
+    "success_visa_season_desc": "Tất cả tính năng chuẩn bị visa được mở trong 90 ngày.",
+    "intro_title": "Từ visa đến cuộc sống,\nPhivis đồng hành cùng bạn",
+    "intro_desc": "Chuẩn bị hồ sơ, phân tích lương, so sánh chuyển tiền. Đơn giản hóa mọi phức tạp khi sống tại Hàn Quốc.",
+    "intro_cta": "Xem các gói",
+    "intro_skip": "Để sau"
   },
   "profile": {
     "title": "Hồ sơ của tôi",
